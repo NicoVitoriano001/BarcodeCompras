@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
             dir.mkdirs(); // cria diretório
         }
 
+
         // Abertura do banco de dados
         File dbFile = new File("/storage/emulated/0/Download/COMPRAS/comprasDB.db");
         db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
