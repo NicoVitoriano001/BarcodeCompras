@@ -22,7 +22,7 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 1;
-    private EditText bcCompras, item, categoria, preco, qnt, total, periodo, obs;
+    private EditText bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras;
     private Button scanButton, saveButton, cancelButton;
     private SQLiteDatabase db;
 
@@ -31,19 +31,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bcCompras = findViewById(R.id.bcCompras);
-        item = findViewById(R.id.item);
-        categoria = findViewById(R.id.categoria);
-        preco = findViewById(R.id.preco);
-        qnt = findViewById(R.id.qnt);
-        total = findViewById(R.id.total);
-        periodo = findViewById(R.id.periodo);
-        obs = findViewById(R.id.obs);
+        bc_compras = findViewById(R.id.bc_compras);
+        descr_compras = findViewById(R.id.descr_compras);
+        cat_compras = findViewById(R.id.cat_compras);
+        preco_compras = findViewById(R.id.preco_compras);
+        qnt_compras = findViewById(R.id.qnt_compras);
+        total_compras = findViewById(R.id.total_compras);
+        periodo_compras = findViewById(R.id.periodo_compras);
+        obs_compras = findViewById(R.id.obs_compras);
         scanButton = findViewById(R.id.scanButton);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
-       db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null); // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
+       // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
+       db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
         scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
@@ -106,19 +107,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         File dbFile = new File(dir, "comprasDB.db");
+
         db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
 
-        // Criar tabela se não existir
+        //tabela collected_tab >>> //colunas bc_imdb NUMERIC, descr_imdb TEXT, cat_imdb TEXT
         db.execSQL("CREATE TABLE IF NOT EXISTS compras_tab (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "bcCompras TEXT," +
-                "item TEXT," +
-                "categoria TEXT," +
-                "preco REAL," +
-                "qnt INTEGER," +
-                "total REAL," +
-                "periodo TEXT," +
-                "obs TEXT)");
+                "bc_compras NUMERIC," +
+                "descr_compras TEXT," +
+                "cat_compras TEXT," +
+                "preco_compras REAL," +
+                "qnt_compras INTEGER," +
+                "total_compras REAL," +
+                "periodo_compras TEXT," +
+                "obs_compras TEXT)");
     }
 
 
@@ -128,28 +130,36 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null && result.getContents() != null) {
-            bcCompras.setText(result.getContents());
-            fetchItemData(result.getContents());
+            bc_compras.setText(result.getContents());
+            fetchItemDataCollectedTable(result.getContents());
         } else {
             Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // Busca item e categoria baseado no código escaneado
-    private void fetchItemData(String bcComprasValue) {
-        // Corrigindo o nome da coluna para bcCompras (consistente com o insert)
-        Cursor cursor = db.rawQuery("SELECT item, categoria FROM compras_tab WHERE bcCompras = ?",
-                new String[]{bcComprasValue});
+    // Busca descr_compras e cat_compras baseado no código escaneado
+// Busca descrição e categoria na tabela collected_tab
+    private void fetchItemDataCollectedTable(String barcodeValue) {
+        if (db == null || !db.isOpen()) {
+            Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        Cursor cursor = db.rawQuery(
+                "SELECT descr_imdb, cat_imdb FROM collected_tab WHERE bc_imdb = ?",
+                new String[]{barcodeValue}
+        );
 
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
-                    item.setText(cursor.getString(0));
-                    categoria.setText(cursor.getString(1));
+                    descr_compras.setText(cursor.getString(0)); // descr_imdb
+                    cat_compras.setText(cursor.getString(1));   // cat_imdb
                 } else {
-                    item.setText("");
-                    categoria.setText("");
-                    Toast.makeText(this, "Item não encontrado no banco.", Toast.LENGTH_SHORT).show();
+                    descr_compras.setText("");
+                    cat_compras.setText("");
+                    Toast.makeText(this, "Item não encontrado na tabela coletada", Toast.LENGTH_SHORT).show();
                 }
             } finally {
                 cursor.close();
@@ -158,45 +168,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveData() {
-        String bcComprasVal = bcCompras.getText().toString().trim();
-        String itemVal = item.getText().toString().trim();
-        String categoriaVal = categoria.getText().toString().trim();
-        String precoStr = preco.getText().toString().trim();
-        String qntStr = qnt.getText().toString().trim();
-        String periodoVal = periodo.getText().toString().trim();
-        String obsVal = obs.getText().toString().trim();
+        String bc_comprasVal = bc_compras.getText().toString().trim();
+        String descr_comprasVal = descr_compras.getText().toString().trim();
+        String cat_comprasVal = cat_compras.getText().toString().trim();
+        String preco_comprasStr = preco_compras.getText().toString().trim();
+        String qnt_comprasStr = qnt_compras.getText().toString().trim();
+        String periodo_comprasVal = periodo_compras.getText().toString().trim();
+        String obs_comprasVal = obs_compras.getText().toString().trim();
 
-        if (bcComprasVal.isEmpty() || precoStr.isEmpty() || qntStr.isEmpty()) {
+        if (bc_comprasVal.isEmpty() || preco_comprasStr.isEmpty() || qnt_comprasStr.isEmpty()) {
             Toast.makeText(this, "Preencha todos os campos obrigatórios!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        double precoVal = Double.parseDouble(precoStr);
-        int qntVal = Integer.parseInt(qntStr);
-        double totalVal = precoVal * qntVal;
+        double preco_comprasVal = Double.parseDouble(preco_comprasStr);
+        int qnt_comprasVal = Integer.parseInt(qnt_comprasStr);
+        double total_comprasVal = preco_comprasVal * qnt_comprasVal;
 
-        total.setText(String.valueOf(totalVal));
+        total_compras.setText(String.valueOf(total_comprasVal));
 
         ContentValues values = new ContentValues();
-        values.put("bcCompras", bcComprasVal);
-        values.put("item", itemVal);
-        values.put("categoria", categoriaVal);
-        values.put("preco", precoVal);
-        values.put("qnt", qntVal);
-        values.put("total", totalVal);
-        values.put("periodo", periodoVal);
-        values.put("obs", obsVal);
+        values.put("bc_compras", bc_comprasVal);
+        values.put("descr_compras", descr_comprasVal);
+        values.put("cat_compras", cat_comprasVal);
+        values.put("preco_compras", preco_comprasVal);
+        values.put("qnt_compras", qnt_comprasVal);
+        values.put("total_compras", total_comprasVal);
+        values.put("periodo_compras", periodo_comprasVal);
+        values.put("obs_compras", obs_comprasVal);
 
         // Log dos dados que serão salvos
         android.util.Log.d("DB_SAVE", "Salvando dados:");
-        android.util.Log.d("DB_SAVE", "bcCompras: " + bcComprasVal);
-        android.util.Log.d("DB_SAVE", "item: " + itemVal);
-        android.util.Log.d("DB_SAVE", "categoria: " + categoriaVal);
-        android.util.Log.d("DB_SAVE", "preco: " + precoVal);
-        android.util.Log.d("DB_SAVE", "qnt: " + qntVal);
-        android.util.Log.d("DB_SAVE", "total: " + totalVal);
-        android.util.Log.d("DB_SAVE", "periodo: " + periodoVal);
-        android.util.Log.d("DB_SAVE", "obs: " + obsVal);
+        android.util.Log.d("DB_SAVE", "bc_compras: " + bc_comprasVal);
+        android.util.Log.d("DB_SAVE", "descr_compras: " + descr_comprasVal);
+        android.util.Log.d("DB_SAVE", "cat_compras: " + cat_comprasVal);
+        android.util.Log.d("DB_SAVE", "preco_compras: " + preco_comprasVal);
+        android.util.Log.d("DB_SAVE", "qnt_compras: " + qnt_comprasVal);
+        android.util.Log.d("DB_SAVE", "total_compras: " + total_comprasVal);
+        android.util.Log.d("DB_SAVE", "periodo_compras: " + periodo_comprasVal);
+        android.util.Log.d("DB_SAVE", "obs_compras: " + obs_comprasVal);
 
         long result = db.insert("compras_tab", null, values);
 
@@ -210,14 +220,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void clearFields() {
-        bcCompras.setText("");
-        item.setText("");
-        categoria.setText("");
-        preco.setText("");
-        qnt.setText("");
-        total.setText("");
-        periodo.setText("");
-        obs.setText("");
+        bc_compras.setText("");
+        descr_compras.setText("");
+        cat_compras.setText("");
+        preco_compras.setText("");
+        qnt_compras.setText("");
+        total_compras.setText("");
+        periodo_compras.setText("");
+        obs_compras.setText("");
     }
 
     @Override

@@ -16,60 +16,60 @@
         android:padding="16dp">
 
         <EditText
-            android:id="@+id/bcCompras"
+            android:id="@+id/bc_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Código de Barras"
             android:inputType="text" />
 
         <EditText
-            android:id="@+id/item"
+            android:id="@+id/descr_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Item"
+            android:hint="descr_compras"
             android:inputType="text" />
 
         <EditText
-            android:id="@+id/categoria"
+            android:id="@+id/cat_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Categoria"
+            android:hint="cat_compras"
             android:inputType="text" />
 
         <EditText
-            android:id="@+id/preco"
+            android:id="@+id/preco_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Preço"
             android:inputType="numberDecimal" />
 
         <EditText
-            android:id="@+id/qnt"
+            android:id="@+id/qnt_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Quantidade"
             android:inputType="number" />
 
         <EditText
-            android:id="@+id/total"
+            android:id="@+id/total_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Total"
+            android:hint="total_compras"
             android:inputType="none"
             android:focusable="false" />
 
         <EditText
-            android:id="@+id/periodo"
+            android:id="@+id/periodo_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Período"
             android:inputType="text" />
 
         <EditText
-            android:id="@+id/obs"
+            android:id="@+id/obs_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Observações"
+            android:hint="obs_compraservações"
             android:inputType="text" />
 
         <Button
