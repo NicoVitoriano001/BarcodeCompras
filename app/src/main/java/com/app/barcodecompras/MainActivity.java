@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -44,16 +43,7 @@ public class MainActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
-        File dir = new File("/storage/emulated/0/Download/COMPRAS/");
-        if (!dir.exists()) {
-            dir.mkdirs(); // cria diretório
-        }
-
-        File dbFile = new File("/storage/emulated/0/Download/COMPRAS/comprasDB.db");
-        //db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
-
-        // Android 10+ Substituir a inicialização do banco por:
-        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
+       db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null); // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
 
         scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
@@ -109,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initializeDatabase() {
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "COMPRAS");
+        //getFilesDir() retorna um diretório privado exclusivo da aplicação. Caminho típico: /data/user/0/com.app.barcodecompras/files/COMPRAS/comprasDB.db
+        File dir = new File(getApplicationContext().getFilesDir(), "COMPRAS");
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -129,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
                 "periodo TEXT," +
                 "obs TEXT)");
     }
-
 
 
     // Resultado do scanner ZXing
@@ -197,6 +187,17 @@ public class MainActivity extends AppCompatActivity {
         values.put("periodo", periodoVal);
         values.put("obs", obsVal);
 
+        // Log dos dados que serão salvos
+        android.util.Log.d("DB_SAVE", "Salvando dados:");
+        android.util.Log.d("DB_SAVE", "bcCompras: " + bcComprasVal);
+        android.util.Log.d("DB_SAVE", "item: " + itemVal);
+        android.util.Log.d("DB_SAVE", "categoria: " + categoriaVal);
+        android.util.Log.d("DB_SAVE", "preco: " + precoVal);
+        android.util.Log.d("DB_SAVE", "qnt: " + qntVal);
+        android.util.Log.d("DB_SAVE", "total: " + totalVal);
+        android.util.Log.d("DB_SAVE", "periodo: " + periodoVal);
+        android.util.Log.d("DB_SAVE", "obs: " + obsVal);
+
         long result = db.insert("compras_tab", null, values);
 
         if (result != -1) {
@@ -206,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Erro ao salvar!", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void clearFields() {
         bcCompras.setText("");
