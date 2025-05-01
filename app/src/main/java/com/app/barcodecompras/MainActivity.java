@@ -1,19 +1,29 @@
 package com.app.barcodecompras;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.Manifest;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
 
+
 public class MainActivity extends AppCompatActivity {
+    // Adicione no início da classe
+    private static final int REQUEST_CODE = 1;
+
     private EditText bcCompras, item, categoria, preco, qnt, total, periodo, obs;
     private Button scanButton, saveButton, cancelButton;
     private SQLiteDatabase db;
@@ -41,7 +51,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         File dbFile = new File("/storage/emulated/0/Download/COMPRAS/comprasDB.db");
-        db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+        //db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+
+        // Android 10+ Substituir a inicialização do banco por:
+        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
         // Botão de scan
         scanButton.setOnClickListener(v -> {
@@ -55,7 +68,61 @@ public class MainActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveData());
 
         cancelButton.setOnClickListener(v -> clearFields());
+
+        if (checkStoragePermission()) {
+            initializeDatabase();
+        }
+
+    } // fim ONCREATE
+
+
+    private boolean checkStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+                return false;
+            }
+        }
+        return true;
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                initializeDatabase();
+            } else {
+                Toast.makeText(this, "Permissão negada - o app não pode funcionar sem acesso ao armazenamento", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+
+    private void initializeDatabase() {
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "COMPRAS");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File dbFile = new File(dir, "comprasDB.db");
+        db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+
+        // Criar tabela se não existir
+        db.execSQL("CREATE TABLE IF NOT EXISTS compras_tab (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "bcCompras TEXT," +
+                "item TEXT," +
+                "categoria TEXT," +
+                "preco REAL," +
+                "qnt INTEGER," +
+                "total REAL," +
+                "periodo TEXT," +
+                "obs TEXT)");
+    }
+
+
 
     // Resultado do scanner ZXing
     @Override
@@ -72,16 +139,24 @@ public class MainActivity extends AppCompatActivity {
 
     // Busca item e categoria baseado no código escaneado
     private void fetchItemData(String bcComprasValue) {
-        Cursor cursor = db.rawQuery("SELECT item, categoria FROM compras_tab WHERE bcCollected = ?", new String[]{bcComprasValue});
-        if (cursor.moveToFirst()) {
-            item.setText(cursor.getString(0));
-            categoria.setText(cursor.getString(1));
-        } else {
-            item.setText("");
-            categoria.setText("");
-            Toast.makeText(this, "Item não encontrado no banco.", Toast.LENGTH_SHORT).show();
+        // Corrigindo o nome da coluna para bcCompras (consistente com o insert)
+        Cursor cursor = db.rawQuery("SELECT item, categoria FROM compras_tab WHERE bcCompras = ?",
+                new String[]{bcComprasValue});
+
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    item.setText(cursor.getString(0));
+                    categoria.setText(cursor.getString(1));
+                } else {
+                    item.setText("");
+                    categoria.setText("");
+                    Toast.makeText(this, "Item não encontrado no banco.", Toast.LENGTH_SHORT).show();
+                }
+            } finally {
+                cursor.close();
+            }
         }
-        cursor.close();
     }
 
     private void saveData() {
