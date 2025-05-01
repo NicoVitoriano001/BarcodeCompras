@@ -7,6 +7,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -78,8 +81,15 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean checkStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        },
+                        REQUEST_CODE);
                 return false;
             }
         }
@@ -87,14 +97,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    // Adicione este método para tratar a resposta da permissão
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 initializeDatabase();
             } else {
-                Toast.makeText(this, "Permissão negada - o app não pode funcionar sem acesso ao armazenamento", Toast.LENGTH_LONG).show();
+                Toast.makeText(this,
+                        "Permissão negada - o app não pode funcionar sem acesso ao armazenamento",
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
