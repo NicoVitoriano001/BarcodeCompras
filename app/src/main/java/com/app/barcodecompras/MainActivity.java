@@ -14,7 +14,6 @@ import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
-
     private EditText bcCompras, item, categoria, preco, qnt, total, periodo, obs;
     private Button scanButton, saveButton, cancelButton;
     private SQLiteDatabase db;
@@ -36,14 +35,11 @@ public class MainActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
-        // ANtes de abrir, criar pasta
         File dir = new File("/storage/emulated/0/Download/COMPRAS/");
         if (!dir.exists()) {
             dir.mkdirs(); // cria diretório
         }
 
-
-        // Abertura do banco de dados
         File dbFile = new File("/storage/emulated/0/Download/COMPRAS/comprasDB.db");
         db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
 
@@ -56,10 +52,8 @@ public class MainActivity extends AppCompatActivity {
             integrator.initiateScan();
         });
 
-        // Botão salvar
         saveButton.setOnClickListener(v -> saveData());
 
-        // Botão cancelar
         cancelButton.setOnClickListener(v -> clearFields());
     }
 
@@ -90,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
         cursor.close();
     }
 
-    // Salvar no banco
     private void saveData() {
         String bcComprasVal = bcCompras.getText().toString().trim();
         String itemVal = item.getText().toString().trim();
@@ -131,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Limpar campos
     private void clearFields() {
         bcCompras.setText("");
         item.setText("");
@@ -143,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
         obs.setText("");
     }
 
-    // Fechar conexão com banco
     @Override
     protected void onDestroy() {
         if (db != null && db.isOpen()) {
