@@ -4,12 +4,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -24,9 +22,7 @@ import java.io.File;
 
 
 public class MainActivity extends AppCompatActivity {
-    // Adicione no início da classe
     private static final int REQUEST_CODE = 1;
-
     private EditText bcCompras, item, categoria, preco, qnt, total, periodo, obs;
     private Button scanButton, saveButton, cancelButton;
     private SQLiteDatabase db;
@@ -59,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
         // Android 10+ Substituir a inicialização do banco por:
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
-        // Botão de scan
         scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
             integrator.setPrompt("Escaneie o código de barras");
@@ -96,8 +91,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
-    // Adicione este método para tratar a resposta da permissão
+    // Adicione este metodo para tratar a resposta da permissão
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
