@@ -19,13 +19,12 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
 
-
 public class MainActivity extends AppCompatActivity {
-    private static final int REQUEST_CODE = 1;
-    private static final int REQUEST_CODE_ADD_ITEM = 1001;
-    private EditText bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras;
-    private Button scanButton, saveButton, cancelButton;
-    private SQLiteDatabase db;
+private static final int REQUEST_CODE = 1;
+private static final int REQUEST_CODE_ADD_ITEM = 1001;
+private EditText bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras;
+private Button scanButton, saveButton, cancelButton;
+private SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
        // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
+        Button scanButton = findViewById(R.id.scanButton);
+
         scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
             integrator.setPrompt("Escaneie o código de barras");
@@ -64,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     } // fim ONCREATE
-
 
     private boolean checkStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

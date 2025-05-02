@@ -8,7 +8,6 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -26,50 +25,50 @@
             android:id="@+id/descr_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="descr_compras"
+            android:hint="@string/descr_item"
             android:inputType="text" />
 
         <EditText
             android:id="@+id/cat_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="cat_compras"
+            android:hint="@string/descr_cat"
             android:inputType="text" />
 
         <EditText
             android:id="@+id/preco_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Preço"
+            android:hint="@string/preco"
             android:inputType="numberDecimal" />
 
         <EditText
             android:id="@+id/qnt_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Quantidade"
+            android:hint="@string/quantidade"
             android:inputType="number" />
 
         <EditText
             android:id="@+id/total_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="total_compras"
-            android:inputType="none"
-            android:focusable="false" />
+            android:focusable="false"
+            android:hint="@string/total_qnt"
+            android:inputType="none" />
 
         <EditText
             android:id="@+id/periodo_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Período"
+            android:hint="@string/periodo"
             android:inputType="text" />
 
         <EditText
             android:id="@+id/obs_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="obs_compras"
+            android:hint="@string/observacao"
             android:inputType="text" />
 
         <Button
@@ -106,4 +105,5 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
+
 </androidx.drawerlayout.widget.DrawerLayout>
