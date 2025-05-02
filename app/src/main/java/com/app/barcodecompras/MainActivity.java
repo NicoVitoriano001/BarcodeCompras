@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.Manifest;
+import android.widget.Toolbar;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
@@ -30,6 +32,7 @@ private SQLiteDatabase db;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         bc_compras = findViewById(R.id.bc_compras);
         descr_compras = findViewById(R.id.descr_compras);

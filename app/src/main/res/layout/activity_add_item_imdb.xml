@@ -29,7 +29,7 @@
         android:id="@+id/descr_imdb_add"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"/>
+        android:inputType="textCapCharacters|textMultiLine"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -42,13 +42,13 @@
         android:id="@+id/cat_imdb_add"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"/>
+        android:inputType="textCapCharacters"/>
 
     <Button
         android:id="@+id/save_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Salvar"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="24dp"
+        android:text="Salvar" />
 
 </LinearLayout>
