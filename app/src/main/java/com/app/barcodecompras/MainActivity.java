@@ -22,6 +22,7 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 1;
+    private static final int REQUEST_CODE_ADD_ITEM = 1001;
     private EditText bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras;
     private Button scanButton, saveButton, cancelButton;
     private SQLiteDatabase db;
@@ -135,36 +136,54 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
         }
+        if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
+            // Recarregar os dados após cadastro
+            String barcode = bc_compras.getText().toString();
+            fetchItemDataCollectedTable(barcode);
+        }
     }
+    /**@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
+            // Recarregar os dados após cadastro
+            String barcode = bc_compras.getText().toString();
+            fetchItemDataCollectedTable(barcode);
+        }
+    }
+**/
+
 
 // Busca descr_compras e cat_compras baseado no código escaneado
 // Busca descrição e categoria na tabela collected_tab
-    private void fetchItemDataCollectedTable(String barcodeValue) {
-        if (db == null || !db.isOpen()) {
-            Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
-            return;
-        }
+private void fetchItemDataCollectedTable(String barcodeValue) {
+    if (db == null || !db.isOpen()) {
+        Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
+        return;
+    }
 
-        Cursor cursor = db.rawQuery(
-                "SELECT descr_imdb, cat_imdb FROM collected_tab WHERE bc_imdb = ?",
-                new String[]{barcodeValue}
-        );
+    Cursor cursor = db.rawQuery(
+            "SELECT descr_imdb, cat_imdb FROM collected_tab WHERE bc_imdb = ?",
+            new String[]{barcodeValue}
+    );
 
-        if (cursor != null) {
-            try {
-                if (cursor.moveToFirst()) {
-                    descr_compras.setText(cursor.getString(0)); // descr_imdb
-                    cat_compras.setText(cursor.getString(1));   // cat_imdb
-                } else {
-                    descr_compras.setText("");
-                    cat_compras.setText("");
-                    Toast.makeText(this, "Item não encontrado na tabela coletada", Toast.LENGTH_SHORT).show();
-                }
-            } finally {
-                cursor.close();
+    if (cursor != null) {
+        try {
+            if (cursor.moveToFirst()) {
+                descr_compras.setText(cursor.getString(0)); // descr_imdb
+                cat_compras.setText(cursor.getString(1));   // cat_imdb
+            } else {
+                // Item não encontrado - abrir activity de cadastro
+                Intent intent = new Intent(MainActivity.this, AddItemIMDB.class);
+                intent.putExtra("BARCODE_VALUE", barcodeValue);
+                startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
             }
+        } finally {
+            cursor.close();
         }
     }
+}
 
     private void saveData() {
         String bc_comprasVal = bc_compras.getText().toString().trim();
