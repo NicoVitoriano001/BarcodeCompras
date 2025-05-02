@@ -10,6 +10,7 @@
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
 
+    <!-- Layout no Mainactivity-->
     <string name="descr_item">Item</string>
     <string name="descr_cat">Categoria</string>
     <string name="preco">Preço</string>
