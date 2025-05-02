@@ -1,5 +1,6 @@
 package com.app.barcodecompras;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -20,6 +21,11 @@ import android.widget.Toolbar;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 private static final int REQUEST_CODE = 1;
@@ -48,6 +54,12 @@ private SQLiteDatabase db;
 
        // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
+
+        // No onCreate(), após inicializar os views:
+        periodo_compras = findViewById(R.id.periodo_compras);
+        periodo_compras.setText(getDataHoraAtual()); // Define a data atual ao iniciar
+
+        periodo_compras.setOnClickListener(v -> showDatePickerDialog());
 
         Button scanButton = findViewById(R.id.scanButton);
 
@@ -101,6 +113,32 @@ private SQLiteDatabase db;
             }
         }
     }
+
+//inicio data calendário
+    private void showDatePickerDialog() {
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    Calendar selectedDate = Calendar.getInstance();
+                    selectedDate.set(selectedYear, selectedMonth, selectedDay);
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
+                    periodo_compras.setText(sdf.format(selectedDate.getTime()));
+                },
+                year, month, day);
+        datePickerDialog.show();
+    }
+        public String getDataHoraAtual() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
+//fim data calendario
 
 
     private void initializeDatabase() {

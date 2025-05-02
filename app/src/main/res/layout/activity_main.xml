@@ -30,21 +30,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Código de Barras"
-                android:inputType="text" />
+                android:inputType="number"  />
 
             <EditText
                 android:id="@+id/descr_compras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/descr_item"
-                android:inputType="textCapCharacters|textMultiLine" />
+                android:inputType="textCapCharacters|textMultiLine"/>
 
             <EditText
                 android:id="@+id/cat_compras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/descr_cat"
-                android:inputType="text" />
+                android:inputType="textCapCharacters" />
 
             <EditText
                 android:id="@+id/preco_compras"
@@ -80,7 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/observacao"
-                android:inputType="text" />
+                android:inputType="textCapCharacters|textMultiLine"/>
 
             <Button
                 android:id="@+id/scanButton"
