@@ -137,14 +137,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Busca descr_compras e cat_compras baseado no código escaneado
+// Busca descr_compras e cat_compras baseado no código escaneado
 // Busca descrição e categoria na tabela collected_tab
     private void fetchItemDataCollectedTable(String barcodeValue) {
         if (db == null || !db.isOpen()) {
             Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
             return;
         }
-
 
         Cursor cursor = db.rawQuery(
                 "SELECT descr_imdb, cat_imdb FROM collected_tab WHERE bc_imdb = ?",
