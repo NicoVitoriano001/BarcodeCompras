@@ -18,6 +18,7 @@ import android.widget.Toast;
 import android.Manifest;
 import android.widget.Toolbar;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
@@ -39,7 +40,6 @@ private SQLiteDatabase db;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         bc_compras = findViewById(R.id.bc_compras);
         descr_compras = findViewById(R.id.descr_compras);
         cat_compras = findViewById(R.id.cat_compras);
@@ -51,6 +51,13 @@ private SQLiteDatabase db;
         scanButton = findViewById(R.id.scanButton);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
+
+        // No onCreate() do MainActivity, após inicializar os views:
+        FloatingActionButton fabSearch = findViewById(R.id.fab_search);
+        fabSearch.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
+            startActivity(intent);
+        });
 
        // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
@@ -99,6 +106,7 @@ private SQLiteDatabase db;
     }
 
     // Adicione este metodo para tratar a resposta da permissão
+   /**
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -113,6 +121,7 @@ private SQLiteDatabase db;
             }
         }
     }
+**/
 
 //inicio data calendário
     private void showDatePickerDialog() {
@@ -133,7 +142,7 @@ private SQLiteDatabase db;
                 year, month, day);
         datePickerDialog.show();
     }
-        public String getDataHoraAtual() {
+    public String getDataHoraAtual() {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
         return sdf.format(calendar.getTime());

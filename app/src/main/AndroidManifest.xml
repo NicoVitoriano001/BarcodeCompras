@@ -32,6 +32,9 @@
         <activity android:name=".AddItemIMDB"
             android:theme="@style/Theme.AppCompat.Light.Dialog"
             android:windowSoftInputMode="stateVisible"/>
+        <activity android:name=".BuscarComprasActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
+
     </application>
 
 </manifest>
