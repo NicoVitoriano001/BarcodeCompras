@@ -69,7 +69,7 @@
             android:id="@+id/obs_compras"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="obs_compraservações"
+            android:hint="obs_compras"
             android:inputType="text" />
 
         <Button
