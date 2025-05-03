@@ -1,5 +1,6 @@
 package com.app.barcodecompras;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,8 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 public class EditComprasActivity extends AppCompatActivity {
     private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras,
             etQntCompras, etPeriodoCompras, etObsCompras, etTotalCompras;
-    private Button btnSalvar, btnCancelar;
-    private SQLiteDatabase db;
+    private Button btnSalvar, btnCancelar, btnExcluir;
+     private SQLiteDatabase db;
     private long compraId;
 
     @Override
@@ -24,7 +25,8 @@ public class EditComprasActivity extends AppCompatActivity {
 
         // Inicializar views
         initViews();
-
+// Configurar listener para o botão excluir
+        btnExcluir.setOnClickListener(v -> excluirCompra());
         // Abrir banco de dados
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
@@ -60,6 +62,7 @@ public class EditComprasActivity extends AppCompatActivity {
         etObsCompras = findViewById(R.id.etObsCompras);
         btnSalvar = findViewById(R.id.btnSalvar);
         btnCancelar = findViewById(R.id.btnCancelar);
+        btnExcluir = findViewById(R.id.btnExcluir);  // Adicione esta linha
     }
 
     private void calculateTotal() {
@@ -125,6 +128,29 @@ public class EditComprasActivity extends AppCompatActivity {
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Por favor, insira valores válidos para preço e quantidade", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void excluirCompra() {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar Exclusão")
+                .setMessage("Tem certeza que deseja excluir esta compra?")
+                .setPositiveButton("Excluir", (dialog, which) -> {
+                    int rowsDeleted = db.delete(
+                            "compras_tab",
+                            "id = ?",
+                            new String[]{String.valueOf(compraId)}
+                    );
+
+                    if (rowsDeleted > 0) {
+                        Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Erro ao excluir compra", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     @Override

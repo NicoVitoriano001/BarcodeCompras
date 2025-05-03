@@ -93,6 +93,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cancelar" />
+            <Button
+                android:id="@+id/btnExcluir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Excluir"
+                android:backgroundTint="@android:color/holo_red_dark" />
         </LinearLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout> <!-- Tag de fechamento adicionada -->
