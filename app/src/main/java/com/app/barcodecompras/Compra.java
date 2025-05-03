@@ -2,7 +2,7 @@ package com.app.barcodecompras;
 //modelo Compra.java
 public class Compra {
     private long id;
-    private long qntCompras;
+    private Integer qntCompras;
     private String bcCompras, descrCompras, catCompras, periodoCompras, obsCompras;
     private double precoCompras, totalCompras;
 

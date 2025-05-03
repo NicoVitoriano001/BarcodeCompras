@@ -55,10 +55,15 @@ private SQLiteDatabase db;
 
         // No onCreate() do MainActivity, após inicializar os views:
         FloatingActionButton fabSearch = findViewById(R.id.fab_searchITEM);
-        fabSearch.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
-            startActivity(intent);
-        });
+        if (fabSearch != null) {
+            fabSearch.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, BuscaComprasActivity.class);
+                startActivity(intent);
+            });
+        } else {
+            Toast.makeText(this, "Botão de busca não encontrado no layout!", Toast.LENGTH_SHORT).show();
+        }
+
 
        // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
@@ -187,18 +192,6 @@ private SQLiteDatabase db;
             fetchItemDataCollectedTable(barcode);
         }
     }
-    /**@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
-            // Recarregar os dados após cadastro
-            String barcode = bc_compras.getText().toString();
-            fetchItemDataCollectedTable(barcode);
-        }
-    }
-**/
-
 
 // Busca descr_compras e cat_compras baseado no código escaneado
 // Busca descrição e categoria na tabela collected_tab

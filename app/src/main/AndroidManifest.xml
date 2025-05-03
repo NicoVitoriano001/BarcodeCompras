@@ -31,11 +31,10 @@
         <activity android:name=".AddItemIMDB"
             android:theme="@style/Theme.AppCompat.Light.Dialog"
             android:windowSoftInputMode="stateVisible"/>
-        <activity android:name=".BuscarComprasActivity"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
+        <activity android:name=".BuscaComprasActivity"></activity>
+        <activity android:name=".ResultComprasActivity"></activity>
         <activity android:name=".EditComprasActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"/>
-
         <activity android:name=".BuscarCollectedActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
 
