@@ -28,20 +28,32 @@ public class BuscarComprasActivity extends AppCompatActivity {
         loadCompras();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Recarregar os dados quando a atividade retornar ao primeiro plano
+        loadCompras();
+    }
+
     private void loadCompras() {
         comprasList.clear();
         Cursor cursor = db.rawQuery("SELECT * FROM compras_tab ORDER BY periodo_compras DESC", null);
 
         if (cursor.moveToFirst()) {
             do {
+                // Certifique-se de que o total está sendo calculado corretamente
+                double preco = cursor.getDouble(4);
+                int quantidade = cursor.getInt(5);
+                double total = preco * quantidade;  // Recalculando o total
+
                 Compra compra = new Compra(
                         cursor.getLong(0),
                         cursor.getString(1),
                         cursor.getString(2),
                         cursor.getString(3),
-                        cursor.getDouble(4),
-                        cursor.getInt(5),
-                        cursor.getDouble(6),
+                        preco,
+                        quantidade,
+                        total,  // Usando o valor recalculado
                         cursor.getString(7),
                         cursor.getString(8)
                 );
@@ -50,15 +62,11 @@ public class BuscarComprasActivity extends AppCompatActivity {
         }
         cursor.close();
 
-        adapter = new ComprasAdapter(comprasList);
-        recyclerView.setAdapter(adapter);
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (db != null && db.isOpen()) {
-            db.close();
+        if (adapter == null) {
+            adapter = new ComprasAdapter(comprasList);
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.notifyDataSetChanged();
         }
-        super.onDestroy();
     }
 }

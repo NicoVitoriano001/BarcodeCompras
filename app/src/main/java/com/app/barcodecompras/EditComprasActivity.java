@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class EditComprasActivity extends AppCompatActivity {
     private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras,
-            etQntCompras, etTotalCompras, etPeriodoCompras, etObsCompras;
+            etQntCompras, etPeriodoCompras, etObsCompras, etTotalCompras;
     private Button btnSalvar, btnCancelar;
     private SQLiteDatabase db;
     private long compraId;
@@ -35,6 +35,15 @@ public class EditComprasActivity extends AppCompatActivity {
             loadCompraData(compraId);
         }
 
+        // Configurar listeners para calcular total quando preço ou quantidade mudar
+        etPrecoCompras.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) calculateTotal();
+        });
+
+        etQntCompras.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) calculateTotal();
+        });
+
         // Configurar listeners
         btnSalvar.setOnClickListener(v -> salvarEdicao());
         btnCancelar.setOnClickListener(v -> finish());
@@ -51,6 +60,18 @@ public class EditComprasActivity extends AppCompatActivity {
         etObsCompras = findViewById(R.id.etObsCompras);
         btnSalvar = findViewById(R.id.btnSalvar);
         btnCancelar = findViewById(R.id.btnCancelar);
+    }
+
+    private void calculateTotal() {
+        try {
+            double preco = Double.parseDouble(etPrecoCompras.getText().toString());
+            int quantidade = Integer.parseInt(etQntCompras.getText().toString());
+            double total = preco * quantidade;
+            etTotalCompras.setText(String.valueOf(total));
+        } catch (NumberFormatException e) {
+            // Handle empty or invalid input
+            etTotalCompras.setText("");
+        }
     }
 
     private void loadCompraData(long id) {
@@ -71,29 +92,38 @@ public class EditComprasActivity extends AppCompatActivity {
     }
 
     private void salvarEdicao() {
-        ContentValues values = new ContentValues();
-        values.put("bc_compras", etBcCompras.getText().toString());
-        values.put("descr_compras", etDescrCompras.getText().toString());
-        values.put("cat_compras", etCatCompras.getText().toString());
-        values.put("preco_compras", Double.parseDouble(etPrecoCompras.getText().toString()));
-        values.put("qnt_compras", Integer.parseInt(etQntCompras.getText().toString()));
-        values.put("total_compras", Double.parseDouble(etTotalCompras.getText().toString()));
-        values.put("periodo_compras", etPeriodoCompras.getText().toString());
-        values.put("obs_compras", etObsCompras.getText().toString());
+        try {
+            // Calcular o total antes de salvar
+            double preco = Double.parseDouble(etPrecoCompras.getText().toString());
+            int quantidade = Integer.parseInt(etQntCompras.getText().toString());
+            double total = preco * quantidade;
 
-        int rowsAffected = db.update(
-                "compras_tab",
-                values,
-                "id = ?",
-                new String[]{String.valueOf(compraId)}
-        );
+            ContentValues values = new ContentValues();
+            values.put("bc_compras", etBcCompras.getText().toString());
+            values.put("descr_compras", etDescrCompras.getText().toString());
+            values.put("cat_compras", etCatCompras.getText().toString());
+            values.put("preco_compras", preco);
+            values.put("qnt_compras", quantidade);
+            values.put("total_compras", total);  // Usando o valor calculado
+            values.put("periodo_compras", etPeriodoCompras.getText().toString());
+            values.put("obs_compras", etObsCompras.getText().toString());
 
-        if (rowsAffected > 0) {
-            Toast.makeText(this, "Compra atualizada com sucesso!", Toast.LENGTH_SHORT).show();
-            setResult(RESULT_OK);
-            finish();
-        } else {
-            Toast.makeText(this, "Erro ao atualizar compra", Toast.LENGTH_SHORT).show();
+            int rowsAffected = db.update(
+                    "compras_tab",
+                    values,
+                    "id = ?",
+                    new String[]{String.valueOf(compraId)}
+            );
+
+            if (rowsAffected > 0) {
+                Toast.makeText(this, "Compra atualizada com sucesso!", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                finish();
+            } else {
+                Toast.makeText(this, "Erro ao atualizar compra", Toast.LENGTH_SHORT).show();
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Por favor, insira valores válidos para preço e quantidade", Toast.LENGTH_SHORT).show();
         }
     }
 
