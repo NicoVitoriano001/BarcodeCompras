@@ -72,5 +72,10 @@
             android:textColor="@color/vermelho_forte"
             android:gravity="end"/>
     </LinearLayout>
-
+    <TextView
+        android:id="@+id/tvObsCompras"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@android:color/darker_gray"/>
 </LinearLayout>

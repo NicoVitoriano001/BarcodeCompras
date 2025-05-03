@@ -17,7 +17,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="Nome do Seu App" />
+            app:title="BarcodeCompras" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main" />

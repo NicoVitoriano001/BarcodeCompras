@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -16,7 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.Manifest;
-import android.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -52,8 +50,11 @@ private SQLiteDatabase db;
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
+        // No onCreate(), após inicializar os views:
+        periodo_compras.setText(getDataHoraAtual()); // Define a data atual ao inicia
+
         // No onCreate() do MainActivity, após inicializar os views:
-        FloatingActionButton fabSearch = findViewById(R.id.fab_search);
+        FloatingActionButton fabSearch = findViewById(R.id.fab_searchITEM);
         fabSearch.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
             startActivity(intent);
@@ -62,29 +63,23 @@ private SQLiteDatabase db;
        // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
-        // No onCreate(), após inicializar os views:
-        periodo_compras = findViewById(R.id.periodo_compras);
-        periodo_compras.setText(getDataHoraAtual()); // Define a data atual ao iniciar
+       Button scanButton = findViewById(R.id.scanButton);
 
-        periodo_compras.setOnClickListener(v -> showDatePickerDialog());
-
-        Button scanButton = findViewById(R.id.scanButton);
-
-        scanButton.setOnClickListener(v -> {
+       scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
             integrator.setPrompt("Escaneie o código de barras");
             integrator.setOrientationLocked(true);
             integrator.setBeepEnabled(true);
             integrator.initiateScan();
-        });
+       });
 
-        saveButton.setOnClickListener(v -> saveData());
+       periodo_compras.setOnClickListener(v -> showDatePickerDialog());
+       saveButton.setOnClickListener(v -> saveData());
+       cancelButton.setOnClickListener(v -> clearFields());
 
-        cancelButton.setOnClickListener(v -> clearFields());
-
-        if (checkStoragePermission()) {
+       if (checkStoragePermission()) {
             initializeDatabase();
-        }
+       }
 
     } // fim ONCREATE
 

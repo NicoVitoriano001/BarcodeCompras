@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -33,6 +32,11 @@
             android:theme="@style/Theme.AppCompat.Light.Dialog"
             android:windowSoftInputMode="stateVisible"/>
         <activity android:name=".BuscarComprasActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
+        <activity android:name=".EditComprasActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"/>
+
+        <activity android:name=".BuscarCollectedActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
 
     </application>

@@ -1,7 +1,7 @@
 package com.app.barcodecompras;
 //adapter ComprasAdapter.java
 
-
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +35,15 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         holder.tvQuantidade.setText(String.valueOf(compra.getQntCompras()));
         holder.tvTotal.setText(String.format("R$ %.2f", compra.getTotalCompras()));
         holder.tvPeriodo.setText(compra.getPeriodoCompras());
+        holder.tvObsCompras.setText(compra.getObsCompras());
+
+        // No método onBindViewHolder do ComprasAdapter:
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), EditComprasActivity.class);
+            intent.putExtra("compra_id", compra.getId());
+            v.getContext().startActivity(intent);
+        });
+
     }
 
     @Override
@@ -43,7 +52,7 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     }
 
     static class CompraViewHolder extends RecyclerView.ViewHolder {
-        TextView tvBcCompras, tvDescricao, tvCategoria, tvPreco, tvQuantidade, tvTotal, tvPeriodo;
+        TextView tvBcCompras, tvDescricao, tvCategoria, tvPreco, tvQuantidade, tvTotal, tvPeriodo, tvObsCompras;
 
         public CompraViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -54,6 +63,7 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
             tvQuantidade = itemView.findViewById(R.id.tvQuantidade);
             tvTotal = itemView.findViewById(R.id.tvTotal);
             tvPeriodo = itemView.findViewById(R.id.tvPeriodo);
+            tvObsCompras = itemView.findViewById(R.id.tvObsCompras);
         }
     }
 }

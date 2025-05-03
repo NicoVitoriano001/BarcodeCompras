@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.android.material:material:1.9.0' // Verifique se há uma versão mais recente
     implementation libs.appcompat
     implementation libs.material
     implementation libs.constraintlayout
