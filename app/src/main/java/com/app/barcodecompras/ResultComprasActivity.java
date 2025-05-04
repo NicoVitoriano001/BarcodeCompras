@@ -4,12 +4,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import android.widget.TextView;
 
 public class ResultComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
@@ -63,8 +65,10 @@ public class ResultComprasActivity extends AppCompatActivity {
         }
     }
 
+
     private void loadCompras(String codigo, String descricao, String categoria, String periodo) {
         comprasList.clear();
+        double somaTotal = 0.0; // Variável para acumular a soma
 
         // Construir query dinâmica baseada nos critérios de busca
         String query = "SELECT * FROM compras_tab WHERE 1=1";
@@ -100,6 +104,7 @@ public class ResultComprasActivity extends AppCompatActivity {
                 double preco = cursor.getDouble(4);
                 int quantidade = cursor.getInt(5);
                 double total = preco * quantidade;  // Recalculando o total
+                somaTotal += total; // Acumula o total
 
                 Compra compra = new Compra(
                         cursor.getLong(0),
@@ -117,6 +122,10 @@ public class ResultComprasActivity extends AppCompatActivity {
         }
         cursor.close();
 
+        // Atualizar o TextView com a soma total
+        TextView tvTitle = findViewById(R.id.tvTitle);
+        tvTitle.setText(String.format("Soma parcial: R$ %.2f", somaTotal));
+
         if (adapter == null) {
             adapter = new ComprasAdapter(comprasList);
             recyclerView.setAdapter(adapter);
@@ -124,5 +133,6 @@ public class ResultComprasActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         }
     }
+
 }
 
