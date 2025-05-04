@@ -15,8 +15,6 @@ public class EditComprasActivity extends AppCompatActivity {
     private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras,
             etQntCompras, etPeriodoCompras, etObsCompras, etTotalCompras;
     private Button btnSalvar, btnCancelar, btnExcluir;
-
-
     private SQLiteDatabase db;
     private long compraId;
 
@@ -96,7 +94,6 @@ public class EditComprasActivity extends AppCompatActivity {
         cursor.close();
     }
 
-
     private void excluirCompra() {
         new AlertDialog.Builder(this)
                 .setTitle("Confirmar Exclusão")
@@ -119,7 +116,6 @@ public class EditComprasActivity extends AppCompatActivity {
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
-
 
     private void salvarEdicao() {
         try {

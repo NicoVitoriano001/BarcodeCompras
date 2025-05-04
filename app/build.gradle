@@ -4,15 +4,14 @@ plugins {
 
 android {
     namespace 'com.app.barcodecompras'
-    compileSdk 35
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.app.barcodecompras"
         minSdk 24
-        targetSdk 35
+        targetSdkVersion 34
         versionCode 1
-        versionName "0.1.0.500"
-
+        versionName "0.1.0.502"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
