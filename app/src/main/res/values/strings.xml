@@ -9,6 +9,12 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="search_button">Buscar</string>
+    <string name="search_title">Buscar Compra</string>
+    <string name="barcode_hint">Digite Barcode</string>
+    <string name="description_hint">Digite Desc Item</string>
+    <string name="category_hint">Digite Categoria Item</string>
 
     <!-- Layout no Mainactivity-->
     <string name="descr_item">Item</string>
@@ -18,5 +24,4 @@
     <string name="total_qnt">Total</string>
     <string name="periodo">Periodo</string>
     <string name="observacao">OBS</string>
-
 </resources>

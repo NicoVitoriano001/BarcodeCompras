@@ -108,7 +108,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:src="@drawable/ic_search"
-            app:backgroundTint="@color/purple_500"
+            app:backgroundTint="@color/teal_700"
             app:tint="@android:color/white"/>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

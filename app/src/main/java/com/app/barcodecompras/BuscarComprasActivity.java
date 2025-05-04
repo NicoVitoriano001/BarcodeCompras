@@ -6,8 +6,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
+
 public class BuscarComprasActivity extends AppCompatActivity {
-    private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria;
+    private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria, etBuscaPeriodo;
     private Button btnBuscar, btnCancelar;
 
     @Override
@@ -19,6 +20,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
         etBuscaCodigo = findViewById(R.id.etBuscaCodigo);
         etBuscaDescricao = findViewById(R.id.etBuscaDescricao);
         etBuscaCategoria = findViewById(R.id.etBuscaCategoria);
+        etBuscaPeriodo = findViewById(R.id.etBuscaPeriodo);
         btnBuscar = findViewById(R.id.btnBuscar);
         btnCancelar = findViewById(R.id.btnCancelarBusca);
 
@@ -34,7 +36,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
         intent.putExtra("CODIGO", etBuscaCodigo.getText().toString());
         intent.putExtra("DESCRICAO", etBuscaDescricao.getText().toString());
         intent.putExtra("CATEGORIA", etBuscaCategoria.getText().toString());
-
+        intent.putExtra("PERIODO", etBuscaPeriodo.getText().toString());
         startActivity(intent);
     }
 }

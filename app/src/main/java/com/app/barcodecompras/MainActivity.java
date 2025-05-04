@@ -100,24 +100,6 @@ private SQLiteDatabase db;
         return true;
     }
 
-    // Adicione este metodo para tratar a resposta da permissão
-   /**
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initializeDatabase();
-            } else {
-                Toast.makeText(this,
-                        "Permissão negada - o app não pode funcionar sem acesso ao armazenamento",
-                        Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-**/
-
 //inicio data calendário
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
@@ -187,18 +169,6 @@ private SQLiteDatabase db;
             fetchItemDataCollectedTable(barcode);
         }
     }
-    /**@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
-            // Recarregar os dados após cadastro
-            String barcode = bc_compras.getText().toString();
-            fetchItemDataCollectedTable(barcode);
-        }
-    }
-**/
-
 
 // Busca descr_compras e cat_compras baseado no código escaneado
 // Busca descrição e categoria na tabela collected_tab
@@ -260,7 +230,7 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
         values.put("periodo_compras", periodo_comprasVal);
         values.put("obs_compras", obs_comprasVal);
 
-        // Log dos dados que serão salvos
+        /* * Log dos dados que serão salvos
         android.util.Log.d("DB_SAVE", "Salvando dados:");
         android.util.Log.d("DB_SAVE", "bc_compras: " + bc_comprasVal);
         android.util.Log.d("DB_SAVE", "descr_compras: " + descr_comprasVal);
@@ -270,7 +240,7 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
         android.util.Log.d("DB_SAVE", "total_compras: " + total_comprasVal);
         android.util.Log.d("DB_SAVE", "periodo_compras: " + periodo_comprasVal);
         android.util.Log.d("DB_SAVE", "obs_compras: " + obs_comprasVal);
-
+        * */
         long result = db.insert("compras_tab", null, values);
 
         if (result != -1) {

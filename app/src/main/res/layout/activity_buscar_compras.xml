@@ -24,6 +24,12 @@
         android:layout_height="wrap_content"
         android:hint="Categoria"/>
 
+    <EditText
+        android:id="@+id/etBuscaPeriodo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Periodo"/>
+
     <!-- Botões -->
     <LinearLayout
         android:layout_width="match_parent"

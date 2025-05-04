@@ -30,11 +30,12 @@ public class ResultComprasActivity extends AppCompatActivity {
         String codigo = getIntent().getStringExtra("CODIGO");
         String descricao = getIntent().getStringExtra("DESCRICAO");
         String categoria = getIntent().getStringExtra("CATEGORIA");
+        String periodo = getIntent().getStringExtra("PERIODO");
 
-        loadCompras(codigo, descricao, categoria);
+        loadCompras(codigo, descricao, categoria, periodo);
     }
 
-    private void loadCompras(String codigo, String descricao, String categoria) {
+    private void loadCompras(String codigo, String descricao, String categoria, String periodo) {
         comprasList.clear();
 
         // Construir query dinâmica baseada nos critérios de busca
@@ -56,12 +57,14 @@ public class ResultComprasActivity extends AppCompatActivity {
             params.add("%" + categoria + "%");
         }
 
-        query += " ORDER BY periodo_compras DESC";
+        if (!periodo.isEmpty()) {
+            query += " AND periodo_compras LIKE ?";
+            params.add("%" + periodo + "%");
+        }
+
+        query += " ORDER BY descr_compras DESC";
 
         Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
-
-        // Restante do código igual ao atual BuscarComprasActivity...
-        // (processar o cursor e popular a lista)
 
         if (cursor.moveToFirst()) {
             do {
