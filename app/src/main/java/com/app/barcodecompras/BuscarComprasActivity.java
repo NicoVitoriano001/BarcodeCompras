@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class BuscarComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
-    private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria, etBuscaPeriodo;
+    private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria, etBuscaPeriodo , etBuscaOBS;
     private Button btnBuscar, btnCancelar;
 
     @Override
@@ -21,6 +21,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
         etBuscaDescricao = findViewById(R.id.etBuscaDescricao);
         etBuscaCategoria = findViewById(R.id.etBuscaCategoria);
         etBuscaPeriodo = findViewById(R.id.etBuscaPeriodo);
+        etBuscaOBS = findViewById(R.id.etBuscaOBS);
         btnBuscar = findViewById(R.id.btnBuscar);
         btnCancelar = findViewById(R.id.btnCancelarBusca);
 
@@ -37,10 +38,11 @@ public class BuscarComprasActivity extends AppCompatActivity {
         intent.putExtra("DESCRICAO", etBuscaDescricao.getText().toString());
         intent.putExtra("CATEGORIA", etBuscaCategoria.getText().toString());
         intent.putExtra("PERIODO", etBuscaPeriodo.getText().toString());
+        intent.putExtra("OBSERVACAO", etBuscaOBS.getText().toString());
         startActivity(intent);
     }
 
-    // Adicione este método para tratar o retorno
+    // Adicione este metodo para tratar o retorno
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

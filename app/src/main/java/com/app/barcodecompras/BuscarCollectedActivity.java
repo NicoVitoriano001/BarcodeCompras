@@ -67,7 +67,6 @@ public class BuscarCollectedActivity extends AppCompatActivity {
             this.description = description;
             this.category = category;
         }
-
         // Getters
         public String getBarcode() { return barcode; }
         public String getDescription() { return description; }

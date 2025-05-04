@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ResultComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
-    private String currentCodigo, currentDescricao, currentCategoria, currentPeriodo;
+    private String currentCodigo, currentDescricao, currentCategoria, currentPeriodo , currentObservacao;
     private RecyclerView recyclerView;
     private ComprasAdapter adapter;
     private SQLiteDatabase db;
@@ -35,14 +35,16 @@ public class ResultComprasActivity extends AppCompatActivity {
         String descricao = getIntent().getStringExtra("DESCRICAO");
         String categoria = getIntent().getStringExtra("CATEGORIA");
         String periodo = getIntent().getStringExtra("PERIODO");
+        String observacao = getIntent().getStringExtra("OBSERVACAO");
 
-        loadCompras(codigo, descricao, categoria, periodo);
+        loadCompras(codigo, descricao, categoria, periodo, observacao);
 
         // Obter e armazenar critérios de busca atuais
         currentCodigo = getIntent().getStringExtra("CODIGO") != null ? getIntent().getStringExtra("CODIGO") : "";
         currentDescricao = getIntent().getStringExtra("DESCRICAO") != null ? getIntent().getStringExtra("DESCRICAO") : "";
         currentCategoria = getIntent().getStringExtra("CATEGORIA") != null ? getIntent().getStringExtra("CATEGORIA") : "";
         currentPeriodo = getIntent().getStringExtra("PERIODO") != null ? getIntent().getStringExtra("PERIODO") : "";
+        currentObservacao = getIntent().getStringExtra("OBSERVACAO") != null ? getIntent().getStringExtra("OBSERVACAO") : "";
 
         // Configurar clique nos itens da lista
         adapter.setOnItemClickListener(compra -> {
@@ -59,13 +61,13 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         if (requestCode == EDIT_COMPRA_REQUEST && resultCode == RESULT_OK) {
             // Recarregar os dados com os mesmos critérios de busca
-            loadCompras(currentCodigo, currentDescricao, currentCategoria, currentPeriodo);
+            loadCompras(currentCodigo, currentDescricao, currentCategoria, currentPeriodo, currentObservacao);
             Toast.makeText(this, "Lista atualizada", Toast.LENGTH_SHORT).show();
         }
     }
 
 
-    private void loadCompras(String codigo, String descricao, String categoria, String periodo) {
+    private void loadCompras(String codigo, String descricao, String categoria, String periodo, String observacao) {
         comprasList.clear();
         double somaTotal = 0.0; // Variável para acumular a soma
 
@@ -91,6 +93,11 @@ public class ResultComprasActivity extends AppCompatActivity {
         if (!periodo.isEmpty()) {
             query += " AND periodo_compras LIKE ?";
             params.add("%" + periodo + "%");
+        }
+
+        if (!observacao.isEmpty()) {
+            query += " AND obs_compras LIKE ?";
+            params.add("%" + observacao + "%");
         }
 
         query += " ORDER BY descr_compras ASC";

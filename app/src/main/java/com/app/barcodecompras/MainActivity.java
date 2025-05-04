@@ -3,14 +3,19 @@ package com.app.barcodecompras;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.Settings;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -20,7 +25,9 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -50,6 +57,18 @@ private ActionBarDrawerToggle toggle;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        // Verificar permissão ao iniciar o app. Usado no backup
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                !Environment.isExternalStorageManager()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Permissão Necessária")
+                    .setMessage("Para salvar backups na pasta Downloads, por favor conceda a permissão 'Gerenciar todos os arquivos'")
+                    .setPositiveButton("OK", (dialog, which) -> requestStoragePermission())
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+        }
 
         bc_compras = findViewById(R.id.bc_compras);
         descr_compras = findViewById(R.id.descr_compras);
@@ -107,9 +126,6 @@ private ActionBarDrawerToggle toggle;
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Configurar Navigation Drawer
-        //navigationView = findViewById(R.id.nav_view); // Certifique-se de ter um NavigationView no seu XML
-
         NavigationView navigationView = findViewById(R.id.nav_view);
 
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -133,22 +149,6 @@ private ActionBarDrawerToggle toggle;
 
     } // fim ONCREATE
 
-    private boolean checkStoragePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        new String[]{
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        },
-                        REQUEST_CODE);
-                return false;
-            }
-        }
-        return true;
-    }
 
 //inicio data calendário
     private void showDatePickerDialog() {
@@ -175,8 +175,6 @@ private ActionBarDrawerToggle toggle;
         return sdf.format(calendar.getTime());
     }
 //fim data calendario
-
-
     private void initializeDatabase() {
         //getFilesDir() retorna um diretório privado exclusivo da aplicação. Caminho típico: /data/user/0/com.app.barcodecompras/files/COMPRAS/comprasDB.db
         File dir = new File(getApplicationContext().getFilesDir(), "COMPRAS");
@@ -200,7 +198,6 @@ private ActionBarDrawerToggle toggle;
                 "periodo_compras TEXT," +
                 "obs_compras TEXT)");
     }
-
 
     // Resultado do scanner ZXing
     @Override
@@ -290,65 +287,154 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
         }
     }
 
+    private void requestStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                startActivity(intent);
+            } catch (Exception e) {
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_CODE);
+        }
+    }
 
+    private boolean checkStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11+ precisa de permissão especial
+            return Environment.isExternalStorageManager();
+        } else {
+            // Android 10 e abaixo
+            return ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        }
+    }
 
-
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permissão concedida, pode continuar
+            } else {
+                Toast.makeText(this, "Permissão negada. Não é possível fazer backup/restore.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
     private void fazerBackup() {
         if (!checkStoragePermission()) {
+            Toast.makeText(this, "Permissão necessária para fazer backup", Toast.LENGTH_SHORT).show();
+            requestStoragePermission();
             return;
         }
 
         try {
-            // Obter data/hora atual para o nome do arquivo
+            // Verificar se temos permissão mesmo após solicitar
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                    !Environment.isExternalStorageManager()) {
+                Toast.makeText(this, "Permissão ainda não concedida", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             String dataHora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String nomeArquivoBKP = "comprasDB_" + dataHora + ".db";
 
-            // Diretório de downloads
-            File dirDownloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File arquivoBackup = new File(dirDownloads, nomeArquivoBKP);
+            // Usando a API recomendada para Android 10+
+            File downloadsDir;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                downloadsDir = new File(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                        "COMPRAS");
+            } else {
+                downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            }
 
-            // Arquivo original do banco de dados
-            File arquivoDB = new File(getApplicationContext().getDatabasePath("comprasDB.db").getPath());
+            if (!downloadsDir.exists()) {
+                downloadsDir.mkdirs();
+            }
 
-            // Copiar arquivo
+            File arquivoBackup = new File(downloadsDir, nomeArquivoBKP);
+            File arquivoDB = getDatabasePath("comprasDB.db");
+
+            if (!arquivoDB.exists()) {
+                Toast.makeText(this, "Banco de dados não encontrado!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             copiarArquivo(arquivoDB, arquivoBackup);
 
-            Toast.makeText(this, "Backup criado com sucesso em: " + arquivoBackup.getPath(), Toast.LENGTH_LONG).show();
+            // Notificar o sistema sobre o novo arquivo (necessário no Android 10+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaScannerConnection.scanFile(this,
+                        new String[]{arquivoBackup.getAbsolutePath()},
+                        null,
+                        null);
+            }
+
+            Toast.makeText(this,
+                    "Backup criado com sucesso em: " + arquivoBackup.getAbsolutePath(),
+                    Toast.LENGTH_LONG).show();
+
         } catch (Exception e) {
             Toast.makeText(this, "Erro ao criar backup: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }
     }
 
     private void restaurarBackup() {
         if (!checkStoragePermission()) {
+            Toast.makeText(this, "Permissão necessária para restaurar backup", Toast.LENGTH_SHORT).show();
+            requestStoragePermission();
             return;
         }
 
-        // Diretório de downloads
-        File dirDownloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        try {
+            File downloadsDir;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                downloadsDir = new File(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                        "BackupCompras");
+            } else {
+                downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            }
 
-        // Listar arquivos de backup
-        File[] arquivos = dirDownloads.listFiles((dir, nome) -> nome.startsWith("comprasDB_") && nome.endsWith(".db"));
+            File[] arquivos = downloadsDir.listFiles((dir, nome) ->
+                    nome.startsWith("comprasDB_") && nome.endsWith(".db"));
 
-        if (arquivos == null || arquivos.length == 0) {
-            Toast.makeText(this, "Nenhum arquivo de backup encontrado", Toast.LENGTH_SHORT).show();
-            return;
+            if (arquivos == null || arquivos.length == 0) {
+                Toast.makeText(this, "Nenhum backup encontrado na pasta Downloads", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Ordenar por data (do mais recente para o mais antigo)
+            Arrays.sort(arquivos, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+
+            String[] nomesArquivos = new String[arquivos.length];
+            for (int i = 0; i < arquivos.length; i++) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                nomesArquivos[i] = arquivos[i].getName() + " - " + sdf.format(new Date(arquivos[i].lastModified()));
+            }
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Selecione o backup para restaurar")
+                    .setItems(nomesArquivos, (dialog, which) -> {
+                        confirmarRestauracao(arquivos[which]);
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Erro ao acessar backups: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }
-
-        // Mostrar diálogo para selecionar arquivo
-        String[] nomesArquivos = new String[arquivos.length];
-        for (int i = 0; i < arquivos.length; i++) {
-            nomesArquivos[i] = arquivos[i].getName();
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Selecione o backup para restaurar")
-                .setItems(nomesArquivos, (dialog, which) -> {
-                    confirmarRestauracao(arquivos[which]);
-                })
-                .show();
     }
 
     private void confirmarRestauracao(File arquivoBackup) {
@@ -357,11 +443,15 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
                 .setMessage("Deseja sobrescrever o banco de dados atual com o backup selecionado?")
                 .setPositiveButton("Sim", (dialog, which) -> {
                     try {
-                        File arquivoDB = new File(getApplicationContext().getDatabasePath("comprasDB.db").getPath());
+                        File arquivoDB = new File(getDatabasePath("comprasDB.db").getPath());
                         copiarArquivo(arquivoBackup, arquivoDB);
                         Toast.makeText(this, "Banco de dados restaurado com sucesso!", Toast.LENGTH_LONG).show();
+
+                        // Recarregar a activity para aplicar as mudanças
+                        recreate();
                     } catch (Exception e) {
                         Toast.makeText(this, "Erro ao restaurar backup: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
                     }
                 })
                 .setNegativeButton("Não", null)
@@ -378,12 +468,6 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
             }
         }
     }
-
-
-
-
-
-
 
     private void clearFields() {
         bc_compras.setText("");

@@ -1,16 +1,13 @@
 package com.app.barcodecompras;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.io.File;
 
 public class AddItemIMDB extends AppCompatActivity {
@@ -39,7 +36,6 @@ public class AddItemIMDB extends AppCompatActivity {
         File dbFile = new File(dir, "comprasDB.db");
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
-        //db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
 
         saveButton.setOnClickListener(v -> saveItem());
     }

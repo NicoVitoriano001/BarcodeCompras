@@ -30,6 +30,12 @@
         android:layout_height="wrap_content"
         android:hint="Periodo"/>
 
+    <EditText
+        android:id="@+id/etBuscaOBS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Observação"/>
+
     <!-- Botões -->
     <LinearLayout
         android:layout_width="match_parent"
