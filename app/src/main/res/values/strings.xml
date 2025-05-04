@@ -1,7 +1,5 @@
 <resources>
-    <string name="app_name">BarcodeCompras 0.1.0.504</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="app_name">BarcodeCompras 0.1.0.505</string>
     <string name="nav_header_title">Barcode Compras</string>
     <string name="nav_header_subtitle">barcode.compras@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
@@ -15,6 +13,8 @@
     <string name="barcode_hint">Digite Barcode</string>
     <string name="description_hint">Digite Desc Item</string>
     <string name="category_hint">Digite Categoria Item</string>
+    <string name="navigation_drawer_open">Abrir menu</string>
+    <string name="navigation_drawer_close">Fechar menu</string>
 
     <!-- Layout no Mainactivity-->
     <string name="descr_item">Item</string>

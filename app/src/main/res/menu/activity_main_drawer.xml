@@ -17,4 +17,15 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_slideshow" />
     </group>
+
+    <group android:id="@+id/group_backup">
+        <item
+            android:id="@+id/nav_backup"
+            android:icon="@drawable/ic_backup"
+            android:title="Fazer Backup" />
+        <item
+            android:id="@+id/nav_restore"
+            android:icon="@drawable/ic_restore"
+            android:title="Restaurar Backup" />
+    </group>
 </menu>

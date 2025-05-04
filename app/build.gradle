@@ -8,10 +8,10 @@ android {
 
     defaultConfig {
         applicationId "com.app.barcodecompras"
-        minSdk 24
+        minSdk 26
         targetSdkVersion 34
         versionCode 1
-        versionName "0.1.0.504"
+        versionName "0.1.0.505"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

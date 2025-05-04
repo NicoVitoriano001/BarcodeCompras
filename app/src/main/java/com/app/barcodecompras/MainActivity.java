@@ -15,16 +15,31 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.Manifest;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Locale;
+import android.view.MenuItem;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import android.os.Environment;
+import androidx.core.view.GravityCompat;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import androidx.appcompat.widget.Toolbar;
+
 
 public class MainActivity extends AppCompatActivity {
 private static final int REQUEST_CODE = 1;
@@ -32,6 +47,8 @@ private static final int REQUEST_CODE_ADD_ITEM = 1001;
 private EditText bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras;
 private Button scanButton, saveButton, cancelButton;
 private SQLiteDatabase db;
+private DrawerLayout drawer;
+private ActionBarDrawerToggle toggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +97,43 @@ private SQLiteDatabase db;
        if (checkStoragePermission()) {
             initializeDatabase();
        }
+
+// Configurar Toolbar (usando a versão AppCompat)
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+// Configurar Navigation Drawer
+        drawer = findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        // Configurar Navigation Drawer
+        //navigationView = findViewById(R.id.nav_view); // Certifique-se de ter um NavigationView no seu XML
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+                if (id == R.id.nav_home) {
+                    // Ação para home
+                } else if (id == R.id.nav_gallery) {
+                    // Ação para galeria
+                } else if (id == R.id.nav_slideshow) {
+                    // Ação para slideshow
+                } else if (id == R.id.nav_backup) {
+                    fazerBackup();
+                } else if (id == R.id.nav_restore) {
+                    restaurarBackup();
+                }
+
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        });
 
     } // fim ONCREATE
 
@@ -230,17 +284,6 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
         values.put("periodo_compras", periodo_comprasVal);
         values.put("obs_compras", obs_comprasVal);
 
-        /* * Log dos dados que serão salvos
-        android.util.Log.d("DB_SAVE", "Salvando dados:");
-        android.util.Log.d("DB_SAVE", "bc_compras: " + bc_comprasVal);
-        android.util.Log.d("DB_SAVE", "descr_compras: " + descr_comprasVal);
-        android.util.Log.d("DB_SAVE", "cat_compras: " + cat_comprasVal);
-        android.util.Log.d("DB_SAVE", "preco_compras: " + preco_comprasVal);
-        android.util.Log.d("DB_SAVE", "qnt_compras: " + qnt_comprasVal);
-        android.util.Log.d("DB_SAVE", "total_compras: " + total_comprasVal);
-        android.util.Log.d("DB_SAVE", "periodo_compras: " + periodo_comprasVal);
-        android.util.Log.d("DB_SAVE", "obs_compras: " + obs_comprasVal);
-        * */
         long result = db.insert("compras_tab", null, values);
 
         if (result != -1) {
@@ -250,6 +293,100 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
             Toast.makeText(this, "Erro ao salvar!", Toast.LENGTH_SHORT).show();
         }
     }
+
+
+
+
+
+
+    private void fazerBackup() {
+        if (!checkStoragePermission()) {
+            return;
+        }
+
+        try {
+            // Obter data/hora atual para o nome do arquivo
+            String dataHora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String nomeArquivoBKP = "comprasDB_" + dataHora + ".db";
+
+            // Diretório de downloads
+            File dirDownloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File arquivoBackup = new File(dirDownloads, nomeArquivoBKP);
+
+            // Arquivo original do banco de dados
+            File arquivoDB = new File(getApplicationContext().getDatabasePath("comprasDB.db").getPath());
+
+            // Copiar arquivo
+            copiarArquivo(arquivoDB, arquivoBackup);
+
+            Toast.makeText(this, "Backup criado com sucesso em: " + arquivoBackup.getPath(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Erro ao criar backup: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void restaurarBackup() {
+        if (!checkStoragePermission()) {
+            return;
+        }
+
+        // Diretório de downloads
+        File dirDownloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+        // Listar arquivos de backup
+        File[] arquivos = dirDownloads.listFiles((dir, nome) -> nome.startsWith("comprasDB_") && nome.endsWith(".db"));
+
+        if (arquivos == null || arquivos.length == 0) {
+            Toast.makeText(this, "Nenhum arquivo de backup encontrado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Mostrar diálogo para selecionar arquivo
+        String[] nomesArquivos = new String[arquivos.length];
+        for (int i = 0; i < arquivos.length; i++) {
+            nomesArquivos[i] = arquivos[i].getName();
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Selecione o backup para restaurar")
+                .setItems(nomesArquivos, (dialog, which) -> {
+                    confirmarRestauracao(arquivos[which]);
+                })
+                .show();
+    }
+
+    private void confirmarRestauracao(File arquivoBackup) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar restauração")
+                .setMessage("Deseja sobrescrever o banco de dados atual com o backup selecionado?")
+                .setPositiveButton("Sim", (dialog, which) -> {
+                    try {
+                        File arquivoDB = new File(getApplicationContext().getDatabasePath("comprasDB.db").getPath());
+                        copiarArquivo(arquivoBackup, arquivoDB);
+                        Toast.makeText(this, "Banco de dados restaurado com sucesso!", Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Erro ao restaurar backup: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                })
+                .setNegativeButton("Não", null)
+                .show();
+    }
+
+    private void copiarArquivo(File origem, File destino) throws IOException {
+        try (InputStream in = new FileInputStream(origem);
+             OutputStream out = new FileOutputStream(destino)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+        }
+    }
+
+
+
+
+
 
 
     private void clearFields() {
