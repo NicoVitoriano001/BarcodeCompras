@@ -44,7 +44,7 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         holder.tvPeriodo.setText(compra.getPeriodoCompras());
         holder.tvObsCompras.setText(compra.getObsCompras());
 
-        // No método onBindViewHolder do ComprasAdapter:
+        // No metodo onBindViewHolder do ComprasAdapter:
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onItemClick(compra);

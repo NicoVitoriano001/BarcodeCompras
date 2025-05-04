@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
-import android.widget.TextView;
 
 public class ResultComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
@@ -94,7 +93,7 @@ public class ResultComprasActivity extends AppCompatActivity {
             params.add("%" + periodo + "%");
         }
 
-        query += " ORDER BY descr_compras DESC";
+        query += " ORDER BY descr_compras ASC";
 
         Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
 
@@ -102,7 +101,7 @@ public class ResultComprasActivity extends AppCompatActivity {
             do {
                 // Certifique-se de que o total está sendo calculado corretamente
                 double preco = cursor.getDouble(4);
-                int quantidade = cursor.getInt(5);
+                double quantidade = cursor.getDouble(5);
                 double total = preco * quantidade;  // Recalculando o total
                 somaTotal += total; // Acumula o total
 

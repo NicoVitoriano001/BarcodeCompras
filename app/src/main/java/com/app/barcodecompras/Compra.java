@@ -2,13 +2,12 @@ package com.app.barcodecompras;
 //modelo Compra.java
 public class Compra {
     private long id;
-    private long qntCompras;
     private String bcCompras, descrCompras, catCompras, periodoCompras, obsCompras;
-    private double precoCompras, totalCompras;
+    private double precoCompras, totalCompras, qntCompras;
 
     // Construtor
     public Compra(long id, String bcCompras, String descrCompras, String catCompras,
-                  double precoCompras, int qntCompras, double totalCompras,
+                  double precoCompras, double qntCompras, double totalCompras,
                   String periodoCompras, String obsCompras) {
         this.id = id;
         this.bcCompras = bcCompras;
@@ -27,7 +26,7 @@ public class Compra {
     public String getDescrCompras() { return descrCompras; }
     public String getCatCompras() { return catCompras; }
     public double getPrecoCompras() { return precoCompras; }
-    public int getQntCompras() { return (int) qntCompras; }
+    public double getQntCompras() { return qntCompras; }
     public double getTotalCompras() { return totalCompras; }
     public String getPeriodoCompras() { return periodoCompras; }
     public String getObsCompras() { return obsCompras; }

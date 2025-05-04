@@ -22,11 +22,9 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import android.view.MenuItem;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,8 +35,6 @@ import java.time.format.DateTimeFormatter;
 import android.os.Environment;
 import androidx.core.view.GravityCompat;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import androidx.appcompat.widget.Toolbar;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -199,7 +195,7 @@ private ActionBarDrawerToggle toggle;
                 "descr_compras TEXT," +
                 "cat_compras TEXT," +
                 "preco_compras REAL," +
-                "qnt_compras INTEGER," +
+                "qnt_compras REAL," +
                 "total_compras REAL," +
                 "periodo_compras TEXT," +
                 "obs_compras TEXT)");
@@ -269,7 +265,7 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
         }
 
         double preco_comprasVal = Double.parseDouble(preco_comprasStr);
-        int qnt_comprasVal = Integer.parseInt(qnt_comprasStr);
+        double qnt_comprasVal = Double.parseDouble(qnt_comprasStr);
         double total_comprasVal = preco_comprasVal * qnt_comprasVal;
 
         total_compras.setText(String.valueOf(total_comprasVal));

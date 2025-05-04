@@ -40,13 +40,6 @@ public class BuscarComprasActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    /** Metodo para abrir a edição
-    private void abrirEdicaoCompra(long compraId) {
-        Intent intent = new Intent(this, EditComprasActivity.class);
-        intent.putExtra("compra_id", compraId);
-        startActivityForResult(intent, EDIT_COMPRA_REQUEST);
-    }
-**/
     // Adicione este método para tratar o retorno
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

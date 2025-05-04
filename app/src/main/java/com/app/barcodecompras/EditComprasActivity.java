@@ -68,7 +68,7 @@ public class EditComprasActivity extends AppCompatActivity {
     private void calculateTotal() {
         try {
             double preco = Double.parseDouble(etPrecoCompras.getText().toString());
-            int quantidade = Integer.parseInt(etQntCompras.getText().toString());
+            double quantidade = Integer.parseInt(etQntCompras.getText().toString());
             double total = preco * quantidade;
             etTotalCompras.setText(String.valueOf(total));
         } catch (NumberFormatException e) {
@@ -86,7 +86,7 @@ public class EditComprasActivity extends AppCompatActivity {
             etDescrCompras.setText(cursor.getString(2));
             etCatCompras.setText(cursor.getString(3));
             etPrecoCompras.setText(String.valueOf(cursor.getDouble(4)));
-            etQntCompras.setText(String.valueOf(cursor.getInt(5)));
+            etQntCompras.setText(String.valueOf(cursor.getDouble(5)));
             etTotalCompras.setText(String.valueOf(cursor.getDouble(6)));
             etPeriodoCompras.setText(cursor.getString(7));
             etObsCompras.setText(cursor.getString(8));
@@ -122,7 +122,7 @@ public class EditComprasActivity extends AppCompatActivity {
         try {
             // Calcular o total antes de salvar
             double preco = Double.parseDouble(etPrecoCompras.getText().toString());
-            int quantidade = Integer.parseInt(etQntCompras.getText().toString());
+            double quantidade = Double.parseDouble(etQntCompras.getText().toString());
             double total = preco * quantidade;
 
             ContentValues values = new ContentValues();
