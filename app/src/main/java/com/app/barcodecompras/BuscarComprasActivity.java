@@ -6,8 +6,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
-
 public class BuscarComprasActivity extends AppCompatActivity {
+    private static final int EDIT_COMPRA_REQUEST = 1;
     private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria, etBuscaPeriodo;
     private Button btnBuscar, btnCancelar;
 
@@ -39,4 +39,21 @@ public class BuscarComprasActivity extends AppCompatActivity {
         intent.putExtra("PERIODO", etBuscaPeriodo.getText().toString());
         startActivity(intent);
     }
-}
+
+    /** Metodo para abrir a edição
+    private void abrirEdicaoCompra(long compraId) {
+        Intent intent = new Intent(this, EditComprasActivity.class);
+        intent.putExtra("compra_id", compraId);
+        startActivityForResult(intent, EDIT_COMPRA_REQUEST);
+    }
+**/
+    // Adicione este método para tratar o retorno
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == EDIT_COMPRA_REQUEST && resultCode == RESULT_OK) {
+            finish();
+            }
+        }
+    }

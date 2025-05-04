@@ -1,16 +1,19 @@
 package com.app.barcodecompras;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class ResultComprasActivity extends AppCompatActivity {
+    private static final int EDIT_COMPRA_REQUEST = 1;
+    private String currentCodigo, currentDescricao, currentCategoria, currentPeriodo;
     private RecyclerView recyclerView;
     private ComprasAdapter adapter;
     private SQLiteDatabase db;
@@ -33,6 +36,31 @@ public class ResultComprasActivity extends AppCompatActivity {
         String periodo = getIntent().getStringExtra("PERIODO");
 
         loadCompras(codigo, descricao, categoria, periodo);
+
+        // Obter e armazenar critérios de busca atuais
+        currentCodigo = getIntent().getStringExtra("CODIGO") != null ? getIntent().getStringExtra("CODIGO") : "";
+        currentDescricao = getIntent().getStringExtra("DESCRICAO") != null ? getIntent().getStringExtra("DESCRICAO") : "";
+        currentCategoria = getIntent().getStringExtra("CATEGORIA") != null ? getIntent().getStringExtra("CATEGORIA") : "";
+        currentPeriodo = getIntent().getStringExtra("PERIODO") != null ? getIntent().getStringExtra("PERIODO") : "";
+
+        // Configurar clique nos itens da lista
+        adapter.setOnItemClickListener(compra -> {
+            Intent intent = new Intent(ResultComprasActivity.this, EditComprasActivity.class);
+            intent.putExtra("compra_id", compra.getId());
+            startActivityForResult(intent, EDIT_COMPRA_REQUEST);
+        });
+
+    } //fim oncreate
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == EDIT_COMPRA_REQUEST && resultCode == RESULT_OK) {
+            // Recarregar os dados com os mesmos critérios de busca
+            loadCompras(currentCodigo, currentDescricao, currentCategoria, currentPeriodo);
+            Toast.makeText(this, "Lista atualizada", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void loadCompras(String codigo, String descricao, String categoria, String periodo) {

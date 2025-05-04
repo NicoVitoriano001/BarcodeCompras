@@ -107,6 +107,7 @@ public class EditComprasActivity extends AppCompatActivity {
 
                     if (rowsDeleted > 0) {
                         Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
+                        // Alterado para RESULT_OK para indicar que houve uma mudança
                         setResult(RESULT_OK);
                         finish();
                     } else {
@@ -143,6 +144,7 @@ public class EditComprasActivity extends AppCompatActivity {
 
             if (rowsAffected > 0) {
                 Toast.makeText(this, "Compra atualizada com sucesso!", Toast.LENGTH_SHORT).show();
+                // Alterado para RESULT_OK para indicar que houve uma mudança
                 setResult(RESULT_OK);
                 finish();
             } else {
@@ -152,6 +154,7 @@ public class EditComprasActivity extends AppCompatActivity {
             Toast.makeText(this, "Por favor, insira valores válidos para preço e quantidade", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     protected void onDestroy() {

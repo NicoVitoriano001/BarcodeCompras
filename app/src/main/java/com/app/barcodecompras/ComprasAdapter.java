@@ -1,7 +1,6 @@
 package com.app.barcodecompras;
 //adapter ComprasAdapter.java
 
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,14 @@ import java.util.List;
 
 public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraViewHolder> {
     private List<Compra> comprasList;
+    private OnItemClickListener listener;
+    public interface OnItemClickListener {
+        void onItemClick(Compra compra);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
 
     public ComprasAdapter(List<Compra> comprasList) {
         this.comprasList = comprasList;
@@ -39,9 +46,9 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
 
         // No método onBindViewHolder do ComprasAdapter:
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), EditComprasActivity.class);
-            intent.putExtra("compra_id", compra.getId());
-            v.getContext().startActivity(intent);
+            if (listener != null) {
+                listener.onItemClick(compra);
+            }
         });
 
     }
