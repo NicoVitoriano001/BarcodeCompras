@@ -7,7 +7,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -110,7 +109,8 @@ private ActionBarDrawerToggle toggle;
        cancelButton.setOnClickListener(v -> clearFields());
 
        if (checkStoragePermission()) {
-            initializeDatabase();
+           // Inicializar o banco de dados primeiro
+           initializeDatabase();  // Agora usando o caminho padrão
        }
 
 // Configurar Toolbar (usando a versão AppCompat)
@@ -142,13 +142,10 @@ private ActionBarDrawerToggle toggle;
                 } else if (id == R.id.nav_restore) {
                     restaurarBackup();
                 }
-
             drawer.closeDrawer(GravityCompat.START);
             return true;
         });
-
     } // fim ONCREATE
-
 
 //inicio data calendário
     private void showDatePickerDialog() {
@@ -176,27 +173,27 @@ private ActionBarDrawerToggle toggle;
     }
 //fim data calendario
     private void initializeDatabase() {
-        //getFilesDir() retorna um diretório privado exclusivo da aplicação. Caminho típico: /data/user/0/com.app.barcodecompras/files/COMPRAS/comprasDB.db
-        File dir = new File(getApplicationContext().getFilesDir(), "COMPRAS");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+    //data/data/com.app.barcodecompras/databases/comprasDB.db
+    File dbFile = getDatabasePath("comprasDB.db");
 
-        File dbFile = new File(dir, "comprasDB.db");
+    // Garantir que o diretório pai existe
+    File parentDir = dbFile.getParentFile();
+    if (!parentDir.exists()) {
+        parentDir.mkdirs();
+    }
 
-        db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+    db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
 
-        //tabela collected_tab >>> //colunas bc_imdb NUMERIC, descr_imdb TEXT, cat_imdb TEXT
-        db.execSQL("CREATE TABLE IF NOT EXISTS compras_tab (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "bc_compras NUMERIC," +
-                "descr_compras TEXT," +
-                "cat_compras TEXT," +
-                "preco_compras REAL," +
-                "qnt_compras REAL," +
-                "total_compras REAL," +
-                "periodo_compras TEXT," +
-                "obs_compras TEXT)");
+    db.execSQL("CREATE TABLE IF NOT EXISTS compras_tab (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "bc_compras NUMERIC," +
+            "descr_compras TEXT," +
+            "cat_compras TEXT," +
+            "preco_compras REAL," +
+            "qnt_compras REAL," +
+            "total_compras REAL," +
+            "periodo_compras TEXT," +
+            "obs_compras TEXT)");
     }
 
     // Resultado do scanner ZXing
@@ -219,8 +216,9 @@ private ActionBarDrawerToggle toggle;
 
 // Busca descr_compras e cat_compras baseado no código escaneado
 // Busca descrição e categoria na tabela collected_tab
-private void fetchItemDataCollectedTable(String barcodeValue) {
+    private void fetchItemDataCollectedTable(String barcodeValue) {
     if (db == null || !db.isOpen()) {
+        db = getDatabase(); // Método auxiliar para obter a instância correta
         Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
         return;
     }
@@ -246,6 +244,15 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
         }
     }
 }
+
+    // Metodo auxiliar para obter a instância do banco
+    private SQLiteDatabase getDatabase() {
+        if (db == null || !db.isOpen()) {
+            File dbFile = getDatabasePath("comprasDB.db");
+            db = SQLiteDatabase.openDatabase(dbFile.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        }
+        return db;
+    }
 
     private void saveData() {
         String bc_comprasVal = bc_compras.getText().toString().trim();
@@ -305,7 +312,6 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
                     REQUEST_CODE);
         }
     }
-
     private boolean checkStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // Android 11+ precisa de permissão especial
@@ -329,6 +335,7 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
         }
     }
 
+   //data/data/com.app.barcodecompras/databases/comprasDB.db
     private void fazerBackup() {
         if (!checkStoragePermission()) {
             Toast.makeText(this, "Permissão necessária para fazer backup", Toast.LENGTH_SHORT).show();
@@ -343,7 +350,7 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
                 Toast.makeText(this, "Permissão ainda não concedida", Toast.LENGTH_SHORT).show();
                 return;
             }
-
+            File arquivoDB = getDatabasePath("comprasDB.db");
             String dataHora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String nomeArquivoBKP = "comprasDB_" + dataHora + ".db";
 
@@ -362,7 +369,7 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
             }
 
             File arquivoBackup = new File(downloadsDir, nomeArquivoBKP);
-            File arquivoDB = getDatabasePath("comprasDB.db");
+           // File arquivoDB = getDatabasePath("comprasDB.db");
 
             if (!arquivoDB.exists()) {
                 Toast.makeText(this, "Banco de dados não encontrado!", Toast.LENGTH_SHORT).show();
@@ -406,6 +413,7 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
                 downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             }
 
+            File arquivoDB = new File(getDatabasePath("comprasDB.db").getPath());
             File[] arquivos = downloadsDir.listFiles((dir, nome) ->
                     nome.startsWith("comprasDB_") && nome.endsWith(".db"));
 
@@ -482,8 +490,11 @@ private void fetchItemDataCollectedTable(String barcodeValue) {
 
     @Override
     protected void onDestroy() {
-        if (db != null && db.isOpen()) {
-            db.close();
+        if (db != null) {
+            if (db.isOpen()) {
+                db.close();
+            }
+            db = null;
         }
         super.onDestroy();
     }
