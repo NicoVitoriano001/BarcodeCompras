@@ -12,12 +12,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!--
         <include
             android:id="@+id/app_bar_main"
             layout="@layout/app_bar_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
+        -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -30,35 +31,40 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Código de Barras"
-                android:inputType="number" />
+                android:inputType="number"
+                android:textColor="@android:color/darker_gray"/>
 
             <EditText
                 android:id="@+id/etDescrCompras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/descr_item"
-                android:inputType="textCapCharacters|textMultiLine"/>
+                android:inputType="textCapCharacters|textMultiLine"
+                android:textColor="@android:color/darker_gray"/>
 
             <EditText
                 android:id="@+id/etCatCompras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/descr_cat"
-                android:inputType="textCapCharacters" />
+                android:inputType="textCapCharacters"
+                android:textColor="@android:color/darker_gray"/>
 
             <EditText
                 android:id="@+id/etPrecoCompras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/preco"
-                android:inputType="numberDecimal" />
+                android:inputType="numberDecimal"
+                android:textColor="@android:color/darker_gray"/>
 
             <EditText
                 android:id="@+id/etQntCompras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/quantidade"
-                android:inputType="numberDecimal" />
+                android:inputType="numberDecimal"
+                android:textColor="@android:color/darker_gray"/>
 
             <EditText
                 android:id="@+id/etTotalCompras"
@@ -66,43 +72,49 @@
                 android:layout_height="wrap_content"
                 android:focusable="false"
                 android:hint="@string/total_qnt"
-                android:inputType="none" />
+                android:inputType="none"
+                android:textColor="@android:color/darker_gray"/>
 
             <EditText
                 android:id="@+id/etPeriodoCompras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/periodo"
-                android:inputType="text" />
+                android:inputType="text"
+                android:textColor="@android:color/darker_gray"/>
 
             <EditText
                 android:id="@+id/etObsCompras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/observacao"
-                android:inputType="textCapCharacters|textMultiLine"/>
+                android:inputType="textCapCharacters|textMultiLine"
+                android:textColor="@android:color/darker_gray"/>
 
             <Button
                 android:id="@+id/btnExcluir"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Excluir"
-                android:backgroundTint="@android:color/holo_red_dark" />
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textColor="@android:color/darker_gray"/>
 
             <Button
                 android:id="@+id/btnSalvar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Salvar" />
+                android:text="Salvar"
+                android:textColor="@android:color/darker_gray"/>
 
             <Button
                 android:id="@+id/btnCancelar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cancelar" />
+                android:text="Cancelar"
+                android:textColor="@android:color/darker_gray"/>
         </LinearLayout>
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout> <!-- Tag de fechamento adicionada -->
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/edit_nav_view"

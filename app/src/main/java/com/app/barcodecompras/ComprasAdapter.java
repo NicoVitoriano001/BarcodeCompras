@@ -28,12 +28,12 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     @Override
     public CompraViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_compra, parent, false);
+                .inflate(R.layout.item_compra, parent, false); //onCreateViewHolder que infla o res/layout/item_compra.xml
         return new CompraViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CompraViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CompraViewHolder holder, int position) { //O metodo onBindViewHolder do adapter preenche os dados de cada item (definido em item_compra.xml) com os dados da lista
         Compra compra = comprasList.get(position);
         holder.tvBcCompras.setText(compra.getBcCompras());
         holder.tvDescricao.setText(compra.getDescrCompras());

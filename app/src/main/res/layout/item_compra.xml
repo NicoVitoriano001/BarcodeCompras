@@ -6,7 +6,7 @@
     android:padding="16dp"
     android:background="?attr/selectableItemBackground"
     android:layout_marginBottom="8dp"
-    android:elevation="2dp"
+    android:elevation="1dp"
     android:backgroundTint="@android:color/white">
 
     <TextView
@@ -14,9 +14,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:textSize="14sp"
+        android:textSize="15sp"
         android:textStyle="bold"
         android:textColor="@color/teal_200"/>
+
+    <TextView
+        android:id="@+id/tvBcCompras"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:textColor="@android:color/darker_gray"/>
 
     <TextView
         android:id="@+id/tvPeriodo"
@@ -25,17 +32,10 @@
         android:textSize="16sp"/>
 
     <TextView
-        android:id="@+id/tvBcCompras"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="@android:color/darker_gray"/>
-
-    <TextView
         android:id="@+id/tvCategoria"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:textColor="@android:color/darker_gray"/>
 
     <LinearLayout
@@ -50,7 +50,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold"/>
 
         <TextView
@@ -58,7 +58,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:gravity="center"/>
 
@@ -67,7 +67,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:textColor="@color/vermelho_forte"
             android:gravity="end"/>
@@ -76,6 +76,6 @@
         android:id="@+id/tvObsCompras"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:textColor="@android:color/darker_gray"/>
 </LinearLayout>

@@ -82,23 +82,46 @@
                 android:hint="@string/observacao"
                 android:inputType="textCapCharacters|textMultiLine"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/scanButton"
-                android:layout_width="wrap_content"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Escanear Código de Barras" />
+                android:text="Escanear Código de Barras"
+                android:textColor="@color/button_text_dark"
+                android:layout_marginTop="8dp"
+                app:icon="@drawable/barcode_scanner_24dp"
+                app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
 
-            <Button
-                android:id="@+id/saveButton"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Salvar" />
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
 
-            <Button
-                android:id="@+id/cancelButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cancelar" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/saveButton"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Salvar"
+                    android:layout_marginEnd="4dp"
+                    app:icon="@drawable/save_24dp"
+                    app:iconTint="@android:color/white"/> <!-- Ícone branco -->
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cancelButton"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cancelar"
+                    android:layout_marginStart="4dp"
+                    android:textColor="?attr/colorOnSurface"
+                app:icon="@drawable/close_24dp"
+                app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+            </LinearLayout>
         </LinearLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

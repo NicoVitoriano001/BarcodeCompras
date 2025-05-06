@@ -408,11 +408,12 @@ private ActionBarDrawerToggle toggle;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 downloadsDir = new File(
                         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                        "BackupCompras");
+                        "COMPRAS");
             } else {
                 downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             }
 
+            //
             File arquivoDB = new File(getDatabasePath("comprasDB.db").getPath());
             File[] arquivos = downloadsDir.listFiles((dir, nome) ->
                     nome.startsWith("comprasDB_") && nome.endsWith(".db"));
