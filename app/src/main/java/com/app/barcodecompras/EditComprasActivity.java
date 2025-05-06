@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -95,10 +96,10 @@ public class EditComprasActivity extends AppCompatActivity {
     }
 
     private void excluirCompra() {
-        new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Confirmar Exclusão")
                 .setMessage("Tem certeza que deseja excluir esta compra?")
-                .setPositiveButton("Excluir", (dialog, which) -> {
+                .setPositiveButton("Excluir", (dialog1, which) -> {
                     int rowsDeleted = db.delete(
                             "compras_tab",
                             "id = ?",
@@ -107,15 +108,30 @@ public class EditComprasActivity extends AppCompatActivity {
 
                     if (rowsDeleted > 0) {
                         Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
-                        // Alterado para RESULT_OK para indicar que houve uma mudança
+                        // Indica que a operação foi concluída com sucesso
                         setResult(RESULT_OK);
+                        // Fecha a activity e retorna para a tela anterior
                         finish();
                     } else {
                         Toast.makeText(this, "Erro ao excluir compra", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancelar", null)
-                .show();
+                .create();
+
+        // Personalização das cores dos botões
+        dialog.setOnShowListener(dialogInterface -> {
+            // Botão Excluir (positivo) - Vermelho com texto branco
+            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            positiveButton.setTextColor(Color.WHITE);
+            positiveButton.setBackgroundColor(Color.RED);
+
+            // Botão Cancelar (negativo) - Texto branco
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            negativeButton.setTextColor(Color.WHITE);
+        });
+
+        dialog.show();
     }
 
     private void salvarEdicao() {

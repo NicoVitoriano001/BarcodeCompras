@@ -2,15 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="16dp" >
+    android:padding="16dp">
 
-    <!-- Campos de pesquisa -->
+    <!-- Campos de pesquisa https://fonts.google.com/icons-->
     <EditText
         android:id="@+id/etBuscaCodigo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Código de Barras"/>
+        android:hint="Código de Barras"
+        android:inputType="number" />
 
     <EditText
         android:id="@+id/etBuscaDescricao"
@@ -42,18 +44,29 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBuscar"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Buscar"/>
+            android:text="Buscar"
+            android:layout_marginStart="4dp"
+            android:textColor="?attr/colorOnSurface"
+            app:icon="@drawable/search_24dp"
+            app:iconTint="?attr/colorOnSurface"/>
 
-        <Button
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancelarBusca"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancelar"/>
+            android:text="Cancelar"
+            android:layout_marginStart="4dp"
+            android:textColor="?attr/colorOnSurface"
+            app:icon="@drawable/close_24dp"
+            app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
     </LinearLayout>
 </LinearLayout>

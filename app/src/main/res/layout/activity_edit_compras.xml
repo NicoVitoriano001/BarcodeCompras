@@ -91,27 +91,52 @@
                 android:inputType="textCapCharacters|textMultiLine"
                 android:textColor="@android:color/darker_gray"/>
 
-            <Button
-                android:id="@+id/btnExcluir"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Excluir"
-                android:backgroundTint="@android:color/holo_red_dark"
-                android:textColor="@android:color/darker_gray"/>
-
-            <Button
+            <!-- Botão Salvar em linha própria -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSalvar"
-                android:layout_width="wrap_content"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Salvar"
-                android:textColor="@android:color/darker_gray"/>
+                android:layout_marginBottom="8dp"
+                android:textColor="?attr/colorOnSurface"
+                app:icon="@drawable/save_24dp"
+                app:iconTint="?attr/colorOnSurface"/>
 
-            <Button
-                android:id="@+id/btnCancelar"
-                android:layout_width="wrap_content"
+            <!-- Botões -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Cancelar"
-                android:textColor="@android:color/darker_gray"/>
+                android:orientation="horizontal">
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCancelar"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cancelar"
+                    android:layout_marginStart="4dp"
+                    android:textColor="?attr/colorOnSurface"
+                    app:icon="@drawable/close_24dp"
+                    app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnExcluir"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Excluir"
+                    android:layout_marginStart="4dp"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/vermelho_forte"
+                    app:icon="@drawable/delete_24dp"
+                    app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+
+            </LinearLayout>
         </LinearLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

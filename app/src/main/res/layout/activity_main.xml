@@ -88,9 +88,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Escanear Código de Barras"
-                android:textColor="@color/button_text_dark"
+                android:textColor="?attr/colorOnSurface"
                 android:layout_marginTop="8dp"
-                app:icon="@drawable/barcode_scanner_24dp"
+                app:icon="@drawable/barcode_scanner_32dp"
                 app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
 
             <LinearLayout
@@ -107,8 +107,9 @@
                     android:layout_weight="1"
                     android:text="Salvar"
                     android:layout_marginEnd="4dp"
+                    android:textColor="?attr/colorOnSurface"
                     app:icon="@drawable/save_24dp"
-                    app:iconTint="@android:color/white"/> <!-- Ícone branco -->
+                    app:iconTint="?attr/colorOnSurface"/> <!-- Ícone branco -->
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/cancelButton"
@@ -119,8 +120,8 @@
                     android:text="Cancelar"
                     android:layout_marginStart="4dp"
                     android:textColor="?attr/colorOnSurface"
-                app:icon="@drawable/close_24dp"
-                app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+                    app:icon="@drawable/close_24dp"
+                    app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
             </LinearLayout>
         </LinearLayout>
 
