@@ -1,54 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Código de Barras -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Código de Barras"
-        android:textSize="16sp"/>
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorPrimary"/>
 
     <EditText
         android:id="@+id/bc_imdb_add"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:inputType="number"
-        android:enabled="false"/>
+        android:enabled="false"
+        android:textColor="@color/white"/>
 
+    <!-- Descrição -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Descrição"
         android:textSize="16sp"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:textColor="?android:attr/textColorPrimary"/>
 
     <EditText
         android:id="@+id/descr_imdb_add"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textCapCharacters|textMultiLine"/>
+        android:hint="@string/descr_item"
+        android:layout_marginTop="4dp"
+        android:inputType="textCapCharacters|textMultiLine"
+        android:textColor="?android:attr/textColorPrimary"/>
 
+    <!-- Categoria -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/descr_cat"
         android:textSize="16sp"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:textColor="?android:attr/textColorPrimary"/>
 
     <EditText
         android:id="@+id/cat_imdb_add"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textCapCharacters"/>
+        android:layout_marginTop="4dp"
+        android:hint="@string/descr_cat"
+        android:inputType="textCapCharacters"
+        android:textColor="?android:attr/textColorPrimary"/>
 
-    <Button
-        android:id="@+id/save_button"
+    <!-- Botões -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Salvar" />
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/save_button"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Adicionar"
+            android:layout_marginStart="4dp"
+            android:textColor="?attr/colorOnSurface"
+            app:icon="@drawable/save_24dp"
+            app:iconTint="?attr/colorOnSurface"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/cancel_button"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancelar"
+            android:layout_marginStart="4dp"
+            android:textColor="?attr/colorOnSurface"
+            app:icon="@drawable/cancel_24dp"
+            app:iconTint="?attr/colorOnSurface"/>
+    </LinearLayout>
 </LinearLayout>

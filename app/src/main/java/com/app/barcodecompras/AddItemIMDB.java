@@ -3,7 +3,6 @@ package com.app.barcodecompras;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Environment;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -12,8 +11,37 @@ import java.io.File;
 
 public class AddItemIMDB extends AppCompatActivity {
     private EditText bcImdbAdd, descrImdbAdd, catImdbAdd;
-    private Button saveButton;
+    private Button saveButton, cancelButton;
     private SQLiteDatabase db;
+
+
+
+    private void openDatabase() {
+        File dbFile = getDatabasePath("comprasDB.db");
+
+        // Verifica se o banco de dados existe
+        if (!dbFile.exists()) {
+            // Se não existir, você pode criar o banco de dados e a tabela aqui
+            db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+            createTable();
+        } else {
+            // Se existir, apenas abra o banco de dados
+            db = SQLiteDatabase.openDatabase(dbFile.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        }
+    }
+
+    private void createTable() {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS collected_tab (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "bc_imdb TEXT, " +
+                "descr_imdb TEXT, " +
+                "cat_imdb TEXT)";
+        db.execSQL(createTableSQL);
+    }
+
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,19 +53,26 @@ public class AddItemIMDB extends AppCompatActivity {
         descrImdbAdd = findViewById(R.id.descr_imdb_add);
         catImdbAdd = findViewById(R.id.cat_imdb_add);
         saveButton = findViewById(R.id.save_button);
+        cancelButton = findViewById(R.id.cancel_button);
 
         // Recebe o valor do código de barras
         String barcode = getIntent().getStringExtra("BARCODE_VALUE");
         bcImdbAdd.setText(barcode);
 
         // Abre o banco de dados
-        File dir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS), "COMPRAS");
-        File dbFile = new File(dir, "comprasDB.db");
+        openDatabase();
 
-        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
+        // Abre o banco de dados
+   //     File dbFile = getDatabasePath("comprasDB.db");
+       // File dir = new File(Environment.getExternalStoragePublicDirectory(
+       //         Environment.DIRECTORY_DOWNLOADS), "COMPRAS");
+       // File dbFile = new File(dir, "comprasDB.db");
+
+     //   db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+        //db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
         saveButton.setOnClickListener(v -> saveItem());
+        cancelButton.setOnClickListener(v -> finish());
     }
 
     private void saveItem() {
@@ -69,6 +104,7 @@ public class AddItemIMDB extends AppCompatActivity {
             Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     protected void onDestroy() {

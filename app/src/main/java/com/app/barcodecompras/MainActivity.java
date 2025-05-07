@@ -218,7 +218,7 @@ private ActionBarDrawerToggle toggle;
 // Busca descrição e categoria na tabela collected_tab
     private void fetchItemDataCollectedTable(String barcodeValue) {
     if (db == null || !db.isOpen()) {
-        db = getDatabase(); // Método auxiliar para obter a instância correta
+        db = getDatabase(); // Metodo auxiliar para obter a instância correta
         Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
         return;
     }
