@@ -14,8 +14,6 @@ public class AddItemIMDB extends AppCompatActivity {
     private Button saveButton, cancelButton;
     private SQLiteDatabase db;
 
-
-
     private void openDatabase() {
         File dbFile = getDatabasePath("comprasDB.db");
 
@@ -33,14 +31,11 @@ public class AddItemIMDB extends AppCompatActivity {
     private void createTable() {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS collected_tab (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "bc_imdb TEXT, " +
+                "bc_imdb INTEGER, " +
                 "descr_imdb TEXT, " +
                 "cat_imdb TEXT)";
         db.execSQL(createTableSQL);
     }
-
-
-
 
 
     @Override
@@ -61,15 +56,6 @@ public class AddItemIMDB extends AppCompatActivity {
 
         // Abre o banco de dados
         openDatabase();
-
-        // Abre o banco de dados
-   //     File dbFile = getDatabasePath("comprasDB.db");
-       // File dir = new File(Environment.getExternalStoragePublicDirectory(
-       //         Environment.DIRECTORY_DOWNLOADS), "COMPRAS");
-       // File dbFile = new File(dir, "comprasDB.db");
-
-     //   db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
-        //db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
         saveButton.setOnClickListener(v -> saveItem());
         cancelButton.setOnClickListener(v -> finish());
@@ -104,7 +90,6 @@ public class AddItemIMDB extends AppCompatActivity {
             Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-
 
     @Override
     protected void onDestroy() {

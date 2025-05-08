@@ -18,19 +18,21 @@
         android:id="@+id/etBuscaDescricao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Descrição do Item"/>
-
+        android:hint="Descrição do Item"
+        android:inputType="textCapCharacters|textMultiLine"/>
     <EditText
         android:id="@+id/etBuscaCategoria"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Categoria"/>
+        android:hint="Categoria"
+        android:inputType="textCapCharacters|textMultiLine"/>
 
     <EditText
         android:id="@+id/etBuscaPeriodo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Periodo"/>
+        android:hint="Periodo"
+        android:inputType="number"/>
 
     <EditText
         android:id="@+id/etBuscaOBS"

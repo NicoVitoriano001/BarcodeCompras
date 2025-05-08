@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/edit_drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--
+        <include
+            android:id="@+id/app_bar_main"
+            layout="@layout/app_bar_main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginTop="?attr/actionBarSize">
+
+            <EditText
+                android:id="@+id/etBcCollected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Código de Barras"
+                android:inputType="number"
+                android:textColor="@android:color/darker_gray"/>
+
+            <EditText
+                android:id="@+id/etDescrCollected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/descr_item"
+                android:inputType="textCapCharacters|textMultiLine"
+                android:textColor="@android:color/darker_gray"/>
+
+            <EditText
+                android:id="@+id/etCatCollected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/descr_cat"
+                android:inputType="textCapCharacters"
+                android:textColor="@android:color/darker_gray"/>
+
+            <!-- Botão Salvar em linha própria -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSalvarCollected"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Salvar"
+                android:layout_marginBottom="8dp"
+                android:textColor="?attr/colorOnSurface"
+                app:icon="@drawable/save_24dp"
+                app:iconTint="?attr/colorOnSurface"/>
+
+            <!-- Botões -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCancelarCollected"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cancelar"
+                    android:layout_marginStart="4dp"
+                    android:textColor="?attr/colorOnSurface"
+                    app:icon="@drawable/close_24dp"
+                    app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnExcluirCollected"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Excluir"
+                    android:layout_marginStart="4dp"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/vermelho_forte"
+                    app:icon="@drawable/delete_24dp"
+                    app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/edit_nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main_drawer" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

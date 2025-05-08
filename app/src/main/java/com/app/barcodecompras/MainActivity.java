@@ -57,7 +57,6 @@ private ActionBarDrawerToggle toggle;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         // Verificar permissão ao iniciar o app. Usado no backup
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                 !Environment.isExternalStorageManager()) {
@@ -137,6 +136,9 @@ private ActionBarDrawerToggle toggle;
                     // Ação para galeria
                 } else if (id == R.id.nav_slideshow) {
                     // Ação para slideshow
+                } else if (id == R.id.nav_busca_collected) {
+                    Intent intent = new Intent(MainActivity.this, BuscarCollectedActivity.class);
+                    startActivity(intent);
                 } else if (id == R.id.nav_backup) {
                     fazerBackup();
                 } else if (id == R.id.nav_restore) {

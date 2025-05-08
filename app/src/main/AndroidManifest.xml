@@ -37,7 +37,6 @@
             android:theme="@style/Theme.BarcodeCompras"
             android:windowSoftInputMode="stateVisible"/>
 
-
         <!-- 05.05.2025 Usar esse para padronizar igual ao Main (salvo Result compras) -->
         <activity android:name=".BuscarComprasActivity"
             android:theme="@style/Theme.BarcodeCompras" />
@@ -48,10 +47,13 @@
             android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"/> -->
 
         <activity android:name=".BuscarCollectedActivity"
-             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
+            android:theme="@style/Theme.BarcodeCompras" />
+        <!--android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/> -->
 
-                <!-- 05.05.2025 ResultComprasActivity deixa como está  -->
+           <!-- 05.05.2025 ResultComprasActivity deixa como está  -->
         <activity android:name=".ResultComprasActivity" />
+
+        <activity android:name=".ResultCollectedActivity" />
 
     </application>
 </manifest>

@@ -1,14 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context=".BuscarCollectedActivity">
+    android:padding="16dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <!-- Campos de pesquisa https://fonts.google.com/icons-->
+    <EditText
+        android:id="@+id/etBuscaCodigoCollected"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"/>
+        android:layout_height="wrap_content"
+        android:hint="Código de Barras"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/etBuscaDescricaoCollected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Descrição do Item"/>
+
+    <EditText
+        android:id="@+id/etBuscaCategoriaCollected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Categoria"/>
+
+
+    <!-- Botões -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBuscarCollected"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Buscar"
+            android:layout_marginStart="4dp"
+            android:textColor="?attr/colorOnSurface"
+            app:icon="@drawable/search_24dp"
+            app:iconTint="?attr/colorOnSurface"/>
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancelarBuscaCollected"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancelar"
+            android:layout_marginStart="4dp"
+            android:textColor="?attr/colorOnSurface"
+            app:icon="@drawable/close_24dp"
+            app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+    </LinearLayout>
 </LinearLayout>

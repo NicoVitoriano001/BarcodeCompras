@@ -17,6 +17,7 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
+
         this.listener = listener;
     }
 
