@@ -30,22 +30,31 @@ public class ResultCollectedActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_result_collected);
 
+// Inicializa o RecyclerView primeiro
+        recyclerView = findViewById(R.id.recyclerViewResultCollected); // Verifique se este ID está correto no XML
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Inicializa o adapter com a lista vazia
+        CollectedList = new ArrayList<>();
         adapter = new CollectedAdapter(CollectedList);
         recyclerView.setAdapter(adapter);
 
+        // Configura o listener do adapter
         adapter.setOnItemClickListener(collected -> {
-            // Iniciar atividade de edição ou qualquer outra ação
-            Intent intent = new Intent(this, EditCollectedActivity.class); // Substitua pela sua atividade de edição
-            intent.putExtra("CODIGO", collected.getBcIMDB());
-            intent.putExtra("DESCRICAO", collected.getDescrIMDB());
-            intent.putExtra("CATEGORIA", collected.getCatIMDB());
-            startActivityForResult(intent, EDIT_COLLECTED_REQUEST);
+            Intent intent = new Intent(this, EditCollectedActivity.class);
+            // Garanta que os dados não são nulos
+            if (collected != null) {
+                intent.putExtra("CODIGO", collected.getBcIMDB() != null ? collected.getBcIMDB() : "");
+                intent.putExtra("DESCRICAO", collected.getDescrIMDB() != null ? collected.getDescrIMDB() : "");
+                intent.putExtra("CATEGORIA", collected.getCatIMDB() != null ? collected.getCatIMDB() : "");
+                startActivityForResult(intent, EDIT_COLLECTED_REQUEST);
+            } else {
+                Toast.makeText(this, "Item inválido", Toast.LENGTH_SHORT).show();
+            }
         });
-       // recyclerView.setAdapter(adapter);
-        recyclerView = findViewById(R.id.recyclerViewResultCollected);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
+
 
         // Obter critérios de busca da intent
         Intent intent = getIntent();
@@ -54,13 +63,13 @@ public class ResultCollectedActivity extends AppCompatActivity {
             String descricao = intent.getStringExtra("DESCRICAO") != null ? intent.getStringExtra("DESCRICAO") : "";
             String categoria = intent.getStringExtra("CATEGORIA") != null ? intent.getStringExtra("CATEGORIA") : "";
 
-            // Armazenar critérios atuais
             currentCodigo = codigo;
             currentDescricao = descricao;
             currentCategoria = categoria;
 
             loadCollected(codigo, descricao, categoria);
         }
+
     } //fim oncreate
 
     @Override

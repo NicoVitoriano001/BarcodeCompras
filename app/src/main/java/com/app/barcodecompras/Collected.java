@@ -1,5 +1,4 @@
 package com.app.barcodecompras;
-
 public class Collected {
     private String bcIMDB;
     private String descrIMDB;
@@ -11,7 +10,6 @@ public class Collected {
         this.descrIMDB = descrIMDB;
         this.catIMDB = catIMDB;
     }
-
     // Getters
     public String getBcIMDB() { return bcIMDB; }
     public String getDescrIMDB() { return descrIMDB; }

@@ -58,7 +58,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     public int getItemCount() {
         return comprasList.size();
     }
-
     static class CompraViewHolder extends RecyclerView.ViewHolder {
         TextView tvBcCompras, tvDescricao, tvCategoria, tvPreco, tvQuantidade, tvTotal, tvPeriodo, tvObsCompras;
 

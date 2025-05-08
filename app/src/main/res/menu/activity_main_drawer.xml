@@ -20,6 +20,10 @@
 
     <group android:id="@+id/group_buscas">
         <item
+            android:id="@+id/nav_add_collected"
+            android:icon="@drawable/add_24dp"
+            android:title="Adiciona Collected" />
+        <item
             android:id="@+id/nav_busca_collected"
             android:icon="@drawable/search_24dp"
             android:title="Busca Collected" />

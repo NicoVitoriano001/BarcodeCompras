@@ -7,10 +7,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 public class EditComprasActivity extends AppCompatActivity {
     private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras,
@@ -18,16 +24,17 @@ public class EditComprasActivity extends AppCompatActivity {
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
     private long compraId;
+    private DrawerLayout drawer;
+    // Adicione no início da classe, após a declaração das variáveis
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_compras);
 
-        // Inicializar views
         initViews();
 
-        // Abrir banco de dados
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
         // Receber dados da compra selecionada
@@ -50,7 +57,29 @@ public class EditComprasActivity extends AppCompatActivity {
         btnSalvar.setOnClickListener(v -> salvarEdicao());
         btnCancelar.setOnClickListener(v -> finish());
         btnExcluir.setOnClickListener(v -> excluirCompra());
-    }
+
+        // inicio drawer
+        drawer = findViewById(R.id.edit_drawer_layout);
+        navigationView = findViewById(R.id.edit_compras_nav_view);
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            drawer.closeDrawer(GravityCompat.START);
+
+            // Adicione um pequeno delay para evitar travamentos
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (id == R.id.nav_home) {
+                    startActivity(new Intent(EditComprasActivity.this, MainActivity.class));
+                } else if (id == R.id.nav_add_collected) {
+                    startActivity(new Intent(EditComprasActivity.this, AddItemIMDB.class));
+                } else if (id == R.id.nav_busca_collected) {
+                    startActivity(new Intent(EditComprasActivity.this, BuscarCollectedActivity.class));
+                }
+                // Não chame finish() aqui - deixe o sistema gerenciar
+            }, 200); // 250ms de delay
+
+            return true;
+        }); // fim drawer
+    }//fim ON CREATE
 
     private void initViews() {
         etBcCompras = findViewById(R.id.etBcCompras);

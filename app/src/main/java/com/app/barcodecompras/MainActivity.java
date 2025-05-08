@@ -42,7 +42,6 @@ import android.os.Environment;
 import androidx.core.view.GravityCompat;
 import android.app.AlertDialog;
 
-
 public class MainActivity extends AppCompatActivity {
 private static final int REQUEST_CODE = 1;
 private static final int REQUEST_CODE_ADD_ITEM = 1001;
@@ -125,18 +124,25 @@ private ActionBarDrawerToggle toggle;
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
 
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
                 if (id == R.id.nav_home) {
-                    // Ação para home
+                    drawer.closeDrawer(GravityCompat.START); // Fecha o drawer primeiro
+                    startActivity(new Intent(this, MainActivity.class));
+                   // return true; // Indica que o clique foi tratado
                 } else if (id == R.id.nav_gallery) {
                     // Ação para galeria
                 } else if (id == R.id.nav_slideshow) {
                     // Ação para slideshow
+                } else if (id == R.id.nav_add_collected) {
+                    drawer.closeDrawer(GravityCompat.START); // Fecha o drawer primeiro
+                    Intent intent = new Intent(MainActivity.this, AddItemIMDB.class);
+                    startActivity(intent);
                 } else if (id == R.id.nav_busca_collected) {
+                    drawer.closeDrawer(GravityCompat.START); // Fecha o drawer primeiro
                     Intent intent = new Intent(MainActivity.this, BuscarCollectedActivity.class);
                     startActivity(intent);
                 } else if (id == R.id.nav_backup) {

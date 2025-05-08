@@ -4,11 +4,18 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.navigation.NavigationView;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,13 +26,15 @@ public class ResultComprasActivity extends AppCompatActivity {
     private ComprasAdapter adapter;
     private SQLiteDatabase db;
     private List<Compra> comprasList = new ArrayList<>();
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result_compras);
 
-        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerViewCompras);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
@@ -53,6 +62,26 @@ public class ResultComprasActivity extends AppCompatActivity {
             startActivityForResult(intent, EDIT_COMPRA_REQUEST);
         });
 
+        //DRAWER -- INICIO
+        drawer = findViewById(R.id.edit_drawer_layout);
+        navigationView = findViewById(R.id.resul_compras_nav_view);
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            drawer.closeDrawer(GravityCompat.START);
+
+            // Adicione um pequeno delay para evitar travamentos
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (id == R.id.nav_home) {
+                    startActivity(new Intent(this, MainActivity.class));
+                } else if (id == R.id.nav_add_collected) {
+                    startActivity(new Intent(this, AddItemIMDB.class));
+                } else if (id == R.id.nav_busca_collected) {
+                    startActivity(new Intent(this, BuscarCollectedActivity.class));
+                }
+                // Não chame finish() aqui - deixe o sistema gerenciar
+            }, 200); // 250ms de delay
+            return true;
+        });//DRAWER -- INICIO
     } //fim oncreate
 
     @Override
@@ -65,7 +94,6 @@ public class ResultComprasActivity extends AppCompatActivity {
             Toast.makeText(this, "Lista atualizada", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private void loadCompras(String codigo, String descricao, String categoria, String periodo, String observacao) {
         comprasList.clear();

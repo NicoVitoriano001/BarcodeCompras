@@ -37,7 +37,6 @@ public class AddItemIMDB extends AppCompatActivity {
         db.execSQL(createTableSQL);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +53,6 @@ public class AddItemIMDB extends AppCompatActivity {
         String barcode = getIntent().getStringExtra("BARCODE_VALUE");
         bcImdbAdd.setText(barcode);
 
-        // Abre o banco de dados
         openDatabase();
 
         saveButton.setOnClickListener(v -> saveItem());

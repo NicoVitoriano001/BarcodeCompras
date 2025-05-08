@@ -7,17 +7,18 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Barra de título
+    <!-- Barra de título -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Soma parcial: $"
+        android:text="Itens do Banco de Dados"
         android:textStyle="bold"
-        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:textSize="18sp"
         android:gravity="center"
         android:layout_marginBottom="16dp"/>
-         -->
+
 
     <!-- RecyclerView - Lista de resultados -->
     <androidx.recyclerview.widget.RecyclerView
