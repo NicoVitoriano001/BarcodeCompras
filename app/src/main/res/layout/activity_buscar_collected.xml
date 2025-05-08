@@ -6,7 +6,20 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Campos de pesquisa https://fonts.google.com/icons-->
+    <!-- Barra de título -->
+    <TextView
+        android:id="@+id/TitleEditCompras"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Buscar Itens Collected"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_marginBottom="6dp"
+        android:paddingTop="1dp"
+        android:textColor="@color/cinza_Gainsboro"/>
+
+    <!-- Baixar icons https://fonts.google.com/icons-->
     <EditText
         android:id="@+id/etBuscaCodigoCollected"
         android:layout_width="match_parent"
@@ -18,13 +31,15 @@
         android:id="@+id/etBuscaDescricaoCollected"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Descrição do Item"/>
+        android:hint="Descrição do Item"
+        android:inputType="textCapCharacters"/>
 
     <EditText
         android:id="@+id/etBuscaCategoriaCollected"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Categoria"/>
+        android:hint="Categoria"
+        android:inputType="textCapCharacters"/>
 
 
     <!-- Botões -->

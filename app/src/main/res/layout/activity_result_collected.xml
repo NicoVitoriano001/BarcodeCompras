@@ -21,7 +21,7 @@
 
     <!-- RecyclerView - Lista de resultados -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+        android:id="@+id/recyclerViewResultCollected"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"

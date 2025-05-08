@@ -3,7 +3,6 @@ package com.app.barcodecompras;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,7 +15,7 @@ public class EditCollectedActivity extends AppCompatActivity {
     private EditText etBcCollected, etDescrCollected, etCatCollected;
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
-    private long collectedId;
+    private String currentBarcode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,73 +28,61 @@ public class EditCollectedActivity extends AppCompatActivity {
         // Abrir banco de dados
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
-        // Receber dados da compra selecionada
+        // Receber dados do item collected selecionado
         Intent intent = getIntent();
         if (intent != null) {
-            collectedId = intent.getLongExtra("compra_id", -1);
-            loadCollectedData(collectedId);
+            currentBarcode = intent.getStringExtra("CODIGO");
+            String descricao = intent.getStringExtra("DESCRICAO");
+            String categoria = intent.getStringExtra("CATEGORIA");
+
+            // Preencher campos com os dados recebidos
+            etBcCollected.setText(currentBarcode);
+            etDescrCollected.setText(descricao);
+            etCatCollected.setText(categoria);
         }
 
         // Configurar listeners
         btnSalvar.setOnClickListener(v -> salvarEdicao());
         btnCancelar.setOnClickListener(v -> finish());
-        btnExcluir.setOnClickListener(v -> excluirCompra());
+        btnExcluir.setOnClickListener(v -> excluirItem());
     }
 
     private void initViews() {
         etBcCollected = findViewById(R.id.etBcCollected);
-        etDescrCollected = findViewById(R.id.etBuscaDescricaoCollected);
+        etDescrCollected = findViewById(R.id.etDescrCollected);
         etCatCollected = findViewById(R.id.etCatCollected);
         btnSalvar = findViewById(R.id.btnSalvar);
         btnCancelar = findViewById(R.id.btnCancelar);
         btnExcluir = findViewById(R.id.btnExcluir);
     }
 
-
-    private void loadCollectedData(long id) {
-        Cursor cursor = db.rawQuery("SELECT * FROM collected_tab WHERE id = ?",
-                new String[]{String.valueOf(id)});
-
-        if (cursor.moveToFirst()) {
-            etBcCollected.setText(cursor.getString(0));
-            etDescrCollected.setText(cursor.getString(1));
-            etCatCollected.setText(cursor.getString(2));
-        }
-        cursor.close();
-    }
-
-    private void excluirCompra() {
+    private void excluirItem() {
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Confirmar Exclusão")
-                .setMessage("Tem certeza que deseja excluir esta compra?")
+                .setMessage("Tem certeza que deseja excluir este item?")
                 .setPositiveButton("Excluir", (dialog1, which) -> {
                     int rowsDeleted = db.delete(
                             "collected_tab",
-                            "id = ?",
-                            new String[]{String.valueOf(collectedId)}
+                            "bc_imdb = ?",
+                            new String[]{currentBarcode}
                     );
 
                     if (rowsDeleted > 0) {
-                        Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
-                        // Indica que a operação foi concluída com sucesso
+                        Toast.makeText(this, "Item excluído com sucesso!", Toast.LENGTH_SHORT).show();
                         setResult(RESULT_OK);
-                        // Fecha a activity e retorna para a tela anterior
                         finish();
                     } else {
-                        Toast.makeText(this, "Erro ao excluir compra", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Erro ao excluir item", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancelar", null)
                 .create();
 
-        // Personalização das cores dos botões
         dialog.setOnShowListener(dialogInterface -> {
-            // Botão Excluir (positivo) - Vermelho com texto branco
             Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             positiveButton.setTextColor(Color.WHITE);
             positiveButton.setBackgroundColor(Color.RED);
 
-            // Botão Cancelar (negativo) - Texto branco
             Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
             negativeButton.setTextColor(Color.WHITE);
         });
@@ -104,32 +91,39 @@ public class EditCollectedActivity extends AppCompatActivity {
     }
 
     private void salvarEdicao() {
-        try {
+        String novoBarcode = etBcCollected.getText().toString();
+        String novaDescricao = etDescrCollected.getText().toString();
+        String novaCategoria = etCatCollected.getText().toString();
 
+        if (novoBarcode.isEmpty() || novaDescricao.isEmpty() || novaCategoria.isEmpty()) {
+            Toast.makeText(this, "Preencha todos os campos!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
             ContentValues values = new ContentValues();
-            values.put("bc_collected", etBcCollected.getText().toString());
-            values.put("descr_collected", etDescrCollected.getText().toString());
-            values.put("cat_collected", etCatCollected.getText().toString());
+            values.put("bc_imdb", novoBarcode);
+            values.put("descr_imdb", novaDescricao);
+            values.put("cat_imdb", novaCategoria);
+
             int rowsAffected = db.update(
-                    "compras_tab",
+                    "collected_tab",
                     values,
-                    "id = ?",
-                    new String[]{String.valueOf(collectedId)}
+                    "bc_imdb = ?",
+                    new String[]{currentBarcode}
             );
 
             if (rowsAffected > 0) {
-                Toast.makeText(this, "Compra atualizada com sucesso!", Toast.LENGTH_SHORT).show();
-                // Alterado para RESULT_OK para indicar que houve uma mudança
+                Toast.makeText(this, "Item atualizado com sucesso!", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();
             } else {
-                Toast.makeText(this, "Erro ao atualizar compra", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Nenhuma alteração foi salva", Toast.LENGTH_SHORT).show();
             }
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "Por favor, insira valores válidos para preço e quantidade", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Erro ao atualizar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-
 
     @Override
     protected void onDestroy() {

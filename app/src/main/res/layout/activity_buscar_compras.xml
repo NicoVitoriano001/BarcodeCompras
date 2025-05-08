@@ -6,6 +6,20 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+
+    <!-- Barra de título -->
+    <TextView
+        android:id="@+id/TitleEditCompras"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Buscar Itens Comprados"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_marginBottom="6dp"
+        android:paddingTop="1dp"
+        android:textColor="@color/cinza_Gainsboro"/>
+
     <!-- Campos de pesquisa https://fonts.google.com/icons-->
     <EditText
         android:id="@+id/etBuscaCodigo"
@@ -32,13 +46,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Periodo"
-        android:inputType="number"/>
+        android:inputType="number|textCapCharacters"/>
 
     <EditText
         android:id="@+id/etBuscaOBS"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Observação"/>
+        android:hint="Observação"
+        android:inputType="textCapCharacters|textMultiLine"/>
 
     <!-- Botões -->
     <LinearLayout

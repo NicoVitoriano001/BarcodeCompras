@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ResultCollectedActivity extends AppCompatActivity {
-    private static final int EDIT_COMPRA_REQUEST = 1;
+    private static final int EDIT_COLLECTED_REQUEST = 1;
     private String currentCodigo, currentDescricao, currentCategoria;
     private RecyclerView recyclerView;
     private CollectedAdapter adapter;
@@ -23,40 +22,52 @@ public class ResultCollectedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Verifica se já existe uma instância
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_result_collected);
 
-        recyclerView = findViewById(R.id.recyclerView);
+        adapter = new CollectedAdapter(CollectedList);
+        recyclerView.setAdapter(adapter);
+
+        adapter.setOnItemClickListener(collected -> {
+            // Iniciar atividade de edição ou qualquer outra ação
+            Intent intent = new Intent(this, EditCollectedActivity.class); // Substitua pela sua atividade de edição
+            intent.putExtra("CODIGO", collected.getBcIMDB());
+            intent.putExtra("DESCRICAO", collected.getDescrIMDB());
+            intent.putExtra("CATEGORIA", collected.getCatIMDB());
+            startActivityForResult(intent, EDIT_COLLECTED_REQUEST);
+        });
+       // recyclerView.setAdapter(adapter);
+        recyclerView = findViewById(R.id.recyclerViewResultCollected);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
         // Obter critérios de busca da intent
-        String codigo = getIntent().getStringExtra("CODIGO");
-        String descricao = getIntent().getStringExtra("DESCRICAO");
-        String categoria = getIntent().getStringExtra("CATEGORIA");
+        Intent intent = getIntent();
+        if (intent != null) {
+            String codigo = intent.getStringExtra("CODIGO") != null ? intent.getStringExtra("CODIGO") : "";
+            String descricao = intent.getStringExtra("DESCRICAO") != null ? intent.getStringExtra("DESCRICAO") : "";
+            String categoria = intent.getStringExtra("CATEGORIA") != null ? intent.getStringExtra("CATEGORIA") : "";
 
-        loadCollected(codigo, descricao, categoria);
+            // Armazenar critérios atuais
+            currentCodigo = codigo;
+            currentDescricao = descricao;
+            currentCategoria = categoria;
 
-        // Obter e armazenar critérios de busca atuais
-        currentCodigo = getIntent().getStringExtra("CODIGO") != null ? getIntent().getStringExtra("CODIGO") : "";
-        currentDescricao = getIntent().getStringExtra("DESCRICAO") != null ? getIntent().getStringExtra("DESCRICAO") : "";
-        currentCategoria = getIntent().getStringExtra("CATEGORIA") != null ? getIntent().getStringExtra("CATEGORIA") : "";
-
-
-        /** Configurar clique nos itens da lista
-        adapter.setOnItemClickListener(collected -> {
-            Intent intent = new Intent(ResultCollectedActivity.this, EditCollectedActivity.class);
-            intent.putExtra("collected_id", collected.getId());
-            startActivityForResult(intent, EDIT_COMPRA_REQUEST);
-        });
-**/
+            loadCollected(codigo, descricao, categoria);
+        }
     } //fim oncreate
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == EDIT_COMPRA_REQUEST && resultCode == RESULT_OK) {
+        if (requestCode == EDIT_COLLECTED_REQUEST && resultCode == RESULT_OK) {
             // Recarregar os dados com os mesmos critérios de busca
             loadCollected(currentCodigo, currentDescricao, currentCategoria);
             Toast.makeText(this, "Lista atualizada", Toast.LENGTH_SHORT).show();
@@ -67,10 +78,13 @@ public class ResultCollectedActivity extends AppCompatActivity {
     private void loadCollected(String codigo, String descricao, String categoria) {
         CollectedList.clear();
 
+        // Verifica se todos os critérios de busca estão vazios
+        if (codigo.isEmpty() && descricao.isEmpty() && categoria.isEmpty()) {
+            Toast.makeText(this, "Informe pelo menos um critério de busca", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Construir query dinâmica baseada nos critérios de busca
         String query = "SELECT bc_imdb, descr_imdb, cat_imdb FROM collected_tab WHERE 1=1";
-       // String query = "SELECT * FROM collected_tab WHERE 1=1";
         List<String> params = new ArrayList<>();
 
         if (!codigo.isEmpty()) {
@@ -90,32 +104,41 @@ public class ResultCollectedActivity extends AppCompatActivity {
 
         query += " ORDER BY descr_imdb ASC";
 
-        Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
-        //Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
+        Cursor cursor = null;
+        try {
+            cursor = db.rawQuery(query, params.toArray(new String[0]));
 
-        if (cursor.moveToFirst()) {
-            do {
-                Collected collected = new Collected(
-                        cursor.getString(0), // bc_imdb //cursor.getLong(0),
-                        cursor.getString(1), // descr_imdb
-                        cursor.getString(2) // cat_imdb
-                );
-                CollectedList.add(collected);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    String bc = cursor.getString(0);
+                    String desc = cursor.getString(1);
+                    String cat = cursor.getString(2);
 
-        // Atualizar o TextView com a soma total
-        TextView tvTitle = findViewById(R.id.tvTitle);
-        tvTitle.setText(String.format("Soma parcial: R$ %.2f"));
+                    Collected collected = new Collected(bc, desc, cat);
+                    CollectedList.add(collected);
+                }
 
-        if (adapter == null) {
-            adapter = new CollectedAdapter(CollectedList);
-            recyclerView.setAdapter(adapter);
-        } else {
-            adapter.notifyDataSetChanged();
+                // Atualiza a UI na thread principal
+                runOnUiThread(() -> {
+                    if (adapter == null) {
+                        adapter = new CollectedAdapter(CollectedList);
+                        recyclerView.setAdapter(adapter);
+                    } else {
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+            } else {
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Nenhum item encontrado", Toast.LENGTH_SHORT).show());
+            }
+        } catch (Exception e) {
+            runOnUiThread(() ->
+                    Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show());
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
         }
     }
-
 }
 

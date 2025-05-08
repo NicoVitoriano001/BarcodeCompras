@@ -8,6 +8,10 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
+    <!-- Baixar icons https://fonts.google.com/icons-->
+    <!-- 2025.05.08 dos EditText tirei, ficou branco
+android:textColor="@android:color/darker_gray" -->
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -44,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/descr_cat"
-                android:inputType="textCapCharacters" />
+                android:inputType="textCapCharacters|textMultiLine" />
 
             <EditText
                 android:id="@+id/preco_compras"
@@ -73,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/periodo"
-                android:inputType="text" />
+                android:inputType="number|textCapCharacters" />
 
             <EditText
                 android:id="@+id/obs_compras"

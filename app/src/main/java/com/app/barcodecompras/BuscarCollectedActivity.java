@@ -7,7 +7,7 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class BuscarCollectedActivity extends AppCompatActivity {
-    private static final int EDIT_COMPRA_REQUEST = 1;
+    private static final int EDIT_COLLECTED_REQUEST = 1;
     private EditText etBuscaCodigoCollected, etBuscaDescricaoCollected, etBuscaCategoriaCollected;
     private Button btnBuscarCollected, btnCancelarCollected;
 
@@ -43,7 +43,7 @@ public class BuscarCollectedActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == EDIT_COMPRA_REQUEST && resultCode == RESULT_OK) {
+        if (requestCode == EDIT_COLLECTED_REQUEST && resultCode == RESULT_OK) {
             finish();
         }
     }

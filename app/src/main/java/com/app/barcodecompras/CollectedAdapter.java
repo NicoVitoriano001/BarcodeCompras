@@ -58,9 +58,9 @@ public class CollectedAdapter extends RecyclerView.Adapter<CollectedAdapter.Coll
 
         public CollectedViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvBcCollected = itemView.findViewById(R.id.tvBcCompras);
-            tvDescricao = itemView.findViewById(R.id.tvDescricao);
-            tvCategoria = itemView.findViewById(R.id.tvCategoria);
+            tvBcCollected = itemView.findViewById(R.id.tvCollectedBarcode);
+            tvDescricao = itemView.findViewById(R.id.tvCollectedDescription);
+            tvCategoria = itemView.findViewById(R.id.tvCollectedCategory);
 
         }
     }

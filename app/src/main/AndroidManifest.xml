@@ -40,19 +40,19 @@
         <!-- 05.05.2025 Usar esse para padronizar igual ao Main (salvo Result compras) -->
         <activity android:name=".BuscarComprasActivity"
             android:theme="@style/Theme.BarcodeCompras" />
+        <activity android:name=".BuscarCollectedActivity"
+            android:theme="@style/Theme.BarcodeCompras" />
+        <!--android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/> -->
 
         <activity android:name=".EditComprasActivity"
             android:theme="@style/Theme.BarcodeCompras" />
     <!--<activity android:name=".EditComprasActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"/> -->
-
-        <activity android:name=".BuscarCollectedActivity"
+        <activity android:name=".EditCollectedActivity"
             android:theme="@style/Theme.BarcodeCompras" />
-        <!--android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/> -->
 
            <!-- 05.05.2025 ResultComprasActivity deixa como está  -->
         <activity android:name=".ResultComprasActivity" />
-
         <activity android:name=".ResultCollectedActivity" />
 
     </application>

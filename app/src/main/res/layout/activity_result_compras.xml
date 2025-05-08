@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Barra de título -->
+    <!-- Barra de título  -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
@@ -16,7 +16,8 @@
         android:textStyle="bold"
         android:textSize="20sp"
         android:gravity="center"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        android:textColor="@color/cinza_Gainsboro"/>
 
     <!-- RecyclerView - Lista de resultados -->
     <androidx.recyclerview.widget.RecyclerView
@@ -28,6 +29,6 @@
         android:paddingBottom="8dp"
         android:scrollbars="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_compra"
-        tools:itemCount="5"/>
+        tools:listitem="@layout/item_collected"
+        tools:itemCount="3"/>
 </LinearLayout>
