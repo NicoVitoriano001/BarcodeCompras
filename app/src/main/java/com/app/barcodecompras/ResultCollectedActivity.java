@@ -102,13 +102,13 @@ public class ResultCollectedActivity extends AppCompatActivity {
         }
 
         if (!descricao.isEmpty()) {
-            query += " AND descr_imdb LIKE ?";
-            params.add("%" + descricao + "%");
+            query += " AND REPLACE(descr_imdb, ' ', '%') LIKE ?";
+            params.add("%" + descricao.replace(" ", "%") + "%");
         }
 
         if (!categoria.isEmpty()) {
-            query += " AND cat_imdb LIKE ?";
-            params.add("%" + categoria + "%");
+            query += " AND REPLACE(cat_imdb, ' ', '%') LIKE ?";
+            params.add("%" + categoria.replace(" ", "%") + "%");
         }
 
         query += " ORDER BY descr_imdb ASC";

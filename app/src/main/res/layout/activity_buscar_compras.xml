@@ -1,89 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/edit_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-
-    <!-- Barra de título -->
-    <TextView
-        android:id="@+id/TitleEditCompras"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Buscar Itens Comprados"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:gravity="center"
-        android:layout_marginBottom="6dp"
-        android:paddingTop="1dp"
-        android:textColor="@color/cinza_Gainsboro"/>
-
-    <!-- Campos de pesquisa https://fonts.google.com/icons-->
-    <EditText
-        android:id="@+id/etBuscaCodigo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Código de Barras"
-        android:inputType="number" />
-
-    <EditText
-        android:id="@+id/etBuscaDescricao"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Descrição do Item"
-        android:inputType="textCapCharacters|textMultiLine"/>
-    <EditText
-        android:id="@+id/etBuscaCategoria"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Categoria"
-        android:inputType="textCapCharacters|textMultiLine"/>
-
-    <EditText
-        android:id="@+id/etBuscaPeriodo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Periodo"
-        android:inputType="number|textCapCharacters"/>
-
-    <EditText
-        android:id="@+id/etBuscaOBS"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Observação"
-        android:inputType="textCapCharacters|textMultiLine"/>
-
-    <!-- Botões -->
+    <!-- Main content -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnBuscar"
-            style="@style/Widget.MaterialComponents.Button"
-            android:layout_width="0dp"
+        <!-- Title bar -->
+        <TextView
+            android:id="@+id/TitleEditCompras"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Buscar"
-            android:layout_marginStart="4dp"
-            android:textColor="?attr/colorOnSurface"
-            app:icon="@drawable/search_24dp"
-            app:iconTint="?attr/colorOnSurface"/>
+            android:text="Buscar Itens Comprados"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"
+            android:paddingTop="1dp"
+            android:textColor="@color/cinza_Gainsboro"/>
 
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCancelarBusca"
-            style="@style/Widget.MaterialComponents.Button"
-            android:layout_width="0dp"
+        <!-- Search fields -->
+        <EditText
+            android:id="@+id/etBuscaCodigo"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Cancelar"
-            android:layout_marginStart="4dp"
-            android:textColor="?attr/colorOnSurface"
-            app:icon="@drawable/close_24dp"
-            app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+            android:layout_marginBottom="8dp"
+            android:hint="Código de Barras"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/etBuscaDescricao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:hint="Descrição do Item"
+            android:inputType="textCapCharacters|textMultiLine"/>
+
+        <EditText
+            android:id="@+id/etBuscaCategoria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:hint="Categoria"
+            android:inputType="textCapCharacters|textMultiLine"/>
+
+        <EditText
+            android:id="@+id/etBuscaPeriodo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:hint="Periodo"
+            android:inputType="number|textCapCharacters"/>
+
+        <EditText
+            android:id="@+id/etBuscaOBS"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Observação"
+            android:inputType="textCapCharacters|textMultiLine"/>
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnBuscar"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Buscar"
+                android:layout_marginEnd="4dp"
+                android:textColor="?attr/colorOnSurface"
+                app:icon="@drawable/search_24dp"
+                app:iconTint="?attr/colorOnSurface"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancelarBusca"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cancelar"
+                android:layout_marginStart="4dp"
+                android:textColor="?attr/colorOnSurface"
+                app:icon="@drawable/close_24dp"
+                app:iconTint="?attr/colorOnSurface"/>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+
+    <!-- Navigation drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/busca_compras_nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main_drawer" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

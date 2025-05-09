@@ -81,7 +81,7 @@ public class ResultComprasActivity extends AppCompatActivity {
                 // Não chame finish() aqui - deixe o sistema gerenciar
             }, 200); // 250ms de delay
             return true;
-        });//DRAWER -- INICIO
+        });//DRAWER -- FIM
     } //fim oncreate
 
     @Override
@@ -109,13 +109,13 @@ public class ResultComprasActivity extends AppCompatActivity {
         }
 
         if (!descricao.isEmpty()) {
-            query += " AND descr_compras LIKE ?";
-            params.add("%" + descricao + "%");
+            query += " AND REPLACE(descr_compras, ' ', '%') LIKE ?";
+            params.add("%" + descricao.replace(" ", "%") + "%");
         }
 
         if (!categoria.isEmpty()) {
-            query += " AND cat_compras LIKE ?";
-            params.add("%" + categoria + "%");
+            query += " AND REPLACE(cat_compras, ' ', '%') LIKE ?";
+            params.add("%" + categoria.replace(" ", "%") + "%");
         }
 
         if (!periodo.isEmpty()) {
