@@ -154,7 +154,7 @@ private ActionBarDrawerToggle toggle;
                     Intent intent = new Intent(MainActivity.this, BuscarCollectedActivity.class);
                     startActivity(intent);
                 } else if (id == R.id.nav_backup) {
-                    fazerBackup();
+                    showBackupConfirmationDialog(); // Substitui a chamada direta a fazerBackup() fazerBackup();
                 } else if (id == R.id.nav_restore) {
                     restaurarBackup();
                 }
@@ -351,7 +351,53 @@ private ActionBarDrawerToggle toggle;
         }
     }
 
-   //data/data/com.app.barcodecompras/databases/comprasDB.db
+
+
+
+
+
+
+    // Adicione esta constante na classe (junto com outras declarações de variáveis)
+    private static final File BACKUP_DIR = new File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            "COMPRAS"
+    );
+
+    // Adicione este método na classe
+    private void showBackupConfirmationDialog() {
+        String dataHora = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String nomeArquivoBKP = "comprasDB_" + dataHora + ".db";
+
+        // Garantir que o diretório existe
+        if (!BACKUP_DIR.exists()) {
+            BACKUP_DIR.mkdirs();
+        }
+
+        File backupFile = new File(BACKUP_DIR, nomeArquivoBKP);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar Backup")
+                .setMessage("Deseja fazer backup do banco de dados?\n\n" +
+                        "Local: " + BACKUP_DIR.getAbsolutePath() + "\n" +
+                        "Nome: " + nomeArquivoBKP)
+                .setPositiveButton("Sim", (dialog, which) -> {
+                    // Chama o método fazerBackup existente
+                    fazerBackup();
+                })
+                .setNegativeButton("Não", null)
+                .show();
+    }
+
+
+
+
+
+
+
+
+
+    //data/data/com.app.barcodecompras/databases/comprasDB.db
     private void fazerBackup() {
         if (!checkStoragePermission()) {
             Toast.makeText(this, "Permissão necessária para fazer backup", Toast.LENGTH_SHORT).show();
@@ -360,32 +406,17 @@ private ActionBarDrawerToggle toggle;
         }
 
         try {
-            // Verificar se temos permissão mesmo após solicitar
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                     !Environment.isExternalStorageManager()) {
                 Toast.makeText(this, "Permissão ainda não concedida", Toast.LENGTH_SHORT).show();
                 return;
             }
-            File arquivoDB = getDatabasePath("comprasDB.db");
-            String dataHora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+            String dataHora = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String nomeArquivoBKP = "comprasDB_" + dataHora + ".db";
-
-            // Usando a API recomendada para Android 10+
-            File downloadsDir;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                downloadsDir = new File(
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                        "COMPRAS");
-            } else {
-                downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            }
-
-            if (!downloadsDir.exists()) {
-                downloadsDir.mkdirs();
-            }
-
-            File arquivoBackup = new File(downloadsDir, nomeArquivoBKP);
-           // File arquivoDB = getDatabasePath("comprasDB.db");
+            File arquivoBackup = new File(BACKUP_DIR, nomeArquivoBKP);
+            File arquivoDB = getDatabasePath("comprasDB.db");
 
             if (!arquivoDB.exists()) {
                 Toast.makeText(this, "Banco de dados não encontrado!", Toast.LENGTH_SHORT).show();
@@ -394,7 +425,8 @@ private ActionBarDrawerToggle toggle;
 
             copiarArquivo(arquivoDB, arquivoBackup);
 
-            // Notificar o sistema sobre o novo arquivo (necessário no Android 10+)
+
+            // Notificar o sistema sobre o novo arquivo
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 MediaScannerConnection.scanFile(this,
                         new String[]{arquivoBackup.getAbsolutePath()},
