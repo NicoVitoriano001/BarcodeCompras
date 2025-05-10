@@ -1,11 +1,11 @@
 package com.app.barcodecompras;
-public class Collected {
+public class BancoDados {
     private String bcIMDB;
     private String descrIMDB;
     private String catIMDB;
 
     // Construtor
-    public Collected(String bcIMDB, String descrIMDB, String catIMDB) {
+    public BancoDados(String bcIMDB, String descrIMDB, String catIMDB) {
         this.bcIMDB = bcIMDB;
         this.descrIMDB = descrIMDB;
         this.catIMDB = catIMDB;

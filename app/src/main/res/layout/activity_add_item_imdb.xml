@@ -16,7 +16,7 @@
 
         <!-- Barra de título -->
         <TextView
-            android:id="@+id/TitleEditCollected"
+            android:id="@+id/TitleEditBancoDados"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Adicionar Item ao Banco de Dados"
@@ -115,7 +115,7 @@
 
     <!-- NavigationView ou outros componentes do DrawerLayout podem ser adicionados aqui -->
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/add_collected_nav_view"
+        android:id="@+id/add_bancodados_nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

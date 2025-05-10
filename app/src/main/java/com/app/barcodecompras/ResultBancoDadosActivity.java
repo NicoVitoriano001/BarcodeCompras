@@ -11,13 +11,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResultCollectedActivity extends AppCompatActivity {
+public class ResultBancoDadosActivity extends AppCompatActivity {
     private static final int EDIT_COLLECTED_REQUEST = 1;
     private String currentCodigo, currentDescricao, currentCategoria;
     private RecyclerView recyclerView;
-    private CollectedAdapter adapter;
+    private BancoDadosAdapter adapter;
     private SQLiteDatabase db;
-    private List<Collected> CollectedList = new ArrayList<>();
+    private List<BancoDados> BancoDadosList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,25 +28,25 @@ public class ResultCollectedActivity extends AppCompatActivity {
             finish();
             return;
         }
-        setContentView(R.layout.activity_result_collected);
+        setContentView(R.layout.activity_result_bancodados);
 
 // Inicializa o RecyclerView primeiro
-        recyclerView = findViewById(R.id.recyclerViewResultCollected); // Verifique se este ID está correto no XML
+        recyclerView = findViewById(R.id.recyclerViewResultBancoDados); // Verifique se este ID está correto no XML
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Inicializa o adapter com a lista vazia
-        CollectedList = new ArrayList<>();
-        adapter = new CollectedAdapter(CollectedList);
+        BancoDadosList = new ArrayList<>();
+        adapter = new BancoDadosAdapter(BancoDadosList);
         recyclerView.setAdapter(adapter);
 
         // Configura o listener do adapter
-        adapter.setOnItemClickListener(collected -> {
-            Intent intent = new Intent(this, EditCollectedActivity.class);
+        adapter.setOnItemClickListener(bancodados -> {
+            Intent intent = new Intent(this, EditBancoDadosActivity.class);
             // Garanta que os dados não são nulos
-            if (collected != null) {
-                intent.putExtra("CODIGO", collected.getBcIMDB() != null ? collected.getBcIMDB() : "");
-                intent.putExtra("DESCRICAO", collected.getDescrIMDB() != null ? collected.getDescrIMDB() : "");
-                intent.putExtra("CATEGORIA", collected.getCatIMDB() != null ? collected.getCatIMDB() : "");
+            if (bancodados != null) {
+                intent.putExtra("CODIGO", bancodados.getBcIMDB() != null ? bancodados.getBcIMDB() : "");
+                intent.putExtra("DESCRICAO", bancodados.getDescrIMDB() != null ? bancodados.getDescrIMDB() : "");
+                intent.putExtra("CATEGORIA", bancodados.getCatIMDB() != null ? bancodados.getCatIMDB() : "");
                 startActivityForResult(intent, EDIT_COLLECTED_REQUEST);
             } else {
                 Toast.makeText(this, "Item inválido", Toast.LENGTH_SHORT).show();
@@ -67,7 +67,7 @@ public class ResultCollectedActivity extends AppCompatActivity {
             currentDescricao = descricao;
             currentCategoria = categoria;
 
-            loadCollected(codigo, descricao, categoria);
+            loadBancoDados(codigo, descricao, categoria);
         }
 
     } //fim oncreate
@@ -78,14 +78,14 @@ public class ResultCollectedActivity extends AppCompatActivity {
 
         if (requestCode == EDIT_COLLECTED_REQUEST && resultCode == RESULT_OK) {
             // Recarregar os dados com os mesmos critérios de busca
-            loadCollected(currentCodigo, currentDescricao, currentCategoria);
+            loadBancoDados(currentCodigo, currentDescricao, currentCategoria);
             Toast.makeText(this, "Lista atualizada", Toast.LENGTH_SHORT).show();
         }
     }
 
 
-    private void loadCollected(String codigo, String descricao, String categoria) {
-        CollectedList.clear();
+    private void loadBancoDados(String codigo, String descricao, String categoria) {
+        BancoDadosList.clear();
 
         // Verifica se todos os critérios de busca estão vazios
         if (codigo.isEmpty() && descricao.isEmpty() && categoria.isEmpty()) {
@@ -93,7 +93,7 @@ public class ResultCollectedActivity extends AppCompatActivity {
             return;
         }
 
-        String query = "SELECT bc_imdb, descr_imdb, cat_imdb FROM collected_tab WHERE 1=1";
+        String query = "SELECT bc_imdb, descr_imdb, cat_imdb FROM bancodados_tab WHERE 1=1";
         List<String> params = new ArrayList<>();
 
         if (!codigo.isEmpty()) {
@@ -123,14 +123,14 @@ public class ResultCollectedActivity extends AppCompatActivity {
                     String desc = cursor.getString(1);
                     String cat = cursor.getString(2);
 
-                    Collected collected = new Collected(bc, desc, cat);
-                    CollectedList.add(collected);
+                    BancoDados bancodados = new BancoDados(bc, desc, cat);
+                    BancoDadosList.add(bancodados);
                 }
 
                 // Atualiza a UI na thread principal
                 runOnUiThread(() -> {
                     if (adapter == null) {
-                        adapter = new CollectedAdapter(CollectedList);
+                        adapter = new BancoDadosAdapter(BancoDadosList);
                         recyclerView.setAdapter(adapter);
                     } else {
                         adapter.notifyDataSetChanged();

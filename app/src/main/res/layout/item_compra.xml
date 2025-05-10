@@ -51,7 +51,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="15sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/tvQuantidade"
@@ -60,7 +61,8 @@
             android:layout_weight="1"
             android:textSize="15sp"
             android:textStyle="bold"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/tvTotal"

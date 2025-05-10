@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.Manifest;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -147,11 +148,11 @@ private ActionBarDrawerToggle toggle;
                     // Ação para galeria
                 } else if (id == R.id.nav_slideshow) {
                     // Ação para slideshow
-                } else if (id == R.id.nav_add_collected) {
+                } else if (id == R.id.nav_add_bancodados) {
                     Intent intent = new Intent(MainActivity.this, AddItemIMDB.class);
                     startActivity(intent);
-                } else if (id == R.id.nav_busca_collected) {
-                    Intent intent = new Intent(MainActivity.this, BuscarCollectedActivity.class);
+                } else if (id == R.id.nav_busca_bancodados) {
+                    Intent intent = new Intent(MainActivity.this, BuscarBancoDadosActivity.class);
                     startActivity(intent);
                 } else if (id == R.id.nav_backup) {
                     showBackupConfirmationDialog(); // Substitui a chamada direta a fazerBackup() fazerBackup();
@@ -219,20 +220,20 @@ private ActionBarDrawerToggle toggle;
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null && result.getContents() != null) {
             bc_compras.setText(result.getContents());
-            fetchItemDataCollectedTable(result.getContents());
+            fetchItemDataBancoDadosTable(result.getContents());
         } else {
             Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
         }
         if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
             // Recarregar os dados após cadastro
             String barcode = bc_compras.getText().toString();
-            fetchItemDataCollectedTable(barcode);
+            fetchItemDataBancoDadosTable(barcode);
         }
     }
 
 // Busca descr_compras e cat_compras baseado no código escaneado
-// Busca descrição e categoria na tabela collected_tab
-    private void fetchItemDataCollectedTable(String barcodeValue) {
+// Busca descrição e categoria na tabela bancodados_tab
+    private void fetchItemDataBancoDadosTable(String barcodeValue) {
     if (db == null || !db.isOpen()) {
         db = getDatabase(); // Metodo auxiliar para obter a instância correta
         Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
@@ -240,7 +241,7 @@ private ActionBarDrawerToggle toggle;
     }
 
     Cursor cursor = db.rawQuery(
-            "SELECT descr_imdb, cat_imdb FROM collected_tab WHERE bc_imdb = ?",
+            "SELECT descr_imdb, cat_imdb FROM bancodados_tab WHERE bc_imdb = ?",
             new String[]{barcodeValue}
     );
 

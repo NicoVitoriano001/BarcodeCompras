@@ -12,32 +12,32 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-public class BuscarCollectedActivity extends AppCompatActivity {
+public class BuscarBancoDadosActivity extends AppCompatActivity {
     private static final int EDIT_COLLECTED_REQUEST = 1;
-    private EditText etBuscaCodigoCollected, etBuscaDescricaoCollected, etBuscaCategoriaCollected;
-    private Button btnBuscarCollected, btnCancelarCollected;
+    private EditText etBuscaCodigoBancoDados, etBuscaDescricaoBancoDados, etBuscaCategoriaBancoDados;
+    private Button btnBuscarBancoDados, btnCancelarBancoDados;
     private DrawerLayout drawer;
     private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_buscar_collected);
+        setContentView(R.layout.activity_buscar_bancodados);
 
         // Inicializar views
-        etBuscaCodigoCollected = findViewById(R.id.etBuscaCodigoCollected);
-        etBuscaDescricaoCollected = findViewById(R.id.etBuscaDescricaoCollected);
-        etBuscaCategoriaCollected = findViewById(R.id.etBuscaCategoriaCollected);
-        btnBuscarCollected = findViewById(R.id.btnBuscarCollected);
-        btnCancelarCollected = findViewById(R.id.btnCancelarBuscaCollected);
+        etBuscaCodigoBancoDados = findViewById(R.id.etBuscaCodigoBancoDados);
+        etBuscaDescricaoBancoDados = findViewById(R.id.etBuscaDescricaoBancoDados);
+        etBuscaCategoriaBancoDados = findViewById(R.id.etBuscaCategoriaBancoDados);
+        btnBuscarBancoDados = findViewById(R.id.btnBuscarBancoDados);
+        btnCancelarBancoDados = findViewById(R.id.btnCancelarBuscaBancoDados);
 
         // Configurar listeners
-        btnBuscarCollected.setOnClickListener(v -> realizarBuscaCollected());
-        btnCancelarCollected.setOnClickListener(v -> finish());
+        btnBuscarBancoDados.setOnClickListener(v -> realizarBuscaBancoDados());
+        btnCancelarBancoDados.setOnClickListener(v -> finish());
 
         //DRAWER -- INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
-        navigationView = findViewById(R.id.busca_collected_nav_view);
+        navigationView = findViewById(R.id.busca_bancodados_nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
             drawer.closeDrawer(GravityCompat.START);
@@ -46,10 +46,10 @@ public class BuscarCollectedActivity extends AppCompatActivity {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_add_collected) {
+                } else if (id == R.id.nav_add_bancodados) {
                     startActivity(new Intent(this, AddItemIMDB.class));
-                } else if (id == R.id.nav_busca_collected) {
-                    startActivity(new Intent(this, BuscarCollectedActivity.class));
+                } else if (id == R.id.nav_busca_bancodados) {
+                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 } else if (id == R.id.nav_backup) {
                     // Agora usando o padrão de Intent com extra
                     Intent intent = new Intent(this, MainActivity.class);
@@ -67,13 +67,13 @@ public class BuscarCollectedActivity extends AppCompatActivity {
         });//DRAWER -- FIM
     } // FIM ON CREATE
 
-    private void realizarBuscaCollected() {
-        Intent intent = new Intent(this, ResultCollectedActivity.class);
+    private void realizarBuscaBancoDados() {
+        Intent intent = new Intent(this, ResultBancoDadosActivity.class);
 
         // Passar parâmetros de busca para a tela de resultados
-        intent.putExtra("CODIGO", etBuscaCodigoCollected.getText().toString());
-        intent.putExtra("DESCRICAO", etBuscaDescricaoCollected.getText().toString());
-        intent.putExtra("CATEGORIA", etBuscaCategoriaCollected.getText().toString());
+        intent.putExtra("CODIGO", etBuscaCodigoBancoDados.getText().toString());
+        intent.putExtra("DESCRICAO", etBuscaDescricaoBancoDados.getText().toString());
+        intent.putExtra("CATEGORIA", etBuscaCategoriaBancoDados.getText().toString());
         startActivity(intent);
     }
 

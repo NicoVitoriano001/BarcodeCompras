@@ -73,10 +73,10 @@ public class ResultComprasActivity extends AppCompatActivity {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_add_collected) {
+                } else if (id == R.id.nav_add_bancodados) {
                     startActivity(new Intent(this, AddItemIMDB.class));
-                } else if (id == R.id.nav_busca_collected) {
-                    startActivity(new Intent(this, BuscarCollectedActivity.class));
+                } else if (id == R.id.nav_busca_bancodados) {
+                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
             }, 200); // 250ms de delay

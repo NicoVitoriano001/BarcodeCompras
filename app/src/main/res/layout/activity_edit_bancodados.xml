@@ -31,21 +31,21 @@
                 android:textColor="@color/cinza_Gainsboro"/>
 
             <EditText
-                android:id="@+id/etDescrCollected"
+                android:id="@+id/etDescrBancoDados"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/descr_item"
                 android:inputType="textCapCharacters|textMultiLine" />
 
             <EditText
-                android:id="@+id/etBcCollected"
+                android:id="@+id/etBcBancoDados"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Código de Barras"
                 android:inputType="number" />
 
             <EditText
-                android:id="@+id/etCatCollected"
+                android:id="@+id/etCatBancoDados"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/descr_cat"
@@ -53,7 +53,7 @@
 
             <!-- Botão Salvar em linha própria -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSalvarCollected"
+                android:id="@+id/btnSalvarBancoDados"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCancelarCollected"
+                    android:id="@+id/btnCancelarBancoDados"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -82,7 +82,7 @@
                     app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnExcluirCollected"
+                    android:id="@+id/btnExcluirBancoDados"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/edit_collected_nav_view"
+        android:id="@+id/edit_bancodados_nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

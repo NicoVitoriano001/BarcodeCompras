@@ -39,7 +39,7 @@ public class AddItemIMDB extends AppCompatActivity {
     }
 
     private void createTable() {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS collected_tab (" +
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS bancodados_tab (" +
            //     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "bc_imdb INTEGER, " +
                 "descr_imdb TEXT, " +
@@ -72,7 +72,7 @@ public class AddItemIMDB extends AppCompatActivity {
 
         //DRAWER -- INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
-        navigationView = findViewById(R.id.add_collected_nav_view);
+        navigationView = findViewById(R.id.add_bancodados_nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
             drawer.closeDrawer(GravityCompat.START);
@@ -81,10 +81,10 @@ public class AddItemIMDB extends AppCompatActivity {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_add_collected) {
+                } else if (id == R.id.nav_add_bancodados) {
                     startActivity(new Intent(this, AddItemIMDB.class));
-                } else if (id == R.id.nav_busca_collected) {
-                    startActivity(new Intent(this, BuscarCollectedActivity.class));
+                } else if (id == R.id.nav_busca_bancodados) {
+                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
             }, 200); // 250ms de delay
@@ -111,7 +111,7 @@ public class AddItemIMDB extends AppCompatActivity {
         values.put("cat_imdb", category);
 
         try {
-            long result = db.insert("collected_tab", null, values);
+            long result = db.insert("bancodados_tab", null, values);
 
             if (result != -1) {
                 Toast.makeText(this, "Item salvo com sucesso", Toast.LENGTH_SHORT).show();

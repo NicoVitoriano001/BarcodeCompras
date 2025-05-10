@@ -69,10 +69,10 @@ public class EditComprasActivity extends AppCompatActivity {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(EditComprasActivity.this, MainActivity.class));
-                } else if (id == R.id.nav_add_collected) {
+                } else if (id == R.id.nav_add_bancodados) {
                     startActivity(new Intent(EditComprasActivity.this, AddItemIMDB.class));
-                } else if (id == R.id.nav_busca_collected) {
-                    startActivity(new Intent(EditComprasActivity.this, BuscarCollectedActivity.class));
+                } else if (id == R.id.nav_busca_bancodados) {
+                    startActivity(new Intent(EditComprasActivity.this, BuscarBancoDadosActivity.class));
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
             }, 200); // 250ms de delay

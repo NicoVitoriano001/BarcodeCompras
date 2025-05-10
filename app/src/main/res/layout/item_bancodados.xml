@@ -11,7 +11,7 @@
 
     <!-- Descrição do item (destaque) -->
     <TextView
-        android:id="@+id/tvCollectedDescription"
+        android:id="@+id/tvBancoDadosDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="15sp"
@@ -20,7 +20,7 @@
 
     <!-- Código de barras -->
     <TextView
-        android:id="@+id/tvCollectedBarcode"
+        android:id="@+id/tvBancoDadosBarcode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -29,7 +29,7 @@
 
     <!-- Categoria -->
     <TextView
-        android:id="@+id/tvCollectedCategory"
+        android:id="@+id/tvBancoDadosCategory"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"

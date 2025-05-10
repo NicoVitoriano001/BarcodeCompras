@@ -15,14 +15,15 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp">
-<!-- Barra de título -->
+
+        <!-- Barra de título -->
     <TextView
         android:id="@+id/TitleEditCompras"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Buscar Itens Collected"
+        android:text="Buscar Itens BancoDados"
         android:textStyle="bold"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:gravity="center"
         android:layout_marginBottom="6dp"
         android:paddingTop="1dp"
@@ -30,21 +31,21 @@
 
     <!-- Baixar icons https://fonts.google.com/icons-->
     <EditText
-        android:id="@+id/etBuscaCodigoCollected"
+        android:id="@+id/etBuscaCodigoBancoDados"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Código de Barras"
         android:inputType="number" />
 
     <EditText
-        android:id="@+id/etBuscaDescricaoCollected"
+        android:id="@+id/etBuscaDescricaoBancoDados"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Descrição do Item"
         android:inputType="textCapCharacters"/>
 
     <EditText
-        android:id="@+id/etBuscaCategoriaCollected"
+        android:id="@+id/etBuscaCategoriaBancoDados"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Categoria"
@@ -58,7 +59,7 @@
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnBuscarCollected"
+            android:id="@+id/btnBuscarBancoDados"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -71,7 +72,7 @@
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCancelarBuscaCollected"
+            android:id="@+id/btnCancelarBuscaBancoDados"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -85,7 +86,7 @@
 </LinearLayout>
     <!-- Navigation drawer -->
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/busca_collected_nav_view"
+        android:id="@+id/busca_bancodados_nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

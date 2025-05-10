@@ -22,7 +22,7 @@
 
     <!-- RecyclerView - Lista de resultados -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewResultCollected"
+        android:id="@+id/recyclerViewResultBancoDados"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
@@ -30,6 +30,6 @@
         android:paddingBottom="8dp"
         android:scrollbars="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_collected"
+        tools:listitem="@layout/item_bancodados"
         tools:itemCount="3"/>
 </LinearLayout>

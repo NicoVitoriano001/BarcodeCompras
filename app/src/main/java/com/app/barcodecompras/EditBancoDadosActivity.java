@@ -18,8 +18,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-public class EditCollectedActivity extends AppCompatActivity {
-    private EditText etBcCollected, etDescrCollected, etCatCollected;
+public class EditBancoDadosActivity extends AppCompatActivity {
+    private EditText etBcBancoDados, etDescrBancoDados, etCatBancoDados;
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
     private String currentBarcode;
@@ -29,14 +29,14 @@ public class EditCollectedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_collected);
+        setContentView(R.layout.activity_edit_bancodados);
 
         // Inicializar views
         initViews();
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
-        // Receber dados do item collected selecionado
+        // Receber dados do item bancodados selecionado
         Intent intent = getIntent();
         if (intent != null) {
             currentBarcode = intent.getStringExtra("CODIGO");
@@ -44,11 +44,11 @@ public class EditCollectedActivity extends AppCompatActivity {
             String categoria = intent.getStringExtra("CATEGORIA");
 
             // Preencher campos com os dados recebidos (com verificações de null)
-            etBcCollected.setText(currentBarcode != null ? currentBarcode : "");
-            etDescrCollected.setText(descricao != null ? descricao : "");
-            etCatCollected.setText(categoria != null ? categoria : "");
+            etBcBancoDados.setText(currentBarcode != null ? currentBarcode : "");
+            etDescrBancoDados.setText(descricao != null ? descricao : "");
+            etCatBancoDados.setText(categoria != null ? categoria : "");
             // Adicione este log para verificar os dados recebidos
-            Log.d("EditCollected", "Dados recebidos - Código: " + currentBarcode +
+            Log.d("EditBancoDados", "Dados recebidos - Código: " + currentBarcode +
                     ", Descrição: " + descricao +
                     ", Categoria: " + categoria);
         }
@@ -60,7 +60,7 @@ public class EditCollectedActivity extends AppCompatActivity {
 
         //DRAWER -- INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
-        navigationView = findViewById(R.id.edit_collected_nav_view);
+        navigationView = findViewById(R.id.edit_bancodados_nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
             drawer.closeDrawer(GravityCompat.START);
@@ -69,10 +69,10 @@ public class EditCollectedActivity extends AppCompatActivity {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_add_collected) {
+                } else if (id == R.id.nav_add_bancodados) {
                     startActivity(new Intent(this, AddItemIMDB.class));
-                } else if (id == R.id.nav_busca_collected) {
-                    startActivity(new Intent(this, BuscarCollectedActivity.class));
+                } else if (id == R.id.nav_busca_bancodados) {
+                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
             }, 200); // 250ms de delay
@@ -82,12 +82,12 @@ public class EditCollectedActivity extends AppCompatActivity {
     }//fim on create
 
     private void initViews() {
-        etBcCollected = findViewById(R.id.etBcCollected);
-        etDescrCollected = findViewById(R.id.etDescrCollected);
-        etCatCollected = findViewById(R.id.etCatCollected);
-        btnSalvar = findViewById(R.id.btnSalvarCollected);
-        btnCancelar = findViewById(R.id.btnCancelarCollected);
-        btnExcluir = findViewById(R.id.btnExcluirCollected);
+        etBcBancoDados = findViewById(R.id.etBcBancoDados);
+        etDescrBancoDados = findViewById(R.id.etDescrBancoDados);
+        etCatBancoDados = findViewById(R.id.etCatBancoDados);
+        btnSalvar = findViewById(R.id.btnSalvarBancoDados);
+        btnCancelar = findViewById(R.id.btnCancelarBancoDados);
+        btnExcluir = findViewById(R.id.btnExcluirBancoDados);
     }
 
     private void excluirItem() {
@@ -96,7 +96,7 @@ public class EditCollectedActivity extends AppCompatActivity {
                 .setMessage("Tem certeza que deseja excluir este item?")
                 .setPositiveButton("Excluir", (dialog1, which) -> {
                     int rowsDeleted = db.delete(
-                            "collected_tab",
+                            "bancodados_tab",
                             "bc_imdb = ?",
                             new String[]{currentBarcode}
                     );
@@ -125,9 +125,9 @@ public class EditCollectedActivity extends AppCompatActivity {
     }
 
     private void salvarEdicao() {
-        String novoBarcode = etBcCollected.getText().toString();
-        String novaDescricao = etDescrCollected.getText().toString();
-        String novaCategoria = etCatCollected.getText().toString();
+        String novoBarcode = etBcBancoDados.getText().toString();
+        String novaDescricao = etDescrBancoDados.getText().toString();
+        String novaCategoria = etCatBancoDados.getText().toString();
 
         if (novoBarcode.isEmpty() || novaDescricao.isEmpty() || novaCategoria.isEmpty()) {
             Toast.makeText(this, "Preencha todos os campos!", Toast.LENGTH_SHORT).show();
@@ -141,7 +141,7 @@ public class EditCollectedActivity extends AppCompatActivity {
             values.put("cat_imdb", novaCategoria);
 
             int rowsAffected = db.update(
-                    "collected_tab",
+                    "bancodados_tab",
                     values,
                     "bc_imdb = ?",
                     new String[]{currentBarcode}
