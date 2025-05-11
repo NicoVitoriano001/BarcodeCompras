@@ -94,7 +94,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
     }
     public String getDataHoraAtual() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM", Locale.getDefault());
         return sdf.format(calendar.getTime());
     }
     // FIM PEGAR DATA
