@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -37,6 +39,9 @@ private SQLiteDatabase db;
 private DrawerLayout drawer;
 private ActionBarDrawerToggle toggle;
 private BancoDadosBkp bancoDadosBkp;
+private EditText precoEditText;
+private EditText qntEditText;
+private EditText totalEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +61,14 @@ private BancoDadosBkp bancoDadosBkp;
                     .setNegativeButton("Cancelar", null)
                     .show();
         }
+
+        // Inicializa os EditTexts
+        precoEditText = findViewById(R.id.preco_compras);
+        qntEditText = findViewById(R.id.qnt_compras);
+        totalEditText = findViewById(R.id.total_compras);
+
+        // Configura os TextWatchers
+        setupTextWatchers();
 
         //inicialização de views
         bc_compras = findViewById(R.id.bc_compras);
@@ -189,7 +202,7 @@ private BancoDadosBkp bancoDadosBkp;
 // Busca descrição e categoria na tabela bancodados_tab
     private void fetchItemDataBancoDadosTable(String barcodeValue) {
     if (db == null || !db.isOpen()) {
-        db = getDatabase(); // Metodo auxiliar para obter a instância correta
+        db = getDatabase();
         Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
         return;
     }
@@ -295,5 +308,44 @@ private BancoDadosBkp bancoDadosBkp;
             db = null;
         }
         super.onDestroy();
+    }
+
+    private void setupTextWatchers() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                calcularTotal();
+            }
+        };
+
+        precoEditText.addTextChangedListener(textWatcher);
+        qntEditText.addTextChangedListener(textWatcher);
+    }
+
+    private void calcularTotal() {
+        try {
+            // Obtém os valores dos campos
+            String precoStr = precoEditText.getText().toString();
+            String qntStr = qntEditText.getText().toString();
+
+            // Converte para números
+            double preco = precoStr.isEmpty() ? 0 : Double.parseDouble(precoStr);
+            double qnt = qntStr.isEmpty() ? 0 : Double.parseDouble(qntStr);
+
+            // Calcula o total
+            double total = preco * qnt;
+
+            // Atualiza o campo total
+            totalEditText.setText(String.format(Locale.getDefault(), "%.2f", total));
+        } catch (NumberFormatException e) {
+            // Caso ocorra erro na conversão
+            totalEditText.setText("");
+        }
     }
 }
