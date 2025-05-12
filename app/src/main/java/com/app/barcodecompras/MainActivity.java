@@ -144,6 +144,9 @@ private EditText totalEditText;
                 } else if (id == R.id.nav_busca_bancodados) {
                     Intent intent = new Intent(MainActivity.this, BuscarBancoDadosActivity.class);
                     startActivity(intent);
+                } else if (id == R.id.nav_busca_compras) {
+                    Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
+                    startActivity(intent);
                 } else if (id == R.id.nav_backup) {
                     bancoDadosBkp.showBackupConfirmationDialog(); //showBackupConfirmationDialog(); // Substitui a chamada direta a fazerBackup() fazerBackup();
                 } else if (id == R.id.nav_restore) {
