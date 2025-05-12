@@ -28,13 +28,6 @@
             android:textColor="@color/white"/>
 
         <!-- Código de Barras -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Código de Barras"
-            android:textSize="16sp"
-            android:textColor="?android:attr/textColorPrimary"/>
-
         <EditText
             android:id="@+id/bc_imdb_add"
             android:layout_width="match_parent"
@@ -45,14 +38,6 @@
             android:textColor="@color/white"/>
 
         <!-- Descrição -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Descrição"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp"
-            android:textColor="?android:attr/textColorPrimary"/>
-
         <EditText
             android:id="@+id/descr_imdb_add"
             android:layout_width="match_parent"
@@ -63,14 +48,6 @@
             android:textColor="?android:attr/textColorPrimary"/>
 
         <!-- Categoria -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/descr_cat"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp"
-            android:textColor="?android:attr/textColorPrimary"/>
-
         <EditText
             android:id="@+id/cat_imdb_add"
             android:layout_width="match_parent"
