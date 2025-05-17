@@ -1,6 +1,8 @@
 package com.app.barcodecompras;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,18 +12,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import android.app.DatePickerDialog;
+import android.widget.Toast;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class BuscarComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
+    private static final int REQUEST_CODE_ADD_ITEM = 1001;
     private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria, etBuscaPeriodo , etBuscaOBS;
     private Button btnBuscar, btnCancelar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private SQLiteDatabase db;
+    private Button scanButtonBuscaCompras;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +45,22 @@ public class BuscarComprasActivity extends AppCompatActivity {
         etBuscaOBS = findViewById(R.id.etBuscaOBS);
         btnBuscar = findViewById(R.id.btnBuscar);
         btnCancelar = findViewById(R.id.btnCancelarBusca);
+
+
+        // Inicializar botão de scan
+        scanButtonBuscaCompras = findViewById(R.id.scanButtonBuscaCompras);
+        scanButtonBuscaCompras.setOnClickListener(v -> {
+            IntentIntegrator integrator = new IntentIntegrator(BuscarComprasActivity.this);
+            integrator.setPrompt("Escaneie o código de barras");
+            integrator.setOrientationLocked(true);
+            integrator.setBeepEnabled(true);
+            integrator.initiateScan();
+        });
+
+        // Banco de dados
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getWritableDatabase();
+
 
         // Configurar data atual no campo de período
         etBuscaPeriodo.setText(getDataHoraAtual());
@@ -111,13 +136,71 @@ public class BuscarComprasActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // Adicione este metodo para tratar o retorno
+    // Resultado do scanner ZXing
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // Tratar resultado do scanner
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null && result.getContents() != null) {
+            etBuscaCodigo.setText(result.getContents());
+            fetchItemDataBancoDadosTable(result.getContents());
+        } else {
+            Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
+        }
+
+        if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
+            // Recarregar os dados após cadastro
+            String barcode = etBuscaCodigo.getText().toString();
+            fetchItemDataBancoDadosTable(barcode);
+        }
+
         if (requestCode == EDIT_COMPRA_REQUEST && resultCode == RESULT_OK) {
             finish();
+        }
+    }
+
+
+    // Busca descrição e categoria na tabela bancodados_tab
+    private void fetchItemDataBancoDadosTable(String barcodeValue) {
+        if (db == null || !db.isOpen()) {
+            db = getDatabase();
+            Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Cursor cursor = db.rawQuery(
+                "SELECT descr_imdb, cat_imdb FROM bancodados_tab WHERE bc_imdb = ?",
+                new String[]{barcodeValue}
+        );
+
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    etBuscaDescricao.setText(cursor.getString(0)); // descr_imdb
+                    etBuscaCategoria.setText(cursor.getString(1)); // cat_imdb
+                } else {
+                    // Item não encontrado - abrir activity de cadastro
+                    Intent intent = new Intent(BuscarComprasActivity.this, AddItemIMDB.class);
+                    intent.putExtra("BARCODE_VALUE", barcodeValue);
+                    startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
+                }
+            } finally {
+                cursor.close();
             }
         }
     }
+
+    // Metodo auxiliar para obter a instância do banco
+    private SQLiteDatabase getDatabase() {
+        if (db == null || !db.isOpen()) {
+            DatabaseHelper dbHelper = new DatabaseHelper(this);
+            db = dbHelper.getWritableDatabase();
+        }
+        return db;
+    }
+
+
+
+}

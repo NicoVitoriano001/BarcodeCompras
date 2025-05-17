@@ -79,7 +79,7 @@ private EditText totalEditText;
         total_compras = findViewById(R.id.total_compras);
         periodo_compras = findViewById(R.id.periodo_compras);
         obs_compras = findViewById(R.id.obs_compras);
-        scanButton = findViewById(R.id.scanButton);
+        scanButton = findViewById(R.id.scanButtonMain);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
@@ -98,7 +98,7 @@ private EditText totalEditText;
     // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
     //db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
-       Button scanButton = findViewById(R.id.scanButton);
+       Button scanButton = findViewById(R.id.scanButtonMain);
 
        scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
@@ -112,11 +112,11 @@ private EditText totalEditText;
        saveButton.setOnClickListener(v -> saveData());
        cancelButton.setOnClickListener(v -> clearFields());
 
-// Configurar Toolbar (usando a versão AppCompat)
+        // Configurar Toolbar (usando a versão AppCompat)
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-// Configurar Navigation Drawer
+        // Configurar Navigation Drawer
         drawer = findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar,
