@@ -70,7 +70,7 @@ public class EditBancoDadosActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemIMDB.class));
+                    startActivity(new Intent(this, AddItemDB.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
@@ -97,7 +97,7 @@ public class EditBancoDadosActivity extends AppCompatActivity {
                 .setPositiveButton("Excluir", (dialog1, which) -> {
                     int rowsDeleted = db.delete(
                             "bancodados_tab",
-                            "bc_imdb = ?",
+                            "bc_DB = ?",
                             new String[]{currentBarcode}
                     );
 
@@ -136,14 +136,14 @@ public class EditBancoDadosActivity extends AppCompatActivity {
 
         try {
             ContentValues values = new ContentValues();
-            values.put("bc_imdb", novoBarcode);
-            values.put("descr_imdb", novaDescricao);
-            values.put("cat_imdb", novaCategoria);
+            values.put("bc_DB", novoBarcode);
+            values.put("descr_DB", novaDescricao);
+            values.put("cat_DB", novaCategoria);
 
             int rowsAffected = db.update(
                     "bancodados_tab",
                     values,
-                    "bc_imdb = ?",
+                    "bc_DB = ?",
                     new String[]{currentBarcode}
             );
 

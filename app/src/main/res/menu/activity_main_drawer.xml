@@ -18,7 +18,7 @@
             android:title="@string/menu_slideshow" />
     </group>
 
-    <group android:id="@+id/group_buscas">
+    <group android:id="@+id/group_bancodados">
         <item
             android:id="@+id/nav_add_bancodados"
             android:icon="@drawable/add_24dp"
@@ -28,6 +28,17 @@
             android:icon="@drawable/search_24dp"
             android:title="Busca BancoDados" />
     </group>
+
+    <group android:id="@+id/group_compras">
+        <item
+            android:id="@+id/nav_busca_compras"
+            android:icon="@drawable/search_24dp"
+            android:title="Busca Compras" />
+    </group>
+
+
+
+
 
     <group android:id="@+id/group_backup">
         <item

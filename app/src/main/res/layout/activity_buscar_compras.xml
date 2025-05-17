@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:text="Buscar Itens Comprados"
             android:textStyle="bold"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:gravity="center"
             android:layout_marginBottom="16dp"
             android:paddingTop="1dp"
@@ -69,6 +69,18 @@
             android:layout_marginBottom="16dp"
             android:hint="Observação"
             android:inputType="textCapCharacters|textMultiLine"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/scanButtonBuscaCompras"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Escanear Código de Barras"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginTop="8dp"
+            app:icon="@drawable/barcode_scanner_32dp"
+            app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
+
 
         <!-- Buttons -->
         <LinearLayout

@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -37,6 +39,9 @@ private SQLiteDatabase db;
 private DrawerLayout drawer;
 private ActionBarDrawerToggle toggle;
 private BancoDadosBkp bancoDadosBkp;
+private EditText precoEditText;
+private EditText qntEditText;
+private EditText totalEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +62,14 @@ private BancoDadosBkp bancoDadosBkp;
                     .show();
         }
 
+        // Inicializa os EditTexts
+        precoEditText = findViewById(R.id.preco_compras);
+        qntEditText = findViewById(R.id.qnt_compras);
+        totalEditText = findViewById(R.id.total_compras);
+
+        // Configura os TextWatchers
+        setupTextWatchers();
+
         //inicialização de views
         bc_compras = findViewById(R.id.bc_compras);
         descr_compras = findViewById(R.id.descr_compras);
@@ -66,7 +79,7 @@ private BancoDadosBkp bancoDadosBkp;
         total_compras = findViewById(R.id.total_compras);
         periodo_compras = findViewById(R.id.periodo_compras);
         obs_compras = findViewById(R.id.obs_compras);
-        scanButton = findViewById(R.id.scanButton);
+        scanButton = findViewById(R.id.scanButtonMain);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
@@ -85,7 +98,7 @@ private BancoDadosBkp bancoDadosBkp;
     // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
     //db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
-       Button scanButton = findViewById(R.id.scanButton);
+       Button scanButton = findViewById(R.id.scanButtonMain);
 
        scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
@@ -99,11 +112,11 @@ private BancoDadosBkp bancoDadosBkp;
        saveButton.setOnClickListener(v -> saveData());
        cancelButton.setOnClickListener(v -> clearFields());
 
-// Configurar Toolbar (usando a versão AppCompat)
+        // Configurar Toolbar (usando a versão AppCompat)
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-// Configurar Navigation Drawer
+        // Configurar Navigation Drawer
         drawer = findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar,
@@ -126,10 +139,13 @@ private BancoDadosBkp bancoDadosBkp;
                 } else if (id == R.id.nav_slideshow) {
                     // Ação para slideshow
                 } else if (id == R.id.nav_add_bancodados) {
-                    Intent intent = new Intent(MainActivity.this, AddItemIMDB.class);
+                    Intent intent = new Intent(MainActivity.this, AddItemDB.class);
                     startActivity(intent);
                 } else if (id == R.id.nav_busca_bancodados) {
                     Intent intent = new Intent(MainActivity.this, BuscarBancoDadosActivity.class);
+                    startActivity(intent);
+                } else if (id == R.id.nav_busca_compras) {
+                    Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
                     startActivity(intent);
                 } else if (id == R.id.nav_backup) {
                     bancoDadosBkp.showBackupConfirmationDialog(); //showBackupConfirmationDialog(); // Substitui a chamada direta a fazerBackup() fazerBackup();
@@ -189,24 +205,24 @@ private BancoDadosBkp bancoDadosBkp;
 // Busca descrição e categoria na tabela bancodados_tab
     private void fetchItemDataBancoDadosTable(String barcodeValue) {
     if (db == null || !db.isOpen()) {
-        db = getDatabase(); // Metodo auxiliar para obter a instância correta
+        db = getDatabase();
         Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
         return;
     }
 
     Cursor cursor = db.rawQuery(
-            "SELECT descr_imdb, cat_imdb FROM bancodados_tab WHERE bc_imdb = ?",
+            "SELECT descr_DB, cat_DB FROM bancodados_tab WHERE bc_DB = ?",
             new String[]{barcodeValue}
     );
 
     if (cursor != null) {
         try {
             if (cursor.moveToFirst()) {
-                descr_compras.setText(cursor.getString(0)); // descr_imdb
-                cat_compras.setText(cursor.getString(1));   // cat_imdb
+                descr_compras.setText(cursor.getString(0)); // descr_DB
+                cat_compras.setText(cursor.getString(1));   // cat_DB
             } else {
                 // Item não encontrado - abrir activity de cadastro
-                Intent intent = new Intent(MainActivity.this, AddItemIMDB.class);
+                Intent intent = new Intent(MainActivity.this, AddItemDB.class);
                 intent.putExtra("BARCODE_VALUE", barcodeValue);
                 startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
             }
@@ -295,5 +311,44 @@ private BancoDadosBkp bancoDadosBkp;
             db = null;
         }
         super.onDestroy();
+    }
+
+    private void setupTextWatchers() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                calcularTotal();
+            }
+        };
+
+        precoEditText.addTextChangedListener(textWatcher);
+        qntEditText.addTextChangedListener(textWatcher);
+    }
+
+    private void calcularTotal() {
+        try {
+            // Obtém os valores dos campos
+            String precoStr = precoEditText.getText().toString();
+            String qntStr = qntEditText.getText().toString();
+
+            // Converte para números
+            double preco = precoStr.isEmpty() ? 0 : Double.parseDouble(precoStr);
+            double qnt = qntStr.isEmpty() ? 0 : Double.parseDouble(qntStr);
+
+            // Calcula o total
+            double total = preco * qnt;
+
+            // Atualiza o campo total
+            totalEditText.setText(String.format(Locale.getDefault(), "%.2f", total));
+        } catch (NumberFormatException e) {
+            // Caso ocorra erro na conversão
+            totalEditText.setText("");
+        }
     }
 }

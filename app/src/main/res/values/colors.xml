@@ -16,6 +16,14 @@
     <color name="button_text_dark">#FFFFFF</color> <!-- Branco -->
     <color name="button_text_light">#000000</color> <!-- Preto -->
 
+    <!-- 2025.05.11 arcoiris -->
+    <color name="red">#FFFF0000</color> <!-- Vermelho -->
+    <color name="orange">#FFFFA500</color> <!-- Laranja -->
+    <color name="yellow">#FFFFFF00</color> <!-- Amarelo -->
+    <color name="green">#FF008000</color> <!-- Verde -->
+    <color name="blue">#FF0000FF</color> <!-- Azul -->
+    <color name="indigo">#FF4B0082</color> <!-- Índigo -->
+    <color name="violet">#FFEE82EE</color> <!-- Violeta -->
 
 
 </resources>

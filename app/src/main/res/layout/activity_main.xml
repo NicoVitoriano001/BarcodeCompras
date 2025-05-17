@@ -87,7 +87,7 @@ android:textColor="@android:color/darker_gray" -->
                 android:inputType="textCapCharacters|textMultiLine"/>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/scanButton"
+                android:id="@+id/scanButtonMain"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -133,7 +133,7 @@ android:textColor="@android:color/darker_gray" -->
             android:id="@+id/fab_searchITEM"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
+            android:layout_gravity="bottom|start"
             android:layout_margin="16dp"
             android:src="@drawable/ic_search"
             app:backgroundTint="@color/teal_700"

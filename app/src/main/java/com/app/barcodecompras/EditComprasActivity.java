@@ -70,7 +70,7 @@ public class EditComprasActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(EditComprasActivity.this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(EditComprasActivity.this, AddItemIMDB.class));
+                    startActivity(new Intent(EditComprasActivity.this, AddItemDB.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(EditComprasActivity.this, BuscarBancoDadosActivity.class));
                 }
