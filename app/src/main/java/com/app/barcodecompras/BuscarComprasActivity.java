@@ -24,7 +24,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 public class BuscarComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
-    private static final int REQUEST_CODE_ADD_ITEM = 1001;
+    private static final int BUSCA_COMPRA_REQUEST = 1001;
     private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria, etBuscaPeriodo , etBuscaOBS;
     private Button btnBuscar, btnCancelar;
     private DrawerLayout drawer;
@@ -150,7 +150,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
             Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
         }
 
-        if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
+        if (requestCode == BUSCA_COMPRA_REQUEST && resultCode == RESULT_OK) {
             // Recarregar os dados após cadastro
             String barcode = etBuscaCodigo.getText().toString();
             fetchItemDataBancoDadosTable(barcode);
@@ -171,20 +171,20 @@ public class BuscarComprasActivity extends AppCompatActivity {
         }
 
         Cursor cursor = db.rawQuery(
-                "SELECT descr_imdb, cat_imdb FROM bancodados_tab WHERE bc_imdb = ?",
+                "SELECT descr_DB, cat_DB FROM bancodados_tab WHERE bc_DB = ?",
                 new String[]{barcodeValue}
         );
 
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
-                    etBuscaDescricao.setText(cursor.getString(0)); // descr_imdb
-                    etBuscaCategoria.setText(cursor.getString(1)); // cat_imdb
+                    etBuscaDescricao.setText(cursor.getString(0)); // descr_DB
+                    etBuscaCategoria.setText(cursor.getString(1)); // cat_DB
                 } else {
                     // Item não encontrado - abrir activity de cadastro
                     Intent intent = new Intent(BuscarComprasActivity.this, AddItemIMDB.class);
                     intent.putExtra("BARCODE_VALUE", barcodeValue);
-                    startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
+                    startActivityForResult(intent,BUSCA_COMPRA_REQUEST);
                 }
             } finally {
                 cursor.close();

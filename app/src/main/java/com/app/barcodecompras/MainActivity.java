@@ -211,15 +211,15 @@ private EditText totalEditText;
     }
 
     Cursor cursor = db.rawQuery(
-            "SELECT descr_imdb, cat_imdb FROM bancodados_tab WHERE bc_imdb = ?",
+            "SELECT descr_DB, cat_DB FROM bancodados_tab WHERE bc_DB = ?",
             new String[]{barcodeValue}
     );
 
     if (cursor != null) {
         try {
             if (cursor.moveToFirst()) {
-                descr_compras.setText(cursor.getString(0)); // descr_imdb
-                cat_compras.setText(cursor.getString(1));   // cat_imdb
+                descr_compras.setText(cursor.getString(0)); // descr_DB
+                cat_compras.setText(cursor.getString(1));   // cat_DB
             } else {
                 // Item não encontrado - abrir activity de cadastro
                 Intent intent = new Intent(MainActivity.this, AddItemIMDB.class);

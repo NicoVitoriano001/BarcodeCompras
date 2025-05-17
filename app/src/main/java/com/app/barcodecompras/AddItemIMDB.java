@@ -41,9 +41,9 @@ public class AddItemIMDB extends AppCompatActivity {
     private void createTable() {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS bancodados_tab (" +
            //     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "bc_imdb INTEGER, " +
-                "descr_imdb TEXT, " +
-                "cat_imdb TEXT)";
+                "bc_DB INTEGER, " +
+                "descr_DB TEXT, " +
+                "cat_DB TEXT)";
         db.execSQL(createTableSQL);
     }
 
@@ -53,9 +53,9 @@ public class AddItemIMDB extends AppCompatActivity {
         setContentView(R.layout.activity_add_item_imdb);
 
         // Inicializa views
-        bcImdbAdd = findViewById(R.id.bc_imdb_add);
-        descrImdbAdd = findViewById(R.id.descr_imdb_add);
-        catImdbAdd = findViewById(R.id.cat_imdb_add);
+        bcImdbAdd = findViewById(R.id.bc_DB_add);
+        descrImdbAdd = findViewById(R.id.descr_DB_add);
+        catImdbAdd = findViewById(R.id.cat_DB_add);
         saveButton = findViewById(R.id.save_button);
         cancelButton = findViewById(R.id.cancel_button);
 
@@ -106,9 +106,9 @@ public class AddItemIMDB extends AppCompatActivity {
         }
 
         ContentValues values = new ContentValues();
-        values.put("bc_imdb", barcode);
-        values.put("descr_imdb", description);
-        values.put("cat_imdb", category);
+        values.put("bc_DB", barcode);
+        values.put("descr_DB", description);
+        values.put("cat_DB", category);
 
         try {
             long result = db.insert("bancodados_tab", null, values);

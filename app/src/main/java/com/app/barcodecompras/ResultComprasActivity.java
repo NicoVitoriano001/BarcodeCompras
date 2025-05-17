@@ -128,7 +128,7 @@ public class ResultComprasActivity extends AppCompatActivity {
             params.add("%" + observacao + "%");
         }
 
-      //  query += " ORDER BY descr_imdb ASC, SUBSTR(periodo_compras, 5) ASC"; // Pega a partir do 5º caractere
+      //  query += " ORDER BY descr_DB ASC, SUBSTR(periodo_compras, 5) ASC"; // Pega a partir do 5º caractere
       //  query += " ORDER BY periodo_compras ASC, descr_compras ASC";
        query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
 

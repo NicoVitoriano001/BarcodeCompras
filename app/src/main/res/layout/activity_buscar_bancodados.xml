@@ -51,6 +51,16 @@
         android:hint="Categoria"
         android:inputType="textCapCharacters"/>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/scanButtonBuscaDB"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Escanear Código de Barras"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginTop="8dp"
+            app:icon="@drawable/barcode_scanner_32dp"
+            app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
 
     <!-- Botões -->
     <LinearLayout

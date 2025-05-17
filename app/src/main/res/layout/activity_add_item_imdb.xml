@@ -29,7 +29,7 @@
 
         <!-- Código de Barras -->
         <EditText
-            android:id="@+id/bc_imdb_add"
+            android:id="@+id/bc_DB_add"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -39,7 +39,7 @@
 
         <!-- Descrição -->
         <EditText
-            android:id="@+id/descr_imdb_add"
+            android:id="@+id/descr_DB_add"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/descr_item"
@@ -49,7 +49,7 @@
 
         <!-- Categoria -->
         <EditText
-            android:id="@+id/cat_imdb_add"
+            android:id="@+id/cat_DB_add"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"

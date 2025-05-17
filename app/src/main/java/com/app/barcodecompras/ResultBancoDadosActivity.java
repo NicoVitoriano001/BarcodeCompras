@@ -93,25 +93,25 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             return;
         }
 
-        String query = "SELECT bc_imdb, descr_imdb, cat_imdb FROM bancodados_tab WHERE 1=1";
+        String query = "SELECT bc_DB, descr_DB, cat_DB FROM bancodados_tab WHERE 1=1";
         List<String> params = new ArrayList<>();
 
         if (!codigo.isEmpty()) {
-            query += " AND bc_imdb LIKE ?";
+            query += " AND bc_DB LIKE ?";
             params.add("%" + codigo + "%");
         }
 
         if (!descricao.isEmpty()) {
-            query += " AND REPLACE(descr_imdb, ' ', '%') LIKE ?";
+            query += " AND REPLACE(descr_DB, ' ', '%') LIKE ?";
             params.add("%" + descricao.replace(" ", "%") + "%");
         }
 
         if (!categoria.isEmpty()) {
-            query += " AND REPLACE(cat_imdb, ' ', '%') LIKE ?";
+            query += " AND REPLACE(cat_DB, ' ', '%') LIKE ?";
             params.add("%" + categoria.replace(" ", "%") + "%");
         }
 
-        query += " ORDER BY descr_imdb ASC";
+        query += " ORDER BY descr_DB ASC";
 
         Cursor cursor = null;
         try {
