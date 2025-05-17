@@ -71,7 +71,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemIMDB.class));
+                    startActivity(new Intent(this, AddItemDB.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 } else if (id == R.id.nav_backup) {
@@ -136,7 +136,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
                     etBuscaCategoriaBancoDados.setText(cursor.getString(1)); // cat_DB
                 } else {
                     // Item não encontrado - abrir activity de cadastro
-                    Intent intent = new Intent(BuscarBancoDadosActivity.this, AddItemIMDB.class);
+                    Intent intent = new Intent(BuscarBancoDadosActivity.this, AddItemDB.class);
                     intent.putExtra("BARCODE_VALUE", barcodeValue);
                     startActivityForResult(intent, BUSCA_DB_REQUEST);
                 }

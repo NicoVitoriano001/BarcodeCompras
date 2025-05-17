@@ -139,7 +139,7 @@ private EditText totalEditText;
                 } else if (id == R.id.nav_slideshow) {
                     // Ação para slideshow
                 } else if (id == R.id.nav_add_bancodados) {
-                    Intent intent = new Intent(MainActivity.this, AddItemIMDB.class);
+                    Intent intent = new Intent(MainActivity.this, AddItemDB.class);
                     startActivity(intent);
                 } else if (id == R.id.nav_busca_bancodados) {
                     Intent intent = new Intent(MainActivity.this, BuscarBancoDadosActivity.class);
@@ -222,7 +222,7 @@ private EditText totalEditText;
                 cat_compras.setText(cursor.getString(1));   // cat_DB
             } else {
                 // Item não encontrado - abrir activity de cadastro
-                Intent intent = new Intent(MainActivity.this, AddItemIMDB.class);
+                Intent intent = new Intent(MainActivity.this, AddItemDB.class);
                 intent.putExtra("BARCODE_VALUE", barcodeValue);
                 startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
             }

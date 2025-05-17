@@ -83,7 +83,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemIMDB.class));
+                    startActivity(new Intent(this, AddItemDB.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 } else if (id == R.id.nav_backup) {
@@ -182,7 +182,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
                     etBuscaCategoria.setText(cursor.getString(1)); // cat_DB
                 } else {
                     // Item não encontrado - abrir activity de cadastro
-                    Intent intent = new Intent(BuscarComprasActivity.this, AddItemIMDB.class);
+                    Intent intent = new Intent(BuscarComprasActivity.this, AddItemDB.class);
                     intent.putExtra("BARCODE_VALUE", barcodeValue);
                     startActivityForResult(intent,BUSCA_COMPRA_REQUEST);
                 }

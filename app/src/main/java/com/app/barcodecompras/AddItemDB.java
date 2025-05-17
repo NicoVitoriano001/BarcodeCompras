@@ -17,7 +17,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
 
-public class AddItemIMDB extends AppCompatActivity {
+public class AddItemDB extends AppCompatActivity {
     private EditText bcImdbAdd, descrImdbAdd, catImdbAdd;
     private Button saveButton, cancelButton;
     private SQLiteDatabase db;
@@ -69,7 +69,6 @@ public class AddItemIMDB extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveItem());
         cancelButton.setOnClickListener(v -> finish());
 
-
         //DRAWER -- INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
         navigationView = findViewById(R.id.add_bancodados_nav_view);
@@ -82,7 +81,7 @@ public class AddItemIMDB extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemIMDB.class));
+                    startActivity(new Intent(this, AddItemDB.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
@@ -90,9 +89,7 @@ public class AddItemIMDB extends AppCompatActivity {
             }, 200); // 250ms de delay
 
             return true;
-        }); //DRAWER -- INICIO
-
-
+        }); //DRAWER -- FIM
     }//FIM ON CREATE
 
     private void saveItem() {

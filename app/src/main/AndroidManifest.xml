@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AddItemIMDB"
+        <activity android:name=".AddItemDB"
             android:theme="@style/Theme.BarcodeCompras"
             android:windowSoftInputMode="stateVisible"/>
 
