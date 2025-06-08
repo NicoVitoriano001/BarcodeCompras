@@ -57,7 +57,6 @@ private ActionBarDrawerToggle toggle;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         // Verificar permissão ao iniciar o app. Usado no backup
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                 !Environment.isExternalStorageManager()) {
@@ -218,7 +217,7 @@ private ActionBarDrawerToggle toggle;
 // Busca descrição e categoria na tabela collected_tab
     private void fetchItemDataCollectedTable(String barcodeValue) {
     if (db == null || !db.isOpen()) {
-        db = getDatabase(); // Método auxiliar para obter a instância correta
+        db = getDatabase();
         Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
         return;
     }
@@ -312,6 +311,7 @@ private ActionBarDrawerToggle toggle;
                     REQUEST_CODE);
         }
     }
+
     private boolean checkStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // Android 11+ precisa de permissão especial

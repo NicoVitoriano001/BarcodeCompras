@@ -12,8 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class EditComprasActivity extends AppCompatActivity {
-    private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras,
-            etQntCompras, etPeriodoCompras, etObsCompras, etTotalCompras;
+    private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras, etQntCompras, etPeriodoCompras, etObsCompras, etTotalCompras;
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
     private long compraId;
