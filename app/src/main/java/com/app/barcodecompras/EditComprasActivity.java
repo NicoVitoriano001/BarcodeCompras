@@ -19,8 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 public class EditComprasActivity extends AppCompatActivity {
-    private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras,
-            etQntCompras, etPeriodoCompras, etObsCompras, etTotalCompras;
+    private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras, etQntCompras, etPeriodoCompras, etObsCompras, etTotalCompras;
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
     private long compraId;
