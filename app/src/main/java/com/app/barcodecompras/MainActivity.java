@@ -92,7 +92,7 @@ private EditText totalEditText;
         });
 
     // Banco de dados (modificado para usar DatabaseHelper)
-    //data/data/com.app.barcodecompras/databases/comprasDB.db
+    // data/data/com.app.barcodecompras/databases/comprasDB.db
        DatabaseHelper dbHelper = new DatabaseHelper(this);
        db = dbHelper.getWritableDatabase();
     // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
