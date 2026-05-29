@@ -165,5 +165,3 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         startActivity(intent);
     }
 }
-
-

@@ -199,7 +199,6 @@ public class EditComprasActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     protected void onDestroy() {
         if (db != null && db.isOpen()) {

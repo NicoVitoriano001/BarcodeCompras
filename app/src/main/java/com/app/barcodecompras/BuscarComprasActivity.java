@@ -201,6 +201,4 @@ public class BuscarComprasActivity extends AppCompatActivity {
         return db;
     }
 
-
-
 }
