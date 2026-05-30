@@ -1,76 +1,76 @@
 package com.app.barcodecompras;
 
 import android.app.DatePickerDialog;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.app.AlertDialog;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
+
+// ✅ FIREBASE REALTIME
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.DatabaseError;
 import com.google.zxing.integration.android.IntentResult;
-import java.io.File;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.drawerlayout.widget.DrawerLayout;
-import com.google.android.material.navigation.NavigationView;
-import android.os.Environment;
-import androidx.core.view.GravityCompat;
-import android.app.AlertDialog;
 
 public class MainActivity extends AppCompatActivity {
-private static final int REQUEST_CODE = 1;
-private static final int REQUEST_CODE_ADD_ITEM = 1001;
-private EditText bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras;
-private Button scanButton, saveButton, cancelButton;
-private SQLiteDatabase db;
-private DrawerLayout drawer;
-private ActionBarDrawerToggle toggle;
-private BancoDadosBkp bancoDadosBkp;
-private EditText precoEditText;
-private EditText qntEditText;
-private EditText totalEditText;
+
+    private EditText bc_compras, descr_compras, cat_compras, preco_compras,
+            qnt_compras, total_compras, periodo_compras, obs_compras;
+
+    private EditText precoEditText, qntEditText, totalEditText;
+
+    private MaterialButton scanButton, saveButton, cancelButton;
+
+    private SQLiteDatabase db;
+
+    private DrawerLayout drawer;
+
+    private ActionBarDrawerToggle toggle;
+
+    private BancoDadosBkp bancoDadosBkp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Inicializa o helper de backup (Adicionado)
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
 
-        // Verificar permissão (modificado para usar a nova classe)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                 !Environment.isExternalStorageManager()) {
+
             new AlertDialog.Builder(this)
                     .setTitle("Permissão Necessária")
-                    .setMessage("Para salvar backups na pasta Downloads, por favor conceda a permissão 'Gerenciar todos os arquivos'")
-                    .setPositiveButton("OK", (dialog, which) -> bancoDadosBkp.requestStoragePermission())
+                    .setMessage("Conceda permissão para backup")
+                    .setPositiveButton("OK", (d, w) -> bancoDadosBkp.requestStoragePermission())
                     .setNegativeButton("Cancelar", null)
                     .show();
         }
 
-        // Inicializa os EditTexts
-        precoEditText = findViewById(R.id.preco_compras);
-        qntEditText = findViewById(R.id.qnt_compras);
-        totalEditText = findViewById(R.id.total_compras);
-
-        // Configura os TextWatchers
-        setupTextWatchers();
-
-        //inicialização de views
         bc_compras = findViewById(R.id.bc_compras);
         descr_compras = findViewById(R.id.descr_compras);
         cat_compras = findViewById(R.id.cat_compras);
@@ -79,11 +79,33 @@ private EditText totalEditText;
         total_compras = findViewById(R.id.total_compras);
         periodo_compras = findViewById(R.id.periodo_compras);
         obs_compras = findViewById(R.id.obs_compras);
+
         scanButton = findViewById(R.id.scanButtonMain);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
-        periodo_compras.setText(getDataHoraAtual()); // Define a data atual ao inicia
+        precoEditText = preco_compras;
+        qntEditText = qnt_compras;
+        totalEditText = total_compras;
+
+        periodo_compras.setText(getDataHoraAtual());
+
+        periodo_compras.setOnClickListener(v -> showDatePickerDialog());
+        
+        saveButton.setOnClickListener(v -> saveData());       
+
+        scanButton.setOnClickListener(v -> {
+            IntentIntegrator integrator = new IntentIntegrator(this);
+            integrator.setPrompt("Escaneie o código");
+            integrator.initiateScan();
+        });
+
+        cancelButton.setOnClickListener(v -> {
+            clearFields();
+            Toast.makeText(this, "Campos limpos", Toast.LENGTH_SHORT).show();
+        });
+        //cancelButton.setOnClickListener(v -> clearFields());
+
 
         FloatingActionButton fabSearch = findViewById(R.id.fab_searchITEM);
         fabSearch.setOnClickListener(v -> {
@@ -91,39 +113,14 @@ private EditText totalEditText;
             startActivity(intent);
         });
 
-    // Banco de dados (modificado para usar DatabaseHelper)
-    //data/data/com.app.barcodecompras/databases/comprasDB.db
-       DatabaseHelper dbHelper = new DatabaseHelper(this);
-       db = dbHelper.getWritableDatabase();
-    // SQLiteDatabase: /data/user/0/com.app.barcodecompras/databases/comprasDB.db
-    //db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
-       Button scanButton = findViewById(R.id.scanButtonMain);
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getWritableDatabase();
 
-       scanButton.setOnClickListener(v -> {
-            IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
-            integrator.setPrompt("Escaneie o código de barras");
-            integrator.setOrientationLocked(true);
-            integrator.setBeepEnabled(true);
-            integrator.initiateScan();
-       });
-
-       periodo_compras.setOnClickListener(v -> showDatePickerDialog());
-       saveButton.setOnClickListener(v -> saveData());
-       cancelButton.setOnClickListener(v -> clearFields());
-
-        // Configurar Toolbar (usando a versão AppCompat)
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        // Configurar Navigation Drawer
-        drawer = findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        syncLocalParaFirebase();
+        setupTextWatchers();
+        syncFirebaseParaLocal();
+    
 
         NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
 
@@ -155,9 +152,29 @@ private EditText totalEditText;
             drawer.closeDrawer(GravityCompat.START);
             return true;
         });
-    } // fim ONCREATE
 
-//inicio data calendário
+
+// Configurar Toolbar (usando a versão AppCompat)
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+// Configurar Navigation Drawer
+        drawer = findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+
+
+/// FIM ONCREATE
+    }
+
+
+
+    //inicio data calendário
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -176,6 +193,7 @@ private EditText totalEditText;
                 year, month, day);
         datePickerDialog.show();
     }
+
     public String getDataHoraAtual() {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
@@ -183,172 +201,204 @@ private EditText totalEditText;
     }
 //fim data calendario
 
-// Resultado do scanner ZXing
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null && result.getContents() != null) {
-            bc_compras.setText(result.getContents());
-            fetchItemDataBancoDadosTable(result.getContents());
-        } else {
-            Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
-        }
-        if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
-            // Recarregar os dados após cadastro
-            String barcode = bc_compras.getText().toString();
-            fetchItemDataBancoDadosTable(barcode);
-        }
-    }
 
-// Busca descr_compras e cat_compras baseado no código escaneado
-// Busca descrição e categoria na tabela bancodados_tab
-    private void fetchItemDataBancoDadosTable(String barcodeValue) {
-    if (db == null || !db.isOpen()) {
-        db = getDatabase();
-        Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
-        return;
-    }
-
-    Cursor cursor = db.rawQuery(
-            "SELECT descr_DB, cat_DB FROM bancodados_tab WHERE bc_DB = ?",
-            new String[]{barcodeValue}
-    );
-
-    if (cursor != null) {
-        try {
-            if (cursor.moveToFirst()) {
-                descr_compras.setText(cursor.getString(0)); // descr_DB
-                cat_compras.setText(cursor.getString(1));   // cat_DB
+        if (result != null) {
+            if (result.getContents() != null) {
+                bc_compras.setText(result.getContents());
             } else {
-                // Item não encontrado - abrir activity de cadastro
-                Intent intent = new Intent(MainActivity.this, AddItemDB.class);
-                intent.putExtra("BARCODE_VALUE", barcodeValue);
-                startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
+                Toast.makeText(this, "Cancelado", Toast.LENGTH_SHORT).show();
             }
-        } finally {
-            cursor.close();
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
-}
 
-    // Metodo auxiliar para obter a instância do banco
-    private SQLiteDatabase getDatabase() {
-        if (db == null || !db.isOpen()) {
-            File dbFile = getDatabasePath("comprasDB.db");
-            db = SQLiteDatabase.openDatabase(dbFile.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
-        }
-        return db;
-    }
     private void saveData() {
-        String bc_comprasVal = bc_compras.getText().toString().trim();
-        String descr_comprasVal = descr_compras.getText().toString().trim();
-        String cat_comprasVal = cat_compras.getText().toString().trim();
-        String preco_comprasStr = preco_compras.getText().toString().trim();
-        String qnt_comprasStr = qnt_compras.getText().toString().trim();
-        String periodo_comprasVal = periodo_compras.getText().toString().trim();
-        String obs_comprasVal = obs_compras.getText().toString().trim();
 
-        if (bc_comprasVal.isEmpty() || preco_comprasStr.isEmpty() || qnt_comprasStr.isEmpty()) {
-            Toast.makeText(this, "Preencha todos os campos obrigatórios!", Toast.LENGTH_SHORT).show();
+        String bc = bc_compras.getText().toString().trim();
+        String descr = descr_compras.getText().toString().trim();
+        String cat = cat_compras.getText().toString().trim();
+
+        if (bc.isEmpty()) {
+            Toast.makeText(this, "Código obrigatório", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        double preco_comprasVal = Double.parseDouble(preco_comprasStr);
-        double qnt_comprasVal = Double.parseDouble(qnt_comprasStr);
-        double total_comprasVal = preco_comprasVal * qnt_comprasVal;
+        double preco = 0;
+        double qnt = 0;
 
-        total_compras.setText(String.valueOf(total_comprasVal));
+        try {
+            String precoStr = preco_compras.getText().toString();
+            String qntStr = qnt_compras.getText().toString();
+
+            if (!precoStr.isEmpty()) {
+                preco = Double.parseDouble(precoStr);
+            }
+
+            if (!qntStr.isEmpty()) {
+                qnt = Double.parseDouble(qntStr);
+            }
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Erro nos valores", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double total = preco * qnt;
+
+        long updatedAt = System.currentTimeMillis();
 
         ContentValues values = new ContentValues();
-        values.put("bc_compras", bc_comprasVal);
-        values.put("descr_compras", descr_comprasVal);
-        values.put("cat_compras", cat_comprasVal);
-        values.put("preco_compras", preco_comprasVal);
-        values.put("qnt_compras", qnt_comprasVal);
-        values.put("total_compras", total_comprasVal);
-        values.put("periodo_compras", periodo_comprasVal);
-        values.put("obs_compras", obs_comprasVal);
+        values.put("bc_compras", bc);
+        values.put("descr_compras", descr);
+        values.put("cat_compras", cat);
+        values.put("preco_compras", preco);
+        values.put("qnt_compras", qnt);
+        values.put("total_compras", total);
+        values.put("updated_at", updatedAt);
 
         long result = db.insert("compras_tab", null, values);
 
         if (result != -1) {
-            Toast.makeText(this, "Salvo com sucesso!", Toast.LENGTH_SHORT).show();
+            enviarParaFirebase(bc, descr, cat, preco, qnt, total, updatedAt);
+            Toast.makeText(this, "Salvo", Toast.LENGTH_SHORT).show();
             clearFields();
-        } else {
-            Toast.makeText(this, "Erro ao salvar!", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permissão concedida, pode continuar
-            } else {
-                Toast.makeText(this, "Permissão negada. Não é possível fazer backup/restore.", Toast.LENGTH_SHORT).show();
+
+
+
+
+
+
+    private void enviarParaFirebase(String bc, String descr, String cat,
+                                    double preco, double qnt, double total, long updatedAt) {
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
+
+
+        ref.child(bc).get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                Long remoteTime = snapshot.child("updatedAt").getValue(Long.class);
+                if (remoteTime != null && remoteTime > updatedAt) {
+                    return;
+                }
             }
-        }
+
+            ref.child(bc).setValue(new com.app.barcodecompras.firebase.CompraFirebase(
+                    bc, descr, cat, preco, qnt, total, "", "", updatedAt
+            ));
+        });
     }
-   private void clearFields() {
+
+
+    private void syncLocalParaFirebase() {
+        Cursor cursor = db.rawQuery("SELECT * FROM compras_tab", null);
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
+
+        while (cursor.moveToNext()) {
+            String bc = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
+            String descr = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras"));
+            String cat = cursor.getString(cursor.getColumnIndexOrThrow("cat_compras"));
+            double preco = cursor.getDouble(cursor.getColumnIndexOrThrow("preco_compras"));
+            double qnt = cursor.getDouble(cursor.getColumnIndexOrThrow("qnt_compras"));
+            double total = cursor.getDouble(cursor.getColumnIndexOrThrow("total_compras"));
+            long updatedAt = cursor.getLong(cursor.getColumnIndexOrThrow("updated_at"));
+
+            ref.child(bc).setValue(
+                    new com.app.barcodecompras.firebase.CompraFirebase(
+                            bc, descr, cat, preco, qnt, total, "", "", updatedAt
+                    )
+            );
+        }
+
+        cursor.close();
+    }
+
+
+
+
+    private void syncFirebaseParaLocal() {
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    String bc = child.getKey();
+
+
+                    if (bc == null) continue;
+                    Cursor cursor = db.rawQuery(
+                            "SELECT * FROM compras_tab WHERE bc_compras = ?",
+                            new String[]{bc}
+                    );
+
+                    if (!cursor.moveToFirst()) {
+                        ContentValues values = new ContentValues();
+                        values.put("bc_compras", bc);
+                        db.insert("compras_tab", null, values);
+                    }
+
+                    cursor.close();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
+    }
+
+    private void clearFields() {
         bc_compras.setText("");
         descr_compras.setText("");
         cat_compras.setText("");
         preco_compras.setText("");
         qnt_compras.setText("");
         total_compras.setText("");
-        periodo_compras.setText("");
-        obs_compras.setText("");
     }
 
-    @Override
-    protected void onDestroy() {
-        if (db != null) {
-            if (db.isOpen()) {
-                db.close();
-            }
-            db = null;
-        }
-        super.onDestroy();
-    }
+    //private String getDataHoraAtual() {
+    //    return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
+   // }
+
+
 
     private void setupTextWatchers() {
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        TextWatcher watcher = new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+            public void onTextChanged(CharSequence s, int st, int b, int c) {}
 
-            @Override
             public void afterTextChanged(Editable s) {
-                calcularTotal();
+                try {
+                    String precoStr = precoEditText.getText().toString();
+                    String qntStr = qntEditText.getText().toString();
+
+                    if (!precoStr.isEmpty() && !qntStr.isEmpty()) {
+                        double preco = Double.parseDouble(precoStr);
+                        double qnt = Double.parseDouble(qntStr);
+                        totalEditText.setText(String.valueOf(preco * qnt));
+                    } else {
+                        totalEditText.setText("");
+                    }
+
+                } catch (Exception e) {
+                    totalEditText.setText("");
+                }
             }
         };
 
-        precoEditText.addTextChangedListener(textWatcher);
-        qntEditText.addTextChangedListener(textWatcher);
+        precoEditText.addTextChangedListener(watcher);
+        qntEditText.addTextChangedListener(watcher);
     }
 
-    private void calcularTotal() {
-        try {
-            // Obtém os valores dos campos
-            String precoStr = precoEditText.getText().toString();
-            String qntStr = qntEditText.getText().toString();
-
-            // Converte para números
-            double preco = precoStr.isEmpty() ? 0 : Double.parseDouble(precoStr);
-            double qnt = qntStr.isEmpty() ? 0 : Double.parseDouble(qntStr);
-
-            // Calcula o total
-            double total = preco * qnt;
-
-            // Atualiza o campo total
-            totalEditText.setText(String.format(Locale.getDefault(), "%.2f", total));
-        } catch (NumberFormatException e) {
-            // Caso ocorra erro na conversão
-            totalEditText.setText("");
-        }
-    }
 }

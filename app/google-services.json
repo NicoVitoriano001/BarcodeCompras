@@ -1,0 +1,29 @@
+  {
+  "project_info": {
+    "project_number": "874154754853",
+    "project_id": "comprasdb-efb44",
+    "storage_bucket": "comprasdb-efb44.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874154754853:android:96a687d7ee39e70af1d0cc",
+        "android_client_info": {
+          "package_name": "com.app.barcodecompras"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ80uXzIJjo-T8iQ22aRlx2m5W6gsu6Xk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

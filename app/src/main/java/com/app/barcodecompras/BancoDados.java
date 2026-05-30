@@ -3,6 +3,7 @@ public class BancoDados {
     private String bcIMDB;
     private String descrIMDB;
     private String catIMDB;
+    private long updatedAt;
 
     // Construtor
     public BancoDados(String bcIMDB, String descrIMDB, String catIMDB) {

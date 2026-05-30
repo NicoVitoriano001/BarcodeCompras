@@ -1,5 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
+    // 2025.05.30 Add the dependency for the Google services Gradle plugin
+
+    id 'com.google.gms.google-services'
+
 }
 
 android {
@@ -31,6 +35,10 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation platform('com.google.firebase:firebase-bom:34.14.0')
     implementation 'com.google.android.material:material:1.9.0' // Verifique se há uma versão mais recente
     implementation libs.appcompat
     implementation libs.material
