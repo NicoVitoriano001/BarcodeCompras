@@ -1,4 +1,4 @@
-package com.app.barcodecompras;
+package com.app.barcodecompras.ui;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
@@ -16,6 +16,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.AddItemDB;
+import com.app.barcodecompras.MainActivity;
+import com.app.barcodecompras.R;
 import com.google.android.material.navigation.NavigationView;
 
 public class EditBancoDadosActivity extends AppCompatActivity {

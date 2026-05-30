@@ -13,9 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.ui.BuscarBancoDadosActivity;
+import com.app.barcodecompras.database.DatabaseHelper;
 import com.google.android.material.navigation.NavigationView;
-
-import java.io.File;
 
 public class AddItemDB extends AppCompatActivity {
     private EditText bcImdbAdd, descrImdbAdd, catImdbAdd;
@@ -24,28 +24,6 @@ public class AddItemDB extends AppCompatActivity {
     private DrawerLayout drawer;
     private NavigationView navigationView;
 
-    private void openDatabase() {
-        File dbFile = getDatabasePath("comprasDB.db");
-
-        // Verifica se o banco de dados existe
-        if (!dbFile.exists()) {
-            // Se não existir, você pode criar o banco de dados e a tabela aqui
-            db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
-            createTable();
-        } else {
-            // Se existir, apenas abra o banco de dados
-            db = SQLiteDatabase.openDatabase(dbFile.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
-        }
-    }
-
-    private void createTable() {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS bancodados_tab (" +
-           //     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "bc_DB INTEGER, " +
-                "descr_DB TEXT, " +
-                "cat_DB TEXT)";
-        db.execSQL(createTableSQL);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +41,8 @@ public class AddItemDB extends AppCompatActivity {
         String barcode = getIntent().getStringExtra("BARCODE_VALUE");
         bcImdbAdd.setText(barcode);
 
-        openDatabase();
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getWritableDatabase();
 
         // Configurar listeners
         saveButton.setOnClickListener(v -> saveItem());
@@ -102,13 +81,21 @@ public class AddItemDB extends AppCompatActivity {
             return;
         }
 
+        long updatedAt = System.currentTimeMillis();
+
         ContentValues values = new ContentValues();
         values.put("bc_DB", barcode);
         values.put("descr_DB", description);
         values.put("cat_DB", category);
+        values.put("updated_at", updatedAt);
 
-        try {
-            long result = db.insert("bancodados_tab", null, values);
+        long result = db.insertWithOnConflict(
+                    "bancodados_tab",
+                    null,
+                    values,
+                    SQLiteDatabase.CONFLICT_REPLACE
+            );
+
 
             if (result != -1) {
                 Toast.makeText(this, "Item salvo com sucesso", Toast.LENGTH_SHORT).show();
@@ -117,13 +104,10 @@ public class AddItemDB extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Erro ao salvar item", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception e) {
-            Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-    }
 
-    @Override
-    protected void onDestroy() {
+        @Override
+        protected void onDestroy() {
         if (db != null && db.isOpen()) {
             db.close();
         }

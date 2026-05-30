@@ -8,6 +8,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.app.barcodecompras.database.BancoDados;
+import com.app.barcodecompras.database.BancoDadosAdapter;
+import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.ui.EditBancoDadosActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +59,8 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             }
         });
 
-        db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getReadableDatabase();
 
 
         // Obter critérios de busca da intent
@@ -85,15 +92,16 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
 
 
     private void loadBancoDados(String codigo, String descricao, String categoria) {
+
         BancoDadosList.clear();
 
-        // Verifica se todos os critérios de busca estão vazios
+        // Verifica se todos os critérios estão vazios
         if (codigo.isEmpty() && descricao.isEmpty() && categoria.isEmpty()) {
             Toast.makeText(this, "Informe pelo menos um critério de busca", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String query = "SELECT bc_DB, descr_DB, cat_DB FROM bancodados_tab WHERE 1=1";
+        String query = "SELECT bc_DB, descr_DB, cat_DB, updated_at FROM bancodados_tab WHERE 1=1";
         List<String> params = new ArrayList<>();
 
         if (!codigo.isEmpty()) {
@@ -114,35 +122,33 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         query += " ORDER BY descr_DB ASC";
 
         Cursor cursor = null;
+
         try {
             cursor = db.rawQuery(query, params.toArray(new String[0]));
 
             if (cursor != null && cursor.getCount() > 0) {
+
                 while (cursor.moveToNext()) {
+
                     String bc = cursor.getString(0);
                     String desc = cursor.getString(1);
                     String cat = cursor.getString(2);
+                    long updatedAt = cursor.getLong(3);
 
-                    BancoDados bancodados = new BancoDados(bc, desc, cat);
+                    BancoDados bancodados = new BancoDados(bc, desc, cat, updatedAt);
                     BancoDadosList.add(bancodados);
                 }
 
-                // Atualiza a UI na thread principal
-                runOnUiThread(() -> {
-                    if (adapter == null) {
-                        adapter = new BancoDadosAdapter(BancoDadosList);
-                        recyclerView.setAdapter(adapter);
-                    } else {
-                        adapter.notifyDataSetChanged();
-                    }
-                });
+                // ✅ Atualiza lista
+                adapter.notifyDataSetChanged();
+
             } else {
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Nenhum item encontrado", Toast.LENGTH_SHORT).show());
+                Toast.makeText(this, "Nenhum item encontrado", Toast.LENGTH_SHORT).show();
             }
+
         } catch (Exception e) {
-            runOnUiThread(() ->
-                    Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
+
         } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();

@@ -1,4 +1,4 @@
-package com.app.barcodecompras;
+package com.app.barcodecompras.ui;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,6 +14,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.AddItemDB;
+import com.app.barcodecompras.MainActivity;
+import com.app.barcodecompras.R;
+import com.app.barcodecompras.ResultBancoDadosActivity;
+import com.app.barcodecompras.database.DatabaseHelper;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;

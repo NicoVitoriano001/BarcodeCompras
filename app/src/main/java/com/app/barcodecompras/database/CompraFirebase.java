@@ -1,17 +1,15 @@
-package com.app.barcodecompras.firebase;
+package com.app.barcodecompras.database;
 
 public class CompraFirebase {
-
     public String bc;
     public String descricao;
+
     public String categoria;
     public String periodo;
     public String obs;
-
     public double preco;
     public double quantidade;
     public double total;
-
     public long updatedAt;
 
     public CompraFirebase() {}

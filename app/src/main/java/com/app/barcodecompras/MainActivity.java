@@ -3,7 +3,6 @@ package com.app.barcodecompras;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +18,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.database.CompraFirebase;
+import com.app.barcodecompras.database.BancoDadosBkp;
+import com.app.barcodecompras.ui.BuscarBancoDadosActivity;
+import com.app.barcodecompras.database.DatabaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -27,9 +30,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 // ✅ FIREBASE REALTIME
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.DatabaseError;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.text.SimpleDateFormat;
@@ -117,10 +117,7 @@ public class MainActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
 
-        syncLocalParaFirebase();
         setupTextWatchers();
-        syncFirebaseParaLocal();
-    
 
         NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
 
@@ -167,14 +164,11 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-
-
 /// FIM ONCREATE
     }
 
 
-
-    //inicio data calendário
+//inicio data calendário
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -289,73 +283,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            ref.child(bc).setValue(new com.app.barcodecompras.firebase.CompraFirebase(
+            ref.child(bc).setValue(new CompraFirebase(
                     bc, descr, cat, preco, qnt, total, "", "", updatedAt
             ));
         });
     }
 
 
-    private void syncLocalParaFirebase() {
-        Cursor cursor = db.rawQuery("SELECT * FROM compras_tab", null);
-
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
-
-        while (cursor.moveToNext()) {
-            String bc = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
-            String descr = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras"));
-            String cat = cursor.getString(cursor.getColumnIndexOrThrow("cat_compras"));
-            double preco = cursor.getDouble(cursor.getColumnIndexOrThrow("preco_compras"));
-            double qnt = cursor.getDouble(cursor.getColumnIndexOrThrow("qnt_compras"));
-            double total = cursor.getDouble(cursor.getColumnIndexOrThrow("total_compras"));
-            long updatedAt = cursor.getLong(cursor.getColumnIndexOrThrow("updated_at"));
-
-            ref.child(bc).setValue(
-                    new com.app.barcodecompras.firebase.CompraFirebase(
-                            bc, descr, cat, preco, qnt, total, "", "", updatedAt
-                    )
-            );
-        }
-
-        cursor.close();
-    }
 
 
 
 
-    private void syncFirebaseParaLocal() {
-
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
-
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    String bc = child.getKey();
 
 
-                    if (bc == null) continue;
-                    Cursor cursor = db.rawQuery(
-                            "SELECT * FROM compras_tab WHERE bc_compras = ?",
-                            new String[]{bc}
-                    );
-
-                    if (!cursor.moveToFirst()) {
-                        ContentValues values = new ContentValues();
-                        values.put("bc_compras", bc);
-                        db.insert("compras_tab", null, values);
-                    }
-
-                    cursor.close();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-            }
-        });
-    }
 
     private void clearFields() {
         bc_compras.setText("");

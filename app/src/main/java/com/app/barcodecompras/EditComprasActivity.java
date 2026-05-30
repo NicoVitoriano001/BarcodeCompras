@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.ui.BuscarBancoDadosActivity;
 import com.google.android.material.navigation.NavigationView;
 
 public class EditComprasActivity extends AppCompatActivity {
