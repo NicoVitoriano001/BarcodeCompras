@@ -13,17 +13,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.app.barcodecompras.ui.BuscarBancoDadosActivity;
 import com.app.barcodecompras.database.DatabaseHelper;
 import com.google.android.material.navigation.NavigationView;
 
-public class AddItemDB extends AppCompatActivity {
+public class AddItemBancoDados extends AppCompatActivity {
     private EditText bcImdbAdd, descrImdbAdd, catImdbAdd;
     private Button saveButton, cancelButton;
     private SQLiteDatabase db;
     private DrawerLayout drawer;
     private NavigationView navigationView;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +58,7 @@ public class AddItemDB extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemDB.class));
+                    startActivity(new Intent(this, AddItemBancoDados.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
@@ -87,7 +85,6 @@ public class AddItemDB extends AppCompatActivity {
         values.put("bc_DB", barcode);
         values.put("descr_DB", description);
         values.put("cat_DB", category);
-        values.put("updated_at", updatedAt);
 
         long result = db.insertWithOnConflict(
                     "bancodados_tab",
@@ -95,7 +92,6 @@ public class AddItemDB extends AppCompatActivity {
                     values,
                     SQLiteDatabase.CONFLICT_REPLACE
             );
-
 
             if (result != -1) {
                 Toast.makeText(this, "Item salvo com sucesso", Toast.LENGTH_SHORT).show();

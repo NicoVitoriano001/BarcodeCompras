@@ -3,6 +3,7 @@ package com.app.barcodecompras;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.app.AlertDialog;
+import com.app.barcodecompras.firebase.FirebaseHelper;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +22,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.app.barcodecompras.database.CompraFirebase;
 import com.app.barcodecompras.database.BancoDadosBkp;
-import com.app.barcodecompras.ui.BuscarBancoDadosActivity;
 import com.app.barcodecompras.database.DatabaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -52,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle toggle;
 
     private BancoDadosBkp bancoDadosBkp;
+
+    private static final int REQUEST_CODE_ADD_ITEM = 1001;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
         scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(this);
             integrator.setPrompt("Escaneie o código");
+            integrator.setOrientationLocked(true);
+            integrator.setBeepEnabled(false);
             integrator.initiateScan();
         });
 
@@ -117,6 +123,11 @@ public class MainActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
 
+        FirebaseHelper firebaseHelper = new FirebaseHelper(this, db);
+
+        //firebaseHelper.syncLocalParaFirebase();   //faz a mesma coisa enviarParaFirebase(...)
+        firebaseHelper.syncFirebaseParaLocal();
+
         setupTextWatchers();
 
         NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
@@ -133,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_slideshow) {
                     // Ação para slideshow
                 } else if (id == R.id.nav_add_bancodados) {
-                    Intent intent = new Intent(MainActivity.this, AddItemDB.class);
+                    Intent intent = new Intent(MainActivity.this, AddItemBancoDados.class);
                     startActivity(intent);
                 } else if (id == R.id.nav_busca_bancodados) {
                     Intent intent = new Intent(MainActivity.this, BuscarBancoDadosActivity.class);
@@ -195,20 +206,83 @@ public class MainActivity extends AppCompatActivity {
     }
 //fim data calendario
 
+
+    // Resultado do scanner ZXing
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-        if (result != null) {
-            if (result.getContents() != null) {
-                bc_compras.setText(result.getContents());
-            } else {
-                Toast.makeText(this, "Cancelado", Toast.LENGTH_SHORT).show();
-            }
+        // ESCANEAMENTO
+        if (result != null && result.getContents() != null) {
+
+            String barcode = result.getContents();
+
+            bc_compras.setText(barcode);
+
+            //busca no banco local
+            fetchItemDataBancoDadosTable(barcode);
+
+        } else if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
+
+            //voltou do cadastro → busca novamente
+            String barcode = bc_compras.getText().toString();
+            fetchItemDataBancoDadosTable(barcode);
+
         } else {
-            super.onActivityResult(requestCode, resultCode, data);
+            Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
         }
     }
+    private void fetchItemDataBancoDadosTable(String barcodeValue) {
+
+        if (db == null || !db.isOpen()) {
+            DatabaseHelper dbHelper = new DatabaseHelper(this);
+            db = dbHelper.getWritableDatabase();
+        }
+
+        Cursor cursor = db.rawQuery(
+                "SELECT descr_DB, cat_DB FROM bancodados_tab WHERE bc_DB = ?",
+                new String[]{barcodeValue}
+        );
+
+        if (cursor != null) {
+            try {
+
+                if (cursor.moveToFirst()) {
+
+                    //ENCONTROU → preencher campos
+                    descr_compras.setText(cursor.getString(0));
+                    cat_compras.setText(cursor.getString(1));
+
+                } else {
+
+                    //NÃO ENCONTROU → perguntar
+                    showAddItemDialog(barcodeValue);
+                }
+
+            } finally {
+                cursor.close();
+            }
+        }
+    }
+
+    private void showAddItemDialog(String barcodeValue) {
+        new AlertDialog.Builder(this)
+                .setTitle("Produto não encontrado")
+                .setMessage("Deseja cadastrar esse item no banco de dados?")
+                .setPositiveButton("Sim", (dialog, which) -> {
+
+                    Intent intent = new Intent(MainActivity.this, AddItemBancoDados.class);
+                    intent.putExtra("BARCODE_VALUE", barcodeValue);
+
+                    startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
+                })
+                .setNegativeButton("Não", null)
+                .show();
+    }
+
 
     private void saveData() {
 
@@ -266,9 +340,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
-
     private void enviarParaFirebase(String bc, String descr, String cat,
                                     double preco, double qnt, double total, long updatedAt) {
 
@@ -288,12 +359,6 @@ public class MainActivity extends AppCompatActivity {
             ));
         });
     }
-
-
-
-
-
-
 
 
 

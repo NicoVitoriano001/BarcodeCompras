@@ -36,14 +36,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AddItemDB"
+        <activity android:name=".AddItemBancoDados"
             android:theme="@style/Theme.BarcodeCompras"
             android:windowSoftInputMode="stateVisible"/>
 
         <!-- 05.05.2025 Usar esse para padronizar igual ao Main (salvo Result compras) -->
         <activity android:name=".BuscarComprasActivity"
             android:theme="@style/Theme.BarcodeCompras" />
-        <activity android:name=".ui.BuscarBancoDadosActivity"
+        <activity android:name=".BuscarBancoDadosActivity"
             android:theme="@style/Theme.BarcodeCompras" />
         <!--android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/> -->
 
@@ -51,7 +51,7 @@
             android:theme="@style/Theme.BarcodeCompras" />
     <!--<activity android:name=".EditComprasActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"/> -->
-        <activity android:name=".ui.EditBancoDadosActivity"
+        <activity android:name=".EditBancoDadosActivity"
             android:theme="@style/Theme.BarcodeCompras" />
 
            <!-- 05.05.2025 ResultComprasActivity deixa como está  -->

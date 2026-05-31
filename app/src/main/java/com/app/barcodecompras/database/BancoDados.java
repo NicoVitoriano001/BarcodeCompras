@@ -5,14 +5,12 @@ public class BancoDados {
     private String bcIMDB;
     private String descrIMDB;
     private String catIMDB;
-    private long updatedAt;
 
     // ✅ Construtor correto
-    public BancoDados(String bcIMDB, String descrIMDB, String catIMDB, long updatedAt) {
+    public BancoDados(String bcIMDB, String descrIMDB, String catIMDB) {
         this.bcIMDB = bcIMDB;
         this.descrIMDB = descrIMDB;
         this.catIMDB = catIMDB;
-        this.updatedAt = updatedAt;
     }
 
     // ✅ Getters
@@ -28,7 +26,4 @@ public class BancoDados {
         return catIMDB;
     }
 
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
 }

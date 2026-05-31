@@ -1,4 +1,4 @@
-package com.app.barcodecompras.ui;
+package com.app.barcodecompras;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
@@ -16,9 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.app.barcodecompras.AddItemDB;
-import com.app.barcodecompras.MainActivity;
-import com.app.barcodecompras.R;
 import com.google.android.material.navigation.NavigationView;
 
 public class EditBancoDadosActivity extends AppCompatActivity {
@@ -73,7 +70,7 @@ public class EditBancoDadosActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemDB.class));
+                    startActivity(new Intent(this, AddItemBancoDados.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }

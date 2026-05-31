@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import com.app.barcodecompras.ui.BuscarBancoDadosActivity;
 import com.app.barcodecompras.database.DatabaseHelper;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -85,7 +84,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemDB.class));
+                    startActivity(new Intent(this, AddItemBancoDados.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 } else if (id == R.id.nav_backup) {
@@ -184,7 +183,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
                     etBuscaCategoria.setText(cursor.getString(1)); // cat_DB
                 } else {
                     // Item não encontrado - abrir activity de cadastro
-                    Intent intent = new Intent(BuscarComprasActivity.this, AddItemDB.class);
+                    Intent intent = new Intent(BuscarComprasActivity.this, AddItemBancoDados.class);
                     intent.putExtra("BARCODE_VALUE", barcodeValue);
                     startActivityForResult(intent,BUSCA_COMPRA_REQUEST);
                 }

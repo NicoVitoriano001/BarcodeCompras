@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.app.barcodecompras.database.BancoDados;
 import com.app.barcodecompras.database.BancoDadosAdapter;
 import com.app.barcodecompras.database.DatabaseHelper;
-import com.app.barcodecompras.ui.EditBancoDadosActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +100,7 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             return;
         }
 
-        String query = "SELECT bc_DB, descr_DB, cat_DB, updated_at FROM bancodados_tab WHERE 1=1";
+        String query = "SELECT bc_DB, descr_DB, cat_DB FROM bancodados_tab WHERE 1=1";
         List<String> params = new ArrayList<>();
 
         if (!codigo.isEmpty()) {
@@ -133,9 +132,8 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
                     String bc = cursor.getString(0);
                     String desc = cursor.getString(1);
                     String cat = cursor.getString(2);
-                    long updatedAt = cursor.getLong(3);
 
-                    BancoDados bancodados = new BancoDados(bc, desc, cat, updatedAt);
+                    BancoDados bancodados = new BancoDados(bc, desc, cat);
                     BancoDadosList.add(bancodados);
                 }
 

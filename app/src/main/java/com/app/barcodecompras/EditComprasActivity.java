@@ -16,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.app.barcodecompras.ui.BuscarBancoDadosActivity;
 import com.google.android.material.navigation.NavigationView;
 
 public class EditComprasActivity extends AppCompatActivity {
@@ -70,7 +69,7 @@ public class EditComprasActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(EditComprasActivity.this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(EditComprasActivity.this, AddItemDB.class));
+                    startActivity(new Intent(EditComprasActivity.this, AddItemBancoDados.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(EditComprasActivity.this, BuscarBancoDadosActivity.class));
                 }
@@ -170,6 +169,8 @@ public class EditComprasActivity extends AppCompatActivity {
             double quantidade = Double.parseDouble(etQntCompras.getText().toString());
             double total = preco * quantidade;
 
+            long updatedAt = System.currentTimeMillis();
+
             ContentValues values = new ContentValues();
             values.put("bc_compras", etBcCompras.getText().toString());
             values.put("descr_compras", etDescrCompras.getText().toString());
@@ -179,6 +180,7 @@ public class EditComprasActivity extends AppCompatActivity {
             values.put("total_compras", total);  // Usando o valor calculado
             values.put("periodo_compras", etPeriodoCompras.getText().toString());
             values.put("obs_compras", etObsCompras.getText().toString());
+            values.put("updated_at", updatedAt);
 
             int rowsAffected = db.update(
                     "compras_tab",

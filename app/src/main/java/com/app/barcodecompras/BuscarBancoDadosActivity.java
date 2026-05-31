@@ -1,4 +1,4 @@
-package com.app.barcodecompras.ui;
+package com.app.barcodecompras;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,10 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.app.barcodecompras.AddItemDB;
-import com.app.barcodecompras.MainActivity;
-import com.app.barcodecompras.R;
-import com.app.barcodecompras.ResultBancoDadosActivity;
 import com.app.barcodecompras.database.DatabaseHelper;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -76,7 +72,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemDB.class));
+                    startActivity(new Intent(this, AddItemBancoDados.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 } else if (id == R.id.nav_backup) {
@@ -141,7 +137,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
                     etBuscaCategoriaBancoDados.setText(cursor.getString(1)); // cat_DB
                 } else {
                     // Item não encontrado - abrir activity de cadastro
-                    Intent intent = new Intent(BuscarBancoDadosActivity.this, AddItemDB.class);
+                    Intent intent = new Intent(BuscarBancoDadosActivity.this, AddItemBancoDados.class);
                     intent.putExtra("BARCODE_VALUE", barcodeValue);
                     startActivityForResult(intent, BUSCA_DB_REQUEST);
                 }

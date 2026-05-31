@@ -33,8 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS bancodados_tab (" +
                 "bc_DB TEXT PRIMARY KEY, " +
                 "descr_DB TEXT, " +
-                "cat_DB TEXT, " +
-                "updated_at INTEGER)");
+                "cat_DB TEXT)");
     }
 
     @Override
