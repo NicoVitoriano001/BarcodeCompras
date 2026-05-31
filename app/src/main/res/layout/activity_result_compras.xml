@@ -17,10 +17,20 @@
 
         <!-- Barra de título -->
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/tvSomaTotal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Soma parcial: $"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"
+            android:textColor="@color/cinza_Gainsboro"/>
+
+        <TextView
+            android:id="@+id/tvMedia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:textStyle="bold"
             android:textSize="20sp"
             android:gravity="center"

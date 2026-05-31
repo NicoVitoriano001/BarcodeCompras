@@ -5,11 +5,11 @@ public class CompraFirebase {
     public String descricao;
 
     public String categoria;
-    public String periodo;
-    public String obs;
     public double preco;
     public double quantidade;
     public double total;
+    public String periodo;
+    public String obs;
     public long updatedAt;
 
     public CompraFirebase() {}

@@ -97,7 +97,12 @@ public class ResultComprasActivity extends AppCompatActivity {
 
     private void loadCompras(String codigo, String descricao, String categoria, String periodo, String observacao) {
         comprasList.clear();
+
         double somaTotal = 0.0; // Variável para acumular a soma
+        double mediaPreco = 0.0; //2026.05.31
+        double somaPrecos = 0.0; //2026.05.31
+        int quantidadeItens = 0; //2026.05.31
+
 
         // Construir query dinâmica baseada nos critérios de busca
         String query = "SELECT * FROM compras_tab WHERE 1=1";
@@ -141,6 +146,8 @@ public class ResultComprasActivity extends AppCompatActivity {
                 double quantidade = cursor.getDouble(5);
                 double total = preco * quantidade;  // Recalculando o total
                 somaTotal += total; // Acumula o total
+                somaPrecos += preco;
+                quantidadeItens++;
 
                 Compra compra = new Compra(
                         cursor.getLong(0),
@@ -155,12 +162,22 @@ public class ResultComprasActivity extends AppCompatActivity {
                 );
                 comprasList.add(compra);
             } while (cursor.moveToNext());
+
+         //2026.05.31
+
+            if (quantidadeItens > 0) {
+                mediaPreco = somaPrecos / quantidadeItens;
+}
+
         }
         cursor.close();
 
-        // Atualizar o TextView com a soma total
-        TextView tvTitle = findViewById(R.id.tvTitle);
-        tvTitle.setText(String.format("Soma parcial: R$ %.2f", somaTotal));
+        // Atualizar o TextView
+        TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
+        tvSomaTotal.setText(String.format("Soma total: R$ %.2f", somaTotal));
+
+        TextView tvMedia = findViewById(R.id.tvMedia);
+        tvMedia.setText(String.format("Preço médio: R$ %.2f", mediaPreco));
 
         if (adapter == null) {
             adapter = new ComprasAdapter(comprasList);

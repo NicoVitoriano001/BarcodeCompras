@@ -289,8 +289,11 @@ public class MainActivity extends AppCompatActivity {
         String bc = bc_compras.getText().toString().trim();
         String descr = descr_compras.getText().toString().trim();
         String cat = cat_compras.getText().toString().trim();
+        String obs = obs_compras.getText().toString().trim();
+        String periodo = periodo_compras.getText().toString();
 
-        if (bc.isEmpty()) {
+        //DEFINIR O QUE PODE FICAR VAZIO QUANDO SALVA
+        if (bc.isEmpty() || descr.isEmpty() || obs.isEmpty() ) {
             Toast.makeText(this, "Código obrigatório", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -326,39 +329,30 @@ public class MainActivity extends AppCompatActivity {
         values.put("preco_compras", preco);
         values.put("qnt_compras", qnt);
         values.put("total_compras", total);
+        values.put("periodo_compras", periodo);
+        values.put("obs_compras", obs);
         values.put("updated_at", updatedAt);
 
         long result = db.insert("compras_tab", null, values);
 
         if (result != -1) {
-            enviarParaFirebase(bc, descr, cat, preco, qnt, total, updatedAt);
+            enviarParaFirebase(bc, descr, cat, preco, qnt, total, periodo, obs, updatedAt);
             Toast.makeText(this, "Salvo", Toast.LENGTH_SHORT).show();
             clearFields();
         }
     }
 
 
+private void enviarParaFirebase(String bc, String descr, String cat,
+                                double preco, double qnt, double total,
+                                String periodo, String obs, long updatedAt){
 
+    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
 
-    private void enviarParaFirebase(String bc, String descr, String cat,
-                                    double preco, double qnt, double total, long updatedAt) {
-
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
-
-
-        ref.child(bc).get().addOnSuccessListener(snapshot -> {
-            if (snapshot.exists()) {
-                Long remoteTime = snapshot.child("updatedAt").getValue(Long.class);
-                if (remoteTime != null && remoteTime > updatedAt) {
-                    return;
-                }
-            }
-
-            ref.child(bc).setValue(new CompraFirebase(
-                    bc, descr, cat, preco, qnt, total, "", "", updatedAt
-            ));
-        });
-    }
+    ref.push().setValue(new CompraFirebase(
+            bc, descr, cat, preco, qnt, total, periodo, obs, updatedAt
+    ));
+}
 
 
 
@@ -401,9 +395,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-
         precoEditText.addTextChangedListener(watcher);
         qntEditText.addTextChangedListener(watcher);
     }
+
 
 }
