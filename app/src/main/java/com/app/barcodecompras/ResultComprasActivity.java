@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,11 +14,13 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.widget.ExpandableListView;
 
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ResultComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
@@ -82,7 +85,21 @@ public class ResultComprasActivity extends AppCompatActivity {
             }, 200); // 250ms de delay
             return true;
         });//DRAWER -- FIM
-    } //fim oncreate
+
+
+        TextView tvMedia = findViewById(R.id.tvMedia);
+        ExpandableListView expandable = findViewById(R.id.expandableResumo);
+
+        tvMedia.setOnClickListener(v -> {
+
+            if (expandable.getVisibility() == View.GONE) {
+                expandable.setVisibility(View.VISIBLE);
+            } else {
+                expandable.setVisibility(View.GONE);
+            }
+        });
+
+    } //FIM ONCREATE
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -98,11 +115,17 @@ public class ResultComprasActivity extends AppCompatActivity {
     private void loadCompras(String codigo, String descricao, String categoria, String periodo, String observacao) {
         comprasList.clear();
 
+
         double somaTotal = 0.0; // Variável para acumular a soma
         double mediaPreco = 0.0; //2026.05.31
         double somaPrecos = 0.0; //2026.05.31
         int quantidadeItens = 0; //2026.05.31
 
+        double maiorPreco = Double.MIN_VALUE;
+        double menorPreco = Double.MAX_VALUE;
+
+        String maiorPeriodo = "", maiorObs = "";
+        String menorPeriodo = "", menorObs = "";
 
         // Construir query dinâmica baseada nos critérios de busca
         String query = "SELECT * FROM compras_tab WHERE 1=1";
@@ -114,13 +137,45 @@ public class ResultComprasActivity extends AppCompatActivity {
         }
 
         if (!descricao.isEmpty()) {
-            query += " AND REPLACE(descr_compras, ' ', '%') LIKE ?";
-            params.add("%" + descricao.replace(" ", "%") + "%");
+
+            String[] termos = descricao.split(" ");
+
+            for (String termo : termos) {
+
+                if (termo.startsWith("-") && termo.length() > 1) {
+
+                    // ✅ NOT LIKE
+                    String valor = termo.substring(1);
+                    query += " AND descr_compras NOT LIKE ?";
+                    params.add("%" + valor + "%");
+
+                } else {
+
+                    // ✅ LIKE normal
+                    query += " AND descr_compras LIKE ?";
+                    params.add("%" + termo + "%");
+                }
+            }
         }
 
         if (!categoria.isEmpty()) {
-            query += " AND REPLACE(cat_compras, ' ', '%') LIKE ?";
-            params.add("%" + categoria.replace(" ", "%") + "%");
+
+            String[] termos = categoria.split(" ");
+
+            for (String termo : termos) {
+
+                if (termo.startsWith("-") && termo.length() > 1) {
+
+                    String valor = termo.substring(1);
+                    query += " AND cat_compras NOT LIKE ?";
+                    params.add("%" + valor + "%");
+
+                } else {
+
+                    query += " AND cat_compras LIKE ?";
+                    params.add("%" + termo + "%");
+                }
+            }
         }
 
         if (!periodo.isEmpty()) {
@@ -161,13 +216,51 @@ public class ResultComprasActivity extends AppCompatActivity {
                         cursor.getString(8)
                 );
                 comprasList.add(compra);
+
+                if (preco > maiorPreco) {
+                    maiorPreco = preco;
+                    maiorPeriodo = cursor.getString(7);
+                    maiorObs = cursor.getString(8);
+                }
+
+                if (preco < menorPreco) {
+                    menorPreco = preco;
+                    menorPeriodo = cursor.getString(7);
+                    menorObs = cursor.getString(8);
+                }
             } while (cursor.moveToNext());
 
-         //2026.05.31
-
+         //2026.05.31 calcula média
             if (quantidadeItens > 0) {
                 mediaPreco = somaPrecos / quantidadeItens;
-}
+            }
+
+
+            ExpandableListView expandable = findViewById(R.id.expandableResumo);
+
+            List<String> groups = new ArrayList<>();
+            Map<String, String> children = new java.util.HashMap<>();
+
+            groups.add("Maior preço");
+            groups.add("Menor preço");
+
+            children.put("Maior preço",
+                    "Preço: R$ " + String.format("%.2f", maiorPreco) +
+                            "\nPeriodo: " + maiorPeriodo +
+                            "\nObs: " + maiorObs);
+
+            children.put("Menor preço",
+                    "Preço: R$ " + String.format("%.2f", menorPreco) +
+                            "\nPeriodo: " + menorPeriodo +
+                            "\nObs: " + menorObs);
+
+            ResumoExpandableAdapter expAdapter =
+                    new ResumoExpandableAdapter(this, groups, children);
+
+            expandable.setAdapter(expAdapter);
+
+
+
 
         }
         cursor.close();
