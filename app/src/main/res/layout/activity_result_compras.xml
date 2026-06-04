@@ -46,8 +46,6 @@
             android:groupIndicator="@null"/>
 
 
-
-
         <!-- RecyclerView - Lista de resultados -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewCompras"

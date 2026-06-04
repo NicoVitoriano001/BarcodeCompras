@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-
     private static final String DATABASE_NAME = "comprasDB.db";
     private static final int DATABASE_VERSION = 2; // aumente versão
 
@@ -29,7 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "obs_compras TEXT, " +
                 "updated_at INTEGER)");
 
-        //ETabela banco de dados (produtos)
+        //Tabela banco de dados
         db.execSQL("CREATE TABLE IF NOT EXISTS bancodados_tab (" +
                 "bc_DB TEXT PRIMARY KEY, " +
                 "descr_DB TEXT, " +
@@ -39,7 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        // ✅ Atualização segura (sem apagar dados)
+        //Atualização segura (sem apagar dados)
         if (oldVersion < 2) {
             try {
                 db.execSQL("ALTER TABLE compras_tab ADD COLUMN updated_at INTEGER");

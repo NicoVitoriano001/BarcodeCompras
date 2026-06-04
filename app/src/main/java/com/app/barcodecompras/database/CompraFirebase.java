@@ -1,6 +1,7 @@
 package com.app.barcodecompras.database;
 
 public class CompraFirebase {
+    // ✅ Nomes EXATAMENTE iguais aos do Firebase
     public String bc;
     public String descricao;
 
@@ -10,14 +11,16 @@ public class CompraFirebase {
     public double total;
     public String periodo;
     public String obs;
-    public long updatedAt;
+    public long updateAt;  // Atenção: é "updateAt" e não "updatedAt"
+    public boolean deleted;
 
-    public CompraFirebase() {}
+    // Construtor vazio necessário para Firebase
+    public CompraFirebase() {
+    }
 
     public CompraFirebase(String bc, String descricao, String categoria,
                           double preco, double quantidade, double total,
-                          String periodo, String obs, long updatedAt) {
-
+                          String periodo, String obs, long updateAt) {
         this.bc = bc;
         this.descricao = descricao;
         this.categoria = categoria;
@@ -26,6 +29,7 @@ public class CompraFirebase {
         this.total = total;
         this.periodo = periodo;
         this.obs = obs;
-        this.updatedAt = updatedAt;
+        this.updateAt = updateAt;
+        this.deleted = false;
     }
 }

@@ -20,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.app.barcodecompras.database.CompraFirebase;
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
 import com.google.android.material.button.MaterialButton;
@@ -28,7 +27,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
 
-// ✅ FIREBASE REALTIME
+//FIREBASE REALTIME
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.zxing.integration.android.IntentResult;
@@ -38,22 +37,16 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-
     private EditText bc_compras, descr_compras, cat_compras, preco_compras,
             qnt_compras, total_compras, periodo_compras, obs_compras;
 
     private EditText precoEditText, qntEditText, totalEditText;
-
     private MaterialButton scanButton, saveButton, cancelButton;
-
     private SQLiteDatabase db;
-
     private DrawerLayout drawer;
-
     private ActionBarDrawerToggle toggle;
-
     private BancoDadosBkp bancoDadosBkp;
-
+    private FirebaseHelper firebaseHelper; // MOVER PARA VARIÁVEL GLOBAL
     private static final int REQUEST_CODE_ADD_ITEM = 1001;
 
 
@@ -110,8 +103,6 @@ public class MainActivity extends AppCompatActivity {
             clearFields();
             Toast.makeText(this, "Campos limpos", Toast.LENGTH_SHORT).show();
         });
-        //cancelButton.setOnClickListener(v -> clearFields());
-
 
         FloatingActionButton fabSearch = findViewById(R.id.fab_searchITEM);
         fabSearch.setOnClickListener(v -> {
@@ -119,54 +110,23 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
 
+        // INICIALIZAR VARIÁVEL GLOBAL
         FirebaseHelper firebaseHelper = new FirebaseHelper(this, db);
 
-        //firebaseHelper.syncLocalParaFirebase();   //faz a mesma coisa enviarParaFirebase(...)
+        // Sincronizar Firebase para local AO ABRIR o app
         firebaseHelper.syncFirebaseParaLocal();
+        // Sincronizar local para Firebase
+        firebaseHelper.syncLocalParaFirebase();
 
         setupTextWatchers();
 
-        NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
-
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            drawer.closeDrawer(GravityCompat.START); // Fecha o drawer imediatamente
-
-                if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, MainActivity.class));
-                   // return true; // Indica que o clique foi tratado
-                } else if (id == R.id.nav_gallery) {
-                    // Ação para galeria
-                } else if (id == R.id.nav_slideshow) {
-                    // Ação para slideshow
-                } else if (id == R.id.nav_add_bancodados) {
-                    Intent intent = new Intent(MainActivity.this, AddItemBancoDados.class);
-                    startActivity(intent);
-                } else if (id == R.id.nav_busca_bancodados) {
-                    Intent intent = new Intent(MainActivity.this, BuscarBancoDadosActivity.class);
-                    startActivity(intent);
-                } else if (id == R.id.nav_busca_compras) {
-                    Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
-                    startActivity(intent);
-                } else if (id == R.id.nav_backup) {
-                    bancoDadosBkp.showBackupConfirmationDialog(); //showBackupConfirmationDialog(); // Substitui a chamada direta a fazerBackup() fazerBackup();
-                } else if (id == R.id.nav_restore) {
-                    bancoDadosBkp.restaurarBackup(); //restaurarBackup();
-                }
-            drawer.closeDrawer(GravityCompat.START);
-            return true;
-        });
-
-
-// Configurar Toolbar (usando a versão AppCompat)
+        // CONFIGURAR NAVIGATION DRAWER CORRETAMENTE
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-// Configurar Navigation Drawer
         drawer = findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar,
@@ -175,11 +135,49 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-/// FIM ONCREATE
+        NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, MainActivity.class));
+            } else if (id == R.id.nav_gallery) {
+                // Ação para galeria
+                Toast.makeText(this, "Galeria", Toast.LENGTH_SHORT).show();
+            } else if (id == R.id.nav_slideshow) {
+                // Ação para slideshow
+                Toast.makeText(this, "Slideshow", Toast.LENGTH_SHORT).show();
+            } else if (id == R.id.nav_add_bancodados) {
+                Intent intent = new Intent(MainActivity.this, AddItemBancoDados.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_busca_bancodados) {
+                Intent intent = new Intent(MainActivity.this, BuscarBancoDadosActivity.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_busca_compras) {
+                Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_syncFirebase) {
+                // ✅ USAR A VARIÁVEL GLOBAL firebaseHelper
+                if (firebaseHelper != null) {
+                    firebaseHelper.syncCompleta();
+                    Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Erro: FirebaseHelper não inicializado", Toast.LENGTH_SHORT).show();
+                }
+            } else if (id == R.id.nav_backup) {
+                bancoDadosBkp.showBackupConfirmationDialog();
+            } else if (id == R.id.nav_restore) {
+                bancoDadosBkp.restaurarBackup();
+            }
+
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        });
     }
+    // FIM ONCREATE
 
-
-//inicio data calendário
+// inicio data calendário
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -206,8 +204,7 @@ public class MainActivity extends AppCompatActivity {
     }
 //fim data calendario
 
-
-    // Resultado do scanner ZXing
+// Resultado do scanner ZXing
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -222,12 +219,12 @@ public class MainActivity extends AppCompatActivity {
 
             bc_compras.setText(barcode);
 
-            //busca no banco local
+            // busca no banco local
             fetchItemDataBancoDadosTable(barcode);
 
         } else if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
 
-            //voltou do cadastro → busca novamente
+            // voltou do cadastro → busca novamente
             String barcode = bc_compras.getText().toString();
             fetchItemDataBancoDadosTable(barcode);
 
@@ -252,13 +249,13 @@ public class MainActivity extends AppCompatActivity {
 
                 if (cursor.moveToFirst()) {
 
-                    //ENCONTROU → preencher campos
+                    // ENCONTROU → preencher campos
                     descr_compras.setText(cursor.getString(0));
                     cat_compras.setText(cursor.getString(1));
 
                 } else {
 
-                    //NÃO ENCONTROU → perguntar
+                    // NÃO ENCONTROU → perguntar
                     showAddItemDialog(barcodeValue);
                 }
 
@@ -283,7 +280,6 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-
     private void saveData() {
 
         String bc = bc_compras.getText().toString().trim();
@@ -292,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
         String obs = obs_compras.getText().toString().trim();
         String periodo = periodo_compras.getText().toString();
 
-        //DEFINIR O QUE PODE FICAR VAZIO QUANDO SALVA
+        // DEFINIR O QUE PODE FICAR VAZIO QUANDO SALVA
         if (bc.isEmpty() || descr.isEmpty() || obs.isEmpty() ) {
             Toast.makeText(this, "Código obrigatório", Toast.LENGTH_SHORT).show();
             return;
@@ -343,18 +339,89 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-private void enviarParaFirebase(String bc, String descr, String cat,
-                                double preco, double qnt, double total,
-                                String periodo, String obs, long updatedAt){
 
-    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
+    // METODO PARA ATUALIZAR (EDITAR) ITEM
+    private void updateData(String bcOriginal) {
+        String bc = bc_compras.getText().toString().trim();
+        String descr = descr_compras.getText().toString().trim();
+        String cat = cat_compras.getText().toString().trim();
+        String obs = obs_compras.getText().toString().trim();
+        String periodo = periodo_compras.getText().toString();
 
-    ref.push().setValue(new CompraFirebase(
-            bc, descr, cat, preco, qnt, total, periodo, obs, updatedAt
-    ));
-}
+        if (bc.isEmpty() || descr.isEmpty()) {
+            Toast.makeText(this, "Código e descrição são obrigatórios", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        double preco = 0, qnt = 0;
+        try {
+            String precoStr = preco_compras.getText().toString();
+            String qntStr = qnt_compras.getText().toString();
+            if (!precoStr.isEmpty()) preco = Double.parseDouble(precoStr);
+            if (!qntStr.isEmpty()) qnt = Double.parseDouble(qntStr);
+        } catch (Exception e) {
+            Toast.makeText(this, "Erro nos valores", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        double total = preco * qnt;
+        long updatedAt = System.currentTimeMillis();
+
+        ContentValues values = new ContentValues();
+        values.put("bc_compras", bc);
+        values.put("descr_compras", descr);
+        values.put("cat_compras", cat);
+        values.put("preco_compras", preco);
+        values.put("qnt_compras", qnt);
+        values.put("total_compras", total);
+        values.put("periodo_compras", periodo);
+        values.put("obs_compras", obs);
+        values.put("updated_at", updatedAt);
+
+        int result = db.update("compras_tab", values, "bc_compras = ?", new String[]{bcOriginal});
+
+        if (result > 0) {
+            enviarParaFirebase(bc, descr, cat, preco, qnt, total, periodo, obs, updatedAt);
+            Toast.makeText(this, "Atualizado com sucesso", Toast.LENGTH_SHORT).show();
+            clearFields();
+        } else {
+            Toast.makeText(this, "Erro ao atualizar", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // METODO PARA DELETAR ITEM
+    private void deletarItem(String bc) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar exclusão")
+                .setMessage("Tem certeza que deseja excluir este item?")
+                .setPositiveButton("Sim", (dialog, which) -> {
+                    firebaseHelper.deletarItem(bc);
+                    db.delete("compras_tab", "bc_compras = ?", new String[]{bc});
+                    Toast.makeText(this, "Item excluído", Toast.LENGTH_SHORT).show();
+                    clearFields();
+                })
+                .setNegativeButton("Não", null)
+                .show();
+    }
+
+    private void enviarParaFirebase(String bc, String descr, String cat,
+                                    double preco, double qnt, double total,
+                                    String periodo, String obs, long updatedAt){
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
+
+        // USAR OS NOMES CORRETOS DAS COLUNAS DO FIREBASE
+        ref.child(bc).child("bc").setValue(bc);
+        ref.child(bc).child("descricao").setValue(descr);      // ← descr do app vai para descricao
+        ref.child(bc).child("categoria").setValue(cat);        // ← cat do app vai para categoria
+        ref.child(bc).child("preco").setValue(preco);
+        ref.child(bc).child("quantidade").setValue(qnt);
+        ref.child(bc).child("total").setValue(total);
+        ref.child(bc).child("periodo").setValue(periodo);
+        ref.child(bc).child("obs").setValue(obs);
+        ref.child(bc).child("updateAt").setValue(updatedAt);
+        ref.child(bc).child("deleted").setValue(false);
+    }
 
     private void clearFields() {
         bc_compras.setText("");
@@ -364,13 +431,6 @@ private void enviarParaFirebase(String bc, String descr, String cat,
         qnt_compras.setText("");
         total_compras.setText("");
     }
-
-    //private String getDataHoraAtual() {
-    //    return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
-   // }
-
-
-
     private void setupTextWatchers() {
 
         TextWatcher watcher = new TextWatcher() {

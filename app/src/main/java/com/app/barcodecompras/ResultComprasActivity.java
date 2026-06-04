@@ -16,11 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.ExpandableListView;
 
+import com.app.barcodecompras.database.BancoDadosBkp;
+import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.firebase.FirebaseHelper;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ResultComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
@@ -31,6 +33,7 @@ public class ResultComprasActivity extends AppCompatActivity {
     private List<Compra> comprasList = new ArrayList<>();
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private BancoDadosBkp bancoDadosBkp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,16 @@ public class ResultComprasActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
+
+        bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
+
+        // INICIALIZAR VARIÁVEL GLOBAL
+        FirebaseHelper firebaseHelper = new FirebaseHelper(this, db);
+
+        // Sincronizar Firebase para local AO ABRIR o app
+        firebaseHelper.syncFirebaseParaLocal();
+        // Sincronizar local para Firebase
+        firebaseHelper.syncLocalParaFirebase();
 
         // Obter critérios de busca da intent
         String codigo = getIntent().getStringExtra("CODIGO");
@@ -65,7 +78,7 @@ public class ResultComprasActivity extends AppCompatActivity {
             startActivityForResult(intent, EDIT_COMPRA_REQUEST);
         });
 
-        //DRAWER -- INICIO
+        // DRAWER -- INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
         navigationView = findViewById(R.id.resul_compras_nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -75,17 +88,40 @@ public class ResultComprasActivity extends AppCompatActivity {
             // Adicione um pequeno delay para evitar travamentos
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, MainActivity.class));
+                    startActivity(new Intent(this, ResultComprasActivity.class));
+                } else if (id == R.id.nav_gallery) {
+                    // Ação para galeria
+                    Toast.makeText(this, "Galeria", Toast.LENGTH_SHORT).show();
+                } else if (id == R.id.nav_slideshow) {
+                    // Ação para slideshow
+                    Toast.makeText(this, "Slideshow", Toast.LENGTH_SHORT).show();
                 } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemBancoDados.class));
+                    Intent intent = new Intent(ResultComprasActivity.this, AddItemBancoDados.class);
+                    startActivity(intent);
                 } else if (id == R.id.nav_busca_bancodados) {
-                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
+                    Intent intent = new Intent(ResultComprasActivity.this, BuscarBancoDadosActivity.class);
+                    startActivity(intent);
+                } else if (id == R.id.nav_busca_compras) {
+                    Intent intent = new Intent(ResultComprasActivity.this, BuscarComprasActivity.class);
+                    startActivity(intent);
+                } else if (id == R.id.nav_syncFirebase) {
+                    // ✅ USAR A VARIÁVEL GLOBAL firebaseHelper
+                    if (firebaseHelper != null) {
+                        firebaseHelper.syncCompleta();
+                        Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Erro: FirebaseHelper não inicializado", Toast.LENGTH_SHORT).show();
+                    }
+                } else if (id == R.id.nav_backup) {
+                    bancoDadosBkp.showBackupConfirmationDialog();
+                } else if (id == R.id.nav_restore) {
+                    bancoDadosBkp.restaurarBackup();
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
             }, 200); // 250ms de delay
             return true;
-        });//DRAWER -- FIM
-
+        });
+        // DRAWER -- FIM
 
         TextView tvMedia = findViewById(R.id.tvMedia);
         ExpandableListView expandable = findViewById(R.id.expandableResumo);
@@ -99,7 +135,8 @@ public class ResultComprasActivity extends AppCompatActivity {
             }
         });
 
-    } //FIM ONCREATE
+    }
+    // FIM ONCREATE
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -115,19 +152,15 @@ public class ResultComprasActivity extends AppCompatActivity {
     private void loadCompras(String codigo, String descricao, String categoria, String periodo, String observacao) {
         comprasList.clear();
 
-
-        double somaTotal = 0.0; // Variável para acumular a soma
-        double mediaPreco = 0.0; //2026.05.31
-        double somaPrecos = 0.0; //2026.05.31
-        int quantidadeItens = 0; //2026.05.31
-
+        double somaTotal = 0.0;
+        double somaPrecos = 0.0;
+        int quantidadeItens = 0;
         double maiorPreco = Double.MIN_VALUE;
         double menorPreco = Double.MAX_VALUE;
-
         String maiorPeriodo = "", maiorObs = "";
         String menorPeriodo = "", menorObs = "";
 
-        // Construir query dinâmica baseada nos critérios de busca
+        // Construir query dinâmica
         String query = "SELECT * FROM compras_tab WHERE 1=1";
         List<String> params = new ArrayList<>();
 
@@ -137,21 +170,13 @@ public class ResultComprasActivity extends AppCompatActivity {
         }
 
         if (!descricao.isEmpty()) {
-
             String[] termos = descricao.split(" ");
-
             for (String termo : termos) {
-
                 if (termo.startsWith("-") && termo.length() > 1) {
-
-                    // ✅ NOT LIKE
                     String valor = termo.substring(1);
                     query += " AND descr_compras NOT LIKE ?";
                     params.add("%" + valor + "%");
-
                 } else {
-
-                    // ✅ LIKE normal
                     query += " AND descr_compras LIKE ?";
                     params.add("%" + termo + "%");
                 }
@@ -159,19 +184,13 @@ public class ResultComprasActivity extends AppCompatActivity {
         }
 
         if (!categoria.isEmpty()) {
-
             String[] termos = categoria.split(" ");
-
             for (String termo : termos) {
-
                 if (termo.startsWith("-") && termo.length() > 1) {
-
                     String valor = termo.substring(1);
                     query += " AND cat_compras NOT LIKE ?";
                     params.add("%" + valor + "%");
-
                 } else {
-
                     query += " AND cat_compras LIKE ?";
                     params.add("%" + termo + "%");
                 }
@@ -188,95 +207,85 @@ public class ResultComprasActivity extends AppCompatActivity {
             params.add("%" + observacao + "%");
         }
 
-      //  query += " ORDER BY descr_DB ASC, SUBSTR(periodo_compras, 5) ASC"; // Pega a partir do 5º caractere
-      //  query += " ORDER BY periodo_compras ASC, descr_compras ASC";
-       query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
+        query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
 
         Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
 
         if (cursor.moveToFirst()) {
             do {
-                // Certifique-se de que o total está sendo calculado corretamente
-                double preco = cursor.getDouble(4);
-                double quantidade = cursor.getDouble(5);
-                double total = preco * quantidade;  // Recalculando o total
-                somaTotal += total; // Acumula o total
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
+                String bc = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
+                String descr = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras"));
+                String cat = cursor.getString(cursor.getColumnIndexOrThrow("cat_compras"));
+                double preco = cursor.getDouble(cursor.getColumnIndexOrThrow("preco_compras"));
+                double quantidade = cursor.getDouble(cursor.getColumnIndexOrThrow("qnt_compras"));
+                double total = preco * quantidade;
+                String periodoCompra = cursor.getString(cursor.getColumnIndexOrThrow("periodo_compras"));
+                String obs = cursor.getString(cursor.getColumnIndexOrThrow("obs_compras"));
+
+                somaTotal += total;
                 somaPrecos += preco;
                 quantidadeItens++;
 
                 Compra compra = new Compra(
-                        cursor.getLong(0),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getString(3),
-                        preco,
-                        quantidade,
-                        total,  // Usando o valor recalculado
-                        cursor.getString(7),
-                        cursor.getString(8)
+                        id, bc, descr, cat, preco, quantidade, total, periodoCompra, obs
                 );
                 comprasList.add(compra);
 
                 if (preco > maiorPreco) {
                     maiorPreco = preco;
-                    maiorPeriodo = cursor.getString(7);
-                    maiorObs = cursor.getString(8);
+                    maiorPeriodo = periodoCompra;
+                    maiorObs = obs;
                 }
 
                 if (preco < menorPreco) {
                     menorPreco = preco;
-                    menorPeriodo = cursor.getString(7);
-                    menorObs = cursor.getString(8);
+                    menorPeriodo = periodoCompra;
+                    menorObs = obs;
                 }
             } while (cursor.moveToNext());
 
-         //2026.05.31 calcula média
-            if (quantidadeItens > 0) {
-                mediaPreco = somaPrecos / quantidadeItens;
-            }
+            double mediaPreco = quantidadeItens > 0 ? somaPrecos / quantidadeItens : 0;
 
+            // EXIBIR SOMA TOTAL COM FORMATO: Soma total: R$ 127,50 (5 itens)
+            TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
+            tvSomaTotal.setText(String.format("Soma total: R$ %.2f (%d itens)", somaTotal, quantidadeItens));
+
+            TextView tvMedia = findViewById(R.id.tvMedia);
+            tvMedia.setText(String.format("Preço médio: R$ %.2f", mediaPreco));
 
             ExpandableListView expandable = findViewById(R.id.expandableResumo);
-
             List<String> groups = new ArrayList<>();
-            Map<String, String> children = new java.util.HashMap<>();
+            java.util.Map<String, String> children = new java.util.HashMap<>();
 
             groups.add("Maior preço");
             groups.add("Menor preço");
 
             children.put("Maior preço",
                     "Preço: R$ " + String.format("%.2f", maiorPreco) +
-                            "\nPeriodo: " + maiorPeriodo +
+                            "\nPeríodo: " + maiorPeriodo +
                             "\nObs: " + maiorObs);
 
             children.put("Menor preço",
                     "Preço: R$ " + String.format("%.2f", menorPreco) +
-                            "\nPeriodo: " + menorPeriodo +
+                            "\nPeríodo: " + menorPeriodo +
                             "\nObs: " + menorObs);
 
-            ResumoExpandableAdapter expAdapter =
-                    new ResumoExpandableAdapter(this, groups, children);
-
+            ResumoExpandableAdapter expAdapter = new ResumoExpandableAdapter(this, groups, children);
             expandable.setAdapter(expAdapter);
-
-
-
-
         }
+
         cursor.close();
-
-        // Atualizar o TextView
-        TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
-        tvSomaTotal.setText(String.format("Soma total: R$ %.2f", somaTotal));
-
-        TextView tvMedia = findViewById(R.id.tvMedia);
-        tvMedia.setText(String.format("Preço médio: R$ %.2f", mediaPreco));
 
         if (adapter == null) {
             adapter = new ComprasAdapter(comprasList);
             recyclerView.setAdapter(adapter);
         } else {
             adapter.notifyDataSetChanged();
+        }
+
+        if (comprasList.isEmpty()) {
+            Toast.makeText(this, "Nenhum resultado encontrado", Toast.LENGTH_SHORT).show();
         }
     }
 

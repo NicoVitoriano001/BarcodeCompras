@@ -2,19 +2,16 @@ package com.app.barcodecompras.firebase;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-
 import com.app.barcodecompras.Compra;
 
 public class FirebaseManager {
-
     private DatabaseReference dbRef;
 
     public FirebaseManager() {
         dbRef = FirebaseDatabase.getInstance().getReference("compras");
     }
 
-    // 🔥 SALVAR COM REGRA DE CONFLITO
+    // SALVAR COM REGRA DE CONFLITO
     public void salvarCompra(Compra compra) {
 
         long now = System.currentTimeMillis();

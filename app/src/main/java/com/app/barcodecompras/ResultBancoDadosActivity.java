@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +24,7 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
     private BancoDadosAdapter adapter;
     private SQLiteDatabase db;
     private List<BancoDados> BancoDadosList = new ArrayList<>();
+    private TextView tvTitle; // Adicionar referência ao TextView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +37,11 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_result_bancodados);
 
-// Inicializa o RecyclerView primeiro
-        recyclerView = findViewById(R.id.recyclerViewResultBancoDados); // Verifique se este ID está correto no XML
+        // Inicializar TextView do título
+        tvTitle = findViewById(R.id.tvTitle);
+
+        // Inicializa o RecyclerView primeiro
+        recyclerView = findViewById(R.id.recyclerViewResultBancoDados);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Inicializa o adapter com a lista vazia
@@ -47,7 +52,6 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         // Configura o listener do adapter
         adapter.setOnItemClickListener(bancodados -> {
             Intent intent = new Intent(this, EditBancoDadosActivity.class);
-            // Garanta que os dados não são nulos
             if (bancodados != null) {
                 intent.putExtra("CODIGO", bancodados.getBcIMDB() != null ? bancodados.getBcIMDB() : "");
                 intent.putExtra("DESCRICAO", bancodados.getDescrIMDB() != null ? bancodados.getDescrIMDB() : "");
@@ -60,7 +64,6 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
 
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getReadableDatabase();
-
 
         // Obter critérios de busca da intent
         Intent intent = getIntent();
@@ -75,8 +78,7 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
 
             loadBancoDados(codigo, descricao, categoria);
         }
-
-    } //fim oncreate
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -89,14 +91,15 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         }
     }
 
-
     private void loadBancoDados(String codigo, String descricao, String categoria) {
-
         BancoDadosList.clear();
 
         // Verifica se todos os critérios estão vazios
         if (codigo.isEmpty() && descricao.isEmpty() && categoria.isEmpty()) {
             Toast.makeText(this, "Informe pelo menos um critério de busca", Toast.LENGTH_SHORT).show();
+            // Atualizar título mesmo sem resultados
+            tvTitle.setText("Itens do Banco de Dados (0 itens)");
+            adapter.notifyDataSetChanged();
             return;
         }
 
@@ -121,14 +124,15 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         query += " ORDER BY descr_DB ASC";
 
         Cursor cursor = null;
+        int itemCount = 0; // Contador de itens
 
         try {
             cursor = db.rawQuery(query, params.toArray(new String[0]));
 
             if (cursor != null && cursor.getCount() > 0) {
+                itemCount = cursor.getCount(); // ✅ Obter total de itens
 
                 while (cursor.moveToNext()) {
-
                     String bc = cursor.getString(0);
                     String desc = cursor.getString(1);
                     String cat = cursor.getString(2);
@@ -137,14 +141,20 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
                     BancoDadosList.add(bancodados);
                 }
 
-                // ✅ Atualiza lista
+                // Atualizar título com a quantidade de itens
+                tvTitle.setText(String.format("Itens do Banco de Dados (%d itens)", itemCount));
+
+                // Atualiza lista
                 adapter.notifyDataSetChanged();
 
             } else {
+                // Nenhum item encontrado
+                tvTitle.setText("Itens do Banco de Dados (0 itens)");
                 Toast.makeText(this, "Nenhum item encontrado", Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {
+            tvTitle.setText("Itens do Banco de Dados (erro)");
             Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
 
         } finally {
@@ -154,4 +164,3 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         }
     }
 }
-
