@@ -36,11 +36,11 @@
             android:title="Busca Compras" />
     </group>
 
-
-
-
-
     <group android:id="@+id/group_backup">
+        <item
+            android:id="@+id/nav_syncFirebase"
+            android:icon="@drawable/ic_backup"
+            android:title="Sync Firebase" />
         <item
             android:id="@+id/nav_backup"
             android:icon="@drawable/ic_backup"

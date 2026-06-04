@@ -1,4 +1,4 @@
-package com.app.barcodecompras;
+package com.app.barcodecompras.database;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -6,6 +6,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.app.barcodecompras.R;
+
 import java.util.List;
 
 public class BancoDadosAdapter extends RecyclerView.Adapter<BancoDadosAdapter.BancoDadosViewHolder> {

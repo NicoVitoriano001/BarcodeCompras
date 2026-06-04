@@ -1,4 +1,4 @@
-package com.app.barcodecompras;
+package com.app.barcodecompras.database;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -12,6 +12,9 @@ import android.provider.Settings;
 import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.app.barcodecompras.MainActivity;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
