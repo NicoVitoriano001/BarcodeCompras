@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.firebase.FirebaseHelper;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -32,6 +33,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private SQLiteDatabase db;
     private Button scanButtonBuscaCompras;
+    private FirebaseHelper firebaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +63,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
         // Banco de dados
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
-
+        firebaseHelper = new FirebaseHelper(this, db);
 
         // Configurar data atual no campo de período
         etBuscaPeriodo.setText(getDataHoraAtual());
@@ -87,6 +89,15 @@ public class BuscarComprasActivity extends AppCompatActivity {
                     startActivity(new Intent(this, AddItemBancoDados.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
+                } else if (id == R.id.nav_syncFirebase) {
+                    // USAR A VARIÁVEL GLOBAL firebaseHelper
+                    if (firebaseHelper != null) {
+                        firebaseHelper.syncCompleta();
+                        Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Erro: FirebaseHelper não inicializado", Toast.LENGTH_SHORT).show();
+                    }
+                    // startActivity(new Intent(EditComprasActivity.this, BuscarBancoDadosActivity.class));
                 } else if (id == R.id.nav_backup) {
                     startActivity(new Intent(this, MainActivity.class));
                 } else if (id == R.id.nav_restore) {
@@ -96,6 +107,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
             }, 200); // 250ms de delay
             return true;
         });//DRAWER -- FIM
+
     }// FIM ON CREATE
 
 

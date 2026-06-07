@@ -1,6 +1,7 @@
 package com.app.barcodecompras;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -16,14 +17,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.app.barcodecompras.database.BancoDadosBkp;
-import com.app.barcodecompras.database.DatabaseHelper;
 import com.app.barcodecompras.firebase.FirebaseHelper;
 import com.google.android.material.navigation.NavigationView;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class EditComprasActivity extends AppCompatActivity {
-    private EditText etBcCompras, etDescrCompras, etCatCompras, etPrecoCompras,
-            etQntCompras, etPeriodoCompras, etObsCompras, etTotalCompras;
+    private EditText bc_compras, descr_compras, cat_compras, preco_compras,
+            qnt_compras, total_compras, periodo_compras, obs_compras;
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
     private FirebaseHelper firebaseHelper;
@@ -40,7 +43,11 @@ public class EditComprasActivity extends AppCompatActivity {
         initViews();
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
+
         firebaseHelper = new FirebaseHelper(this, db);
+
+        periodo_compras.setText(getDataHoraAtual());
+        periodo_compras.setOnClickListener(v -> showDatePickerDialog());
 
         // Receber dados da compra selecionada
         Intent intent = getIntent();
@@ -58,11 +65,11 @@ public class EditComprasActivity extends AppCompatActivity {
         }
 
         // Configurar listeners
-        etPrecoCompras.setOnFocusChangeListener((v, hasFocus) -> {
+        preco_compras.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) calculateTotal();
         });
 
-        etQntCompras.setOnFocusChangeListener((v, hasFocus) -> {
+        qnt_compras.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) calculateTotal();
         });
 
@@ -94,22 +101,49 @@ public class EditComprasActivity extends AppCompatActivity {
                     }
                    // startActivity(new Intent(EditComprasActivity.this, BuscarBancoDadosActivity.class));
                 }
-            }, 200);
+            }, 250);
 
             return true;
         });
         // DRAWER FIM
     }
+// ONCREATE FIM
 
+
+    // inicio data calendário
+    private void showDatePickerDialog() {
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    Calendar selectedDate = Calendar.getInstance();
+                    selectedDate.set(selectedYear, selectedMonth, selectedDay);
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
+                    periodo_compras.setText(sdf.format(selectedDate.getTime()));
+                },
+                year, month, day);
+        datePickerDialog.show();
+    }
+
+    public String getDataHoraAtual() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
     private void initViews() {
-        etBcCompras = findViewById(R.id.etBcCompras);
-        etDescrCompras = findViewById(R.id.etDescrCompras);
-        etCatCompras = findViewById(R.id.etCatCompras);
-        etPrecoCompras = findViewById(R.id.etPrecoCompras);
-        etQntCompras = findViewById(R.id.etQntCompras);
-        etTotalCompras = findViewById(R.id.etTotalCompras);
-        etPeriodoCompras = findViewById(R.id.etPeriodoCompras);
-        etObsCompras = findViewById(R.id.etObsCompras);
+        bc_compras = findViewById(R.id.etBcCompras);
+        descr_compras = findViewById(R.id.etDescrCompras);
+        cat_compras = findViewById(R.id.etCatCompras);
+        preco_compras = findViewById(R.id.etPrecoCompras);
+        qnt_compras = findViewById(R.id.etQntCompras);
+        total_compras = findViewById(R.id.etTotalCompras);
+        periodo_compras = findViewById(R.id.etPeriodoCompras);
+        obs_compras = findViewById(R.id.etObsCompras);
 
         btnSalvar = findViewById(R.id.btnSalvar);
         btnCancelar = findViewById(R.id.btnCancelar);
@@ -118,19 +152,19 @@ public class EditComprasActivity extends AppCompatActivity {
 
     private void calculateTotal() {
         try {
-            String precoStr = etPrecoCompras.getText().toString();
-            String qntStr = etQntCompras.getText().toString();
+            String precoStr = preco_compras.getText().toString();
+            String qntStr = qnt_compras.getText().toString();
 
             if (!precoStr.isEmpty() && !qntStr.isEmpty()) {
                 double preco = Double.parseDouble(precoStr);
                 double quantidade = Double.parseDouble(qntStr);
                 double total = preco * quantidade;
-                etTotalCompras.setText(String.format("%.2f", total));
+                total_compras.setText(String.format("%.2f", total));
             } else {
-                etTotalCompras.setText("");
+                total_compras.setText("");
             }
         } catch (NumberFormatException e) {
-            etTotalCompras.setText("");
+            total_compras.setText("");
         }
     }
 
@@ -144,14 +178,14 @@ public class EditComprasActivity extends AppCompatActivity {
             if (cursor.moveToFirst()) {
                 originalBcCompras = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
 
-                etBcCompras.setText(cursor.getString(cursor.getColumnIndexOrThrow("bc_compras")));
-                etDescrCompras.setText(cursor.getString(cursor.getColumnIndexOrThrow("descr_compras")));
-                etCatCompras.setText(cursor.getString(cursor.getColumnIndexOrThrow("cat_compras")));
-                etPrecoCompras.setText(String.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow("preco_compras"))));
-                etQntCompras.setText(String.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow("qnt_compras"))));
-                etTotalCompras.setText(String.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow("total_compras"))));
-                etPeriodoCompras.setText(cursor.getString(cursor.getColumnIndexOrThrow("periodo_compras")));
-                etObsCompras.setText(cursor.getString(cursor.getColumnIndexOrThrow("obs_compras")));
+                bc_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("bc_compras")));
+                descr_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("descr_compras")));
+                cat_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("cat_compras")));
+                preco_compras.setText(String.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow("preco_compras"))));
+                qnt_compras.setText(String.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow("qnt_compras"))));
+                total_compras.setText(String.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow("total_compras"))));
+                periodo_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("periodo_compras")));
+                obs_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("obs_compras")));
             } else {
                 Toast.makeText(this, "Compra não encontrada", Toast.LENGTH_SHORT).show();
                 finish();
@@ -241,11 +275,11 @@ public class EditComprasActivity extends AppCompatActivity {
     // salvarEdicao com verificação
     private void salvarEdicao() {
         try {
-            String bc = etBcCompras.getText().toString().trim();
-            String descr = etDescrCompras.getText().toString().trim();
-            String cat = etCatCompras.getText().toString().trim();
-            String periodo = etPeriodoCompras.getText().toString().trim();
-            String obs = etObsCompras.getText().toString().trim();
+            String bc = bc_compras.getText().toString().trim();
+            String descr = descr_compras.getText().toString().trim();
+            String cat = cat_compras.getText().toString().trim();
+            String periodo = periodo_compras.getText().toString().trim();
+            String obs = obs_compras.getText().toString().trim();
 
             if (bc.isEmpty()) {
                 Toast.makeText(this, "Código é obrigatório", Toast.LENGTH_SHORT).show();
@@ -261,8 +295,8 @@ public class EditComprasActivity extends AppCompatActivity {
             double quantidade = 0;
 
             try {
-                String precoStr = etPrecoCompras.getText().toString();
-                String qntStr = etQntCompras.getText().toString();
+                String precoStr = preco_compras.getText().toString();
+                String qntStr = qnt_compras.getText().toString();
 
                 if (!precoStr.isEmpty()) preco = Double.parseDouble(precoStr);
                 if (!qntStr.isEmpty()) quantidade = Double.parseDouble(qntStr);
