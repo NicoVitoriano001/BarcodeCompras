@@ -4,7 +4,7 @@ public class BancoDados {
     private String descrIMDB;
     private String catIMDB;
 
-    // Construtor correto
+    // Construtor banco de dados
     public BancoDados(String bcIMDB, String descrIMDB, String catIMDB) {
         this.bcIMDB = bcIMDB;
         this.descrIMDB = descrIMDB;

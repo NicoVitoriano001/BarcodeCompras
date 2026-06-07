@@ -15,17 +15,17 @@ public class FirebaseManager {
     public void salvarCompra(Compra compra) {
 
         long now = System.currentTimeMillis();
-        compra.setUpdatedAt(now);
+        compra.setUpdateAt(now);
 
         dbRef.child(compra.getBcCompras())
                 .get()
                 .addOnSuccessListener(snapshot -> {
 
                     if (snapshot.exists()) {
-                        Long remoteTime = snapshot.child("updatedAt").getValue(Long.class);
+                        Long remoteTime = snapshot.child("updateAt").getValue(Long.class);
 
-                        if (remoteTime != null && remoteTime > compra.getUpdatedAt()) {
-                            return; // 🔥 remoto é mais novo
+                        if (remoteTime != null && remoteTime > compra.getUpdateAt()) {
+                            return; // remoto é mais novo
                         }
                     }
 

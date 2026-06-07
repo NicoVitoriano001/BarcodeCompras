@@ -10,16 +10,16 @@ public class FirebaseManager {
 
     public void salvarCompra(Compra compra) {
         long now = System.currentTimeMillis();
-        compra.setUpdatedAt(now);
+        compra.setUpdateAt(now);
 
         db.collection("compras")
                 .document(compra.getBcCompras())
                 .get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
-                        Long remoteTime = document.getLong("updatedAt");
+                        Long remoteTime = document.getLong("updateAt");
 
-                        if (remoteTime != null && remoteTime > compra.getUpdatedAt()) {
+                        if (remoteTime != null && remoteTime > compra.getUpdateAt()) {
                             return; // REMOTO É MAIS NOVO → NÃO SOBRESCREVE
                         }
                     }

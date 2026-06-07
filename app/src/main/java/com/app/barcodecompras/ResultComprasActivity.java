@@ -51,9 +51,9 @@ public class ResultComprasActivity extends AppCompatActivity {
         FirebaseHelper firebaseHelper = new FirebaseHelper(this, db);
 
         // Sincronizar Firebase para local AO ABRIR o app
-        firebaseHelper.syncFirebaseParaLocal();
+        // firebaseHelper.syncFirebaseParaLocal();
         // Sincronizar local para Firebase
-        firebaseHelper.syncLocalParaFirebase();
+        // firebaseHelper.syncLocalParaFirebase();
 
         // Obter critérios de busca da intent
         String codigo = getIntent().getStringExtra("CODIGO");
@@ -105,7 +105,7 @@ public class ResultComprasActivity extends AppCompatActivity {
                     Intent intent = new Intent(ResultComprasActivity.this, BuscarComprasActivity.class);
                     startActivity(intent);
                 } else if (id == R.id.nav_syncFirebase) {
-                    // ✅ USAR A VARIÁVEL GLOBAL firebaseHelper
+                    // USAR A VARIÁVEL GLOBAL firebaseHelper
                     if (firebaseHelper != null) {
                         firebaseHelper.syncCompleta();
                         Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();

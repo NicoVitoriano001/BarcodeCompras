@@ -3,7 +3,7 @@ public class Compra {
     private long id;
     private String bcCompras, descrCompras, catCompras, periodoCompras, obsCompras;
     private double precoCompras, totalCompras, qntCompras;
-    private long updatedAt;
+    private long updateAt;
 
     // Construtor
     public Compra(long id, String bcCompras, String descrCompras, String catCompras,
@@ -30,11 +30,9 @@ public class Compra {
     public double getTotalCompras() { return totalCompras; }
     public String getPeriodoCompras() { return periodoCompras; }
     public String getObsCompras() { return obsCompras; }
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
-    public void setUpdatedAt(long updatedAt) {
-        this.updatedAt = updatedAt;
+    public long getUpdateAt() {return updateAt;}
+    public void setUpdateAt(long updateAt) {
+        this.updateAt = updateAt;
     }
 
 }

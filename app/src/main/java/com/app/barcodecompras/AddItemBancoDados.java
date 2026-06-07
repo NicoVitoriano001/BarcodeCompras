@@ -63,10 +63,11 @@ public class AddItemBancoDados extends AppCompatActivity {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 200); // 250ms de delay
+            }, 500); // 250ms de delay
 
             return true;
         }); //DRAWER -- FIM
+
     }//FIM ON CREATE
 
     private void saveItem() {
@@ -79,7 +80,7 @@ public class AddItemBancoDados extends AppCompatActivity {
             return;
         }
 
-        long updatedAt = System.currentTimeMillis();
+        long updateAt = System.currentTimeMillis();
 
         ContentValues values = new ContentValues();
         values.put("bc_DB", barcode);
