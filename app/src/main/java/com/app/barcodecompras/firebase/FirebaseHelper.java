@@ -14,13 +14,16 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FirebaseHelper {
     private SQLiteDatabase db;
     private DatabaseReference ref;
     private Context context;
     private static final String TAG = "FirebaseHelper";
+    private static final String FIELD_TIMESTAMP = "updateAt";  // camelCase, sem underline
 
     public FirebaseHelper(Context context, SQLiteDatabase db) {
         this.context = context;
@@ -28,24 +31,27 @@ public class FirebaseHelper {
         this.ref = FirebaseDatabase.getInstance().getReference("compras");
     }
 
-    // Sync Firebase → Local (baixa APENAS itens modificados após última sincronização)
+    // Sync Firebase → Local
     public void syncFirebaseParaLocal() {
         long lastSyncTime = getLastSyncTime();
-        // Query otimizada: busca apenas itens com updateAt > lastSyncTime
-        Query query = ref.orderByChild("updateAt").startAt(lastSyncTime + 1);
+
+        Query query = ref.orderByChild(FIELD_TIMESTAMP).startAt(lastSyncTime + 1);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
+
                 long newestTimestamp = lastSyncTime;
-                List<String> modifiedIds = new ArrayList<>();
+                List<String> firebaseIds = new ArrayList<>();
 
                 for (DataSnapshot child : snapshot.getChildren()) {
-                    String bc = child.getKey();
-                    if (bc == null) continue;
+                    String itemId = child.getKey();
+                    if (itemId == null) continue;
 
-                    modifiedIds.add(bc);
+                    firebaseIds.add(itemId);
 
+                    long id = 0;
+                    String bc = "";
                     String descricao = "";
                     String categoria = "";
                     double preco = 0;
@@ -56,15 +62,25 @@ public class FirebaseHelper {
                     long updateAt = 0;
                     boolean deleted = false;
 
-                    // Ler cada campo individualmente
+                    // Ler ID (pode ser o mesmo da chave ou um campo separado)
+                    if (child.hasChild("id")) {
+                        Long val = child.child("id").getValue(Long.class);
+                        if (val != null) id = val;
+                    }
+
+                    if (child.hasChild("bc")) {
+                        String val = child.child("bc").getValue(String.class);
+                        if (val != null) bc = val;
+                    }
+
                     if (child.hasChild("descricao")) {
-                        descricao = child.child("descricao").getValue(String.class);
-                        if (descricao == null) descricao = "";
+                        String val = child.child("descricao").getValue(String.class);
+                        if (val != null) descricao = val;
                     }
 
                     if (child.hasChild("categoria")) {
-                        categoria = child.child("categoria").getValue(String.class);
-                        if (categoria == null) categoria = "";
+                        String val = child.child("categoria").getValue(String.class);
+                        if (val != null) categoria = val;
                     }
 
                     if (child.hasChild("preco")) {
@@ -85,17 +101,18 @@ public class FirebaseHelper {
                     }
 
                     if (child.hasChild("periodo")) {
-                        periodo = child.child("periodo").getValue(String.class);
-                        if (periodo == null) periodo = "";
+                        String val = child.child("periodo").getValue(String.class);
+                        if (val != null) periodo = val;
                     }
 
                     if (child.hasChild("obs")) {
-                        obs = child.child("obs").getValue(String.class);
-                        if (obs == null) obs = "";
+                        String val = child.child("obs").getValue(String.class);
+                        if (val != null) obs = val;
                     }
 
-                    if (child.hasChild("updateAt")) {
-                        Long val = child.child("updateAt").getValue(Long.class);
+                    // Usar FIELD_TIMESTAMP (updateAt)
+                    if (child.hasChild(FIELD_TIMESTAMP)) {
+                        Long val = child.child(FIELD_TIMESTAMP).getValue(Long.class);
                         if (val != null) {
                             updateAt = val;
                             if (updateAt > newestTimestamp) {
@@ -111,17 +128,18 @@ public class FirebaseHelper {
 
                     // Se marcado como deletado, remover do local
                     if (deleted) {
-                        db.delete("compras_tab", "bc_compras = ?", new String[]{bc});
+                        db.delete("compras_tab", "id = ?", new String[]{String.valueOf(id)});
                         continue;
                     }
 
-                    // Verificar se existe no banco local
+                    // Verificar se existe no banco local pelo ID
                     Cursor cursor = db.rawQuery(
-                            "SELECT id, updated_at FROM compras_tab WHERE bc_compras = ?",
-                            new String[]{bc}
+                            "SELECT id, updated_at FROM compras_tab WHERE id = ?",
+                            new String[]{String.valueOf(id)}
                     );
 
                     ContentValues values = new ContentValues();
+                    values.put("id", id);
                     values.put("bc_compras", bc);
                     values.put("descr_compras", descricao);
                     values.put("cat_compras", categoria);
@@ -137,22 +155,16 @@ public class FirebaseHelper {
                         cursor.close();
 
                         if (updateAt > localUpdated) {
-                            db.update("compras_tab", values, "bc_compras = ?", new String[]{bc});
-                            Log.d(TAG, "Atualizado item: " + bc);
+                            db.update("compras_tab", values, "id = ?", new String[]{String.valueOf(id)});
                         }
                     } else {
                         cursor.close();
                         db.insert("compras_tab", null, values);
-                        Log.d(TAG, "Inserido novo item: " + bc);
                     }
                 }
 
-                // Verificar se algum item foi deletado no Firebase (não retornou na query)
-                // Mas como a query usa startAt, itens deletados antes do lastSync não são detectados
-                // Para isso, mantemos uma lista de todos os IDs ativos no Firebase
                 checkForDeletedItems(newestTimestamp);
 
-                // Salvar novo timestamp se houver itens mais novos
                 if (newestTimestamp > lastSyncTime) {
                     saveLastSyncTime(newestTimestamp);
                 }
@@ -165,54 +177,11 @@ public class FirebaseHelper {
         });
     }
 
-    // Metodo auxiliar para detectar itens deletados no Firebase
-    private void checkForDeletedItems(long lastTimestamp) {
-        // Buscar todos os IDs ativos no Firebase (sem filtro de data)
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                List<String> activeIds = new ArrayList<>();
-
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    String bc = child.getKey();
-                    if (bc != null) {
-                        // Verificar se não está marcado como deletado
-                        Boolean deleted = child.child("deleted").getValue(Boolean.class);
-                        if (deleted == null || !deleted) {
-                            activeIds.add(bc);
-                        }
-                    }
-                }
-
-                // Remover itens locais que não estão mais ativos no Firebase
-                Cursor localCursor = db.rawQuery("SELECT bc_compras FROM compras_tab", null);
-                int deletedCount = 0;
-
-                while (localCursor.moveToNext()) {
-                    String localBc = localCursor.getString(0);
-                    if (!activeIds.contains(localBc)) {
-                        db.delete("compras_tab", "bc_compras = ?", new String[]{localBc});
-                        deletedCount++;
-                    }
-                }
-                localCursor.close();
-
-                if (deletedCount > 0) {
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-            }
-        });
-    }
-
-    // Sync Local → Firebase (envia APENAS itens modificados)
     public void syncLocalParaFirebase() {
         long lastSyncTime = getLastSyncTime();
 
         Cursor cursor = db.rawQuery(
-                "SELECT bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras, updated_at FROM compras_tab WHERE updated_at > ?",
+                "SELECT id, bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras, updated_at FROM compras_tab WHERE updated_at > ?",
                 new String[]{String.valueOf(lastSyncTime)}
         );
 
@@ -225,92 +194,166 @@ public class FirebaseHelper {
         long newestTimestamp = lastSyncTime;
 
         while (cursor.moveToNext()) {
-            String bc = cursor.getString(0);
-            String descricao = cursor.getString(1);
-            String categoria = cursor.getString(2);
-            double preco = cursor.getDouble(3);
-            double quantidade = cursor.getDouble(4);
-            double total = cursor.getDouble(5);
-            String periodo = cursor.getString(6);
-            String obs = cursor.getString(7);
-            long updateAt = cursor.getLong(8);
+            long id = cursor.getLong(0);
+            String bc = cursor.getString(1);
+            String descricao = cursor.getString(2);
+            String categoria = cursor.getString(3);
+            double preco = cursor.getDouble(4);
+            double quantidade = cursor.getDouble(5);
+            double total = cursor.getDouble(6);
+            String periodo = cursor.getString(7);
+            String obs = cursor.getString(8);
+            long updateAt = cursor.getLong(9);
 
             if (updateAt > newestTimestamp) {
                 newestTimestamp = updateAt;
             }
 
-            // Enviar apenas campos que mudaram (usando updateChildren para eficiência)
-            ref.child(bc).updateChildren(getItemMap(bc, descricao, categoria, preco, quantidade, total, periodo, obs, updateAt, false));
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", id);
+            itemMap.put("bc", bc);
+            itemMap.put("descricao", descricao);
+            itemMap.put("categoria", categoria);
+            itemMap.put("preco", preco);
+            itemMap.put("quantidade", quantidade);
+            itemMap.put("total", total);
+            itemMap.put("periodo", periodo);
+            itemMap.put("obs", obs);
+            itemMap.put(FIELD_TIMESTAMP, updateAt);
+            itemMap.put("deleted", false);
+
+            ref.child(String.valueOf(id)).setValue(itemMap);
         }
         cursor.close();
 
-        // Atualizar timestamp apenas se houve envio
         if (newestTimestamp > lastSyncTime) {
             saveLastSyncTime(newestTimestamp);
         }
 
     }
 
-    // Metodo auxiliar para criar mapa de atualização (evita recriar objeto a cada chamada)
-    private java.util.Map<String, Object> getItemMap(String bc, String descricao, String categoria,
-                                                     double preco, double quantidade, double total,
-                                                     String periodo, String obs, long updateAt, boolean deleted) {
-        java.util.Map<String, Object> map = new java.util.HashMap<>();
-        map.put("bc", bc);
-        map.put("descricao", descricao);
-        map.put("categoria", categoria);
-        map.put("preco", preco);
-        map.put("quantidade", quantidade);
-        map.put("total", total);
-        map.put("periodo", periodo);
-        map.put("obs", obs);
-        map.put("updateAt", updateAt);
-        map.put("deleted", deleted);
-        return map;
+    // Metodo auxiliar para detectar itens deletados
+    private void checkForDeletedItems(long lastTimestamp) {
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                List<String> activeIds = new ArrayList<>();
+
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    String itemId = child.getKey();
+                    if (itemId != null) {
+                        Boolean deleted = child.child("deleted").getValue(Boolean.class);
+                        if (deleted == null || !deleted) {
+                            activeIds.add(itemId);
+                        }
+                    }
+                }
+
+                Cursor localCursor = db.rawQuery("SELECT id FROM compras_tab", null);
+                int deletedCount = 0;
+
+                while (localCursor.moveToNext()) {
+                    String localId = String.valueOf(localCursor.getLong(0));
+                    if (!activeIds.contains(localId)) {
+                        db.delete("compras_tab", "id = ?", new String[]{localId});
+                        deletedCount++;
+                    }
+                }
+                localCursor.close();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e(TAG, "Erro ao verificar itens deletados: " + error.getMessage());
+            }
+        });
     }
 
-    // Sincronização completa (bidirecional otimizada)
+    // Sincronização completa
     public void syncCompleta() {
         syncLocalParaFirebase();
-        new android.os.Handler().postDelayed(() -> syncFirebaseParaLocal(), 1500);
+        new android.os.Handler().postDelayed(() -> syncFirebaseParaLocal(), 2500);
     }
 
-    // Deletar item com soft delete
-    public void deletarItem(String bc) {
+    // Deletar item
+    public void deletarItem(long id) {
         long updateAt = System.currentTimeMillis();
 
-        // Marcar como deletado no Firebase
-        ref.child(bc).child("deleted").setValue(true);
-        ref.child(bc).child("updateAt").setValue(updateAt);
+        ref.child(String.valueOf(id)).child("deleted").setValue(true);
+        ref.child(String.valueOf(id)).child(FIELD_TIMESTAMP).setValue(updateAt);
 
-        // Remover do banco local
-        db.delete("compras_tab", "bc_compras = ?", new String[]{bc});
-
-        // Atualizar timestamp local para próxima sincronização
+        db.delete("compras_tab", "id = ?", new String[]{String.valueOf(id)});
         saveLastSyncTime(updateAt);
+
     }
 
-    // Sincronizar um único item específico (útil após edição)
-    public void syncSingleItem(String bc) {
+    public void deletarItem(String bc) {
         Cursor cursor = db.rawQuery(
-                "SELECT bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras, updated_at FROM compras_tab WHERE bc_compras = ?",
+                "SELECT id FROM compras_tab WHERE bc_compras = ? ORDER BY id DESC LIMIT 1",
                 new String[]{bc}
         );
 
         if (cursor.moveToFirst()) {
-            String descricao = cursor.getString(1);
-            String categoria = cursor.getString(2);
-            double preco = cursor.getDouble(3);
-            double quantidade = cursor.getDouble(4);
-            double total = cursor.getDouble(5);
-            String periodo = cursor.getString(6);
-            String obs = cursor.getString(7);
-            long updateAt = cursor.getLong(8);
+            long id = cursor.getLong(0);
+            cursor.close();
+            deletarItem(id);
+        } else {
+            cursor.close();
+        }
+    }
 
-            ref.child(bc).updateChildren(getItemMap(bc, descricao, categoria, preco, quantidade, total, periodo, obs, updateAt, false));
+    // Sincronizar um único item
+    public void syncSingleItem(long id) {
+        Cursor cursor = db.rawQuery(
+                "SELECT id, bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras, updated_at FROM compras_tab WHERE id = ?",
+                new String[]{String.valueOf(id)}
+        );
+
+        if (cursor.moveToFirst()) {
+            long itemId = cursor.getLong(0);
+            String bc = cursor.getString(1);
+            String descricao = cursor.getString(2);
+            String categoria = cursor.getString(3);
+            double preco = cursor.getDouble(4);
+            double quantidade = cursor.getDouble(5);
+            double total = cursor.getDouble(6);
+            String periodo = cursor.getString(7);
+            String obs = cursor.getString(8);
+            long updateAt = cursor.getLong(9);
+
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", itemId);
+            itemMap.put("bc", bc);
+            itemMap.put("descricao", descricao);
+            itemMap.put("categoria", categoria);
+            itemMap.put("preco", preco);
+            itemMap.put("quantidade", quantidade);
+            itemMap.put("total", total);
+            itemMap.put("periodo", periodo);
+            itemMap.put("obs", obs);
+            itemMap.put(FIELD_TIMESTAMP, updateAt);
+            itemMap.put("deleted", false);
+
+            ref.child(String.valueOf(itemId)).setValue(itemMap);
+            Log.d(TAG, "Item único sincronizado - ID: " + itemId);
         }
         cursor.close();
     }
+
+//    public void syncSingleItem(String bc) {
+//        Cursor cursor = db.rawQuery(
+//                "SELECT id FROM compras_tab WHERE bc_compras = ? ORDER BY id DESC LIMIT 1",
+//                new String[]{bc}
+//        );
+//
+//        if (cursor.moveToFirst()) {
+//            long id = cursor.getLong(0);
+//            cursor.close();
+//            syncSingleItem(id);
+//        } else {
+//            cursor.close();
+//        }
+//    }
 
     private long getLastSyncTime() {
         return context.getSharedPreferences("sync", Context.MODE_PRIVATE)

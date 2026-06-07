@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle toggle;
     private BancoDadosBkp bancoDadosBkp;
     private FirebaseHelper firebaseHelper; // MOVER PARA VARIÁVEL GLOBAL
+    //private long compraId;
     private static final int REQUEST_CODE_ADD_ITEM = 1001;
 
 
@@ -88,8 +89,8 @@ public class MainActivity extends AppCompatActivity {
         periodo_compras.setText(getDataHoraAtual());
 
         periodo_compras.setOnClickListener(v -> showDatePickerDialog());
-        
-        saveButton.setOnClickListener(v -> saveData());       
+
+        saveButton.setOnClickListener(v -> saveData());
 
         scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(this);
@@ -113,17 +114,15 @@ public class MainActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
 
-        // INICIALIZAR VARIÁVEL GLOBAL
-        FirebaseHelper firebaseHelper = new FirebaseHelper(this, db);
-
+        firebaseHelper = new FirebaseHelper(this, db);
         // Sincronizar Firebase para local AO ABRIR o app
-        firebaseHelper.syncFirebaseParaLocal();
+        // firebaseHelper.syncFirebaseParaLocal();
         // Sincronizar local para Firebase
-        firebaseHelper.syncLocalParaFirebase();
+        // firebaseHelper.syncLocalParaFirebase();
 
         setupTextWatchers();
 
-        // CONFIGURAR NAVIGATION DRAWER CORRETAMENTE
+        // DRAWER INICIO
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -158,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
                 startActivity(intent);
             } else if (id == R.id.nav_syncFirebase) {
-                // ✅ USAR A VARIÁVEL GLOBAL firebaseHelper
+                // USAR A VARIÁVEL GLOBAL firebaseHelper
                 if (firebaseHelper != null) {
                     firebaseHelper.syncCompleta();
                     Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();
@@ -170,11 +169,11 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_restore) {
                 bancoDadosBkp.restaurarBackup();
             }
-
             drawer.closeDrawer(GravityCompat.START);
             return true;
         });
     }
+
     // FIM ONCREATE
 
 // inicio data calendário
@@ -290,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
 
         // DEFINIR O QUE PODE FICAR VAZIO QUANDO SALVA
         if (bc.isEmpty() || descr.isEmpty() || obs.isEmpty() ) {
-            Toast.makeText(this, "Código obrigatório", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "BC, Descr e OBS obrigatórios", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -316,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
 
         double total = preco * qnt;
 
-        long updatedAt = System.currentTimeMillis();
+        long updateAt = System.currentTimeMillis();
 
         ContentValues values = new ContentValues();
         values.put("bc_compras", bc);
@@ -327,100 +326,100 @@ public class MainActivity extends AppCompatActivity {
         values.put("total_compras", total);
         values.put("periodo_compras", periodo);
         values.put("obs_compras", obs);
-        values.put("updated_at", updatedAt);
+        values.put("updated_at", updateAt);
 
         long result = db.insert("compras_tab", null, values);
 
         if (result != -1) {
-            enviarParaFirebase(bc, descr, cat, preco, qnt, total, periodo, obs, updatedAt);
+            enviarParaFirebase(result, bc, descr, cat, preco, qnt, total, periodo, obs, updateAt);
             Toast.makeText(this, "Salvo", Toast.LENGTH_SHORT).show();
             clearFields();
         }
     }
 
-
-
     // METODO PARA ATUALIZAR (EDITAR) ITEM
-    private void updateData(String bcOriginal) {
-        String bc = bc_compras.getText().toString().trim();
-        String descr = descr_compras.getText().toString().trim();
-        String cat = cat_compras.getText().toString().trim();
-        String obs = obs_compras.getText().toString().trim();
-        String periodo = periodo_compras.getText().toString();
+//    private void updateData(long id) {
+//        String bc = bc_compras.getText().toString().trim();
+//        String descr = descr_compras.getText().toString().trim();
+//        String cat = cat_compras.getText().toString().trim();
+//        String obs = obs_compras.getText().toString().trim();
+//        String periodo = periodo_compras.getText().toString();
+//
+//        if (bc.isEmpty() || descr.isEmpty()) {
+//            Toast.makeText(this, "Código e descrição são obrigatórios", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//
+//        double preco = 0, qnt = 0;
+//        try {
+//            String precoStr = preco_compras.getText().toString();
+//            String qntStr = qnt_compras.getText().toString();
+//            if (!precoStr.isEmpty()) preco = Double.parseDouble(precoStr);
+//            if (!qntStr.isEmpty()) qnt = Double.parseDouble(qntStr);
+//        } catch (Exception e) {
+//            Toast.makeText(this, "Erro nos valores", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//
+//        double total = preco * qnt;
+//        long updateAt = System.currentTimeMillis();
+//
+//        ContentValues values = new ContentValues();
+//        values.put("bc_compras", bc);
+//        values.put("descr_compras", descr);
+//        values.put("cat_compras", cat);
+//        values.put("preco_compras", preco);
+//        values.put("qnt_compras", qnt);
+//        values.put("total_compras", total);
+//        values.put("periodo_compras", periodo);
+//        values.put("obs_compras", obs);
+//        values.put("updated_at", updateAt);
+//
+//        int result = db.update("compras_tab", values, "id = ?", new String[]{String.valueOf(id)});        if (result > 0) {
+//            enviarParaFirebase(compraId, bc, descr, cat, preco, qnt, total, periodo, obs, updateAt);            Toast.makeText(this, "Atualizado com sucesso", Toast.LENGTH_SHORT).show();
+//            clearFields();
+//        } else {
+//            Toast.makeText(this, "Erro ao atualizar", Toast.LENGTH_SHORT).show();
+//        }
+//    }
+//
+//    // METODO PARA DELETAR ITEM
+//    private void deletarItem(long id) {
+//        new AlertDialog.Builder(this)
+//                .setTitle("Confirmar exclusão")
+//                .setMessage("Tem certeza que deseja excluir este item?")
+//                .setPositiveButton("Sim", (dialog, which) -> {
+//
+//                    firebaseHelper.deletarItem(String.valueOf(id));
+//
+//                    db.delete("compras_tab", "id = ?", new String[]{String.valueOf(id)});
+//
+//                    Toast.makeText(this, "Item excluído", Toast.LENGTH_SHORT).show();
+//                    clearFields();
+//                })
+//                .setNegativeButton("Não", null)
+//                .show();
+//    }
 
-        if (bc.isEmpty() || descr.isEmpty()) {
-            Toast.makeText(this, "Código e descrição são obrigatórios", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        double preco = 0, qnt = 0;
-        try {
-            String precoStr = preco_compras.getText().toString();
-            String qntStr = qnt_compras.getText().toString();
-            if (!precoStr.isEmpty()) preco = Double.parseDouble(precoStr);
-            if (!qntStr.isEmpty()) qnt = Double.parseDouble(qntStr);
-        } catch (Exception e) {
-            Toast.makeText(this, "Erro nos valores", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        double total = preco * qnt;
-        long updatedAt = System.currentTimeMillis();
-
-        ContentValues values = new ContentValues();
-        values.put("bc_compras", bc);
-        values.put("descr_compras", descr);
-        values.put("cat_compras", cat);
-        values.put("preco_compras", preco);
-        values.put("qnt_compras", qnt);
-        values.put("total_compras", total);
-        values.put("periodo_compras", periodo);
-        values.put("obs_compras", obs);
-        values.put("updated_at", updatedAt);
-
-        int result = db.update("compras_tab", values, "bc_compras = ?", new String[]{bcOriginal});
-
-        if (result > 0) {
-            enviarParaFirebase(bc, descr, cat, preco, qnt, total, periodo, obs, updatedAt);
-            Toast.makeText(this, "Atualizado com sucesso", Toast.LENGTH_SHORT).show();
-            clearFields();
-        } else {
-            Toast.makeText(this, "Erro ao atualizar", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    // METODO PARA DELETAR ITEM
-    private void deletarItem(String bc) {
-        new AlertDialog.Builder(this)
-                .setTitle("Confirmar exclusão")
-                .setMessage("Tem certeza que deseja excluir este item?")
-                .setPositiveButton("Sim", (dialog, which) -> {
-                    firebaseHelper.deletarItem(bc);
-                    db.delete("compras_tab", "bc_compras = ?", new String[]{bc});
-                    Toast.makeText(this, "Item excluído", Toast.LENGTH_SHORT).show();
-                    clearFields();
-                })
-                .setNegativeButton("Não", null)
-                .show();
-    }
-
-    private void enviarParaFirebase(String bc, String descr, String cat,
+    private void enviarParaFirebase(long id, String bc, String descr, String cat,
                                     double preco, double qnt, double total,
-                                    String periodo, String obs, long updatedAt){
+                                    String periodo, String obs, long updateAt){
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
 
-        // USAR OS NOMES CORRETOS DAS COLUNAS DO FIREBASE
-        ref.child(bc).child("bc").setValue(bc);
-        ref.child(bc).child("descricao").setValue(descr);      // ← descr do app vai para descricao
-        ref.child(bc).child("categoria").setValue(cat);        // ← cat do app vai para categoria
-        ref.child(bc).child("preco").setValue(preco);
-        ref.child(bc).child("quantidade").setValue(qnt);
-        ref.child(bc).child("total").setValue(total);
-        ref.child(bc).child("periodo").setValue(periodo);
-        ref.child(bc).child("obs").setValue(obs);
-        ref.child(bc).child("updateAt").setValue(updatedAt);
-        ref.child(bc).child("deleted").setValue(false);
+        String key = String.valueOf(id);
+
+        ref.child(key).child("id").setValue(id);
+        ref.child(key).child("bc").setValue(bc);
+        ref.child(key).child("descricao").setValue(descr);
+        ref.child(key).child("categoria").setValue(cat);
+        ref.child(key).child("preco").setValue(preco);
+        ref.child(key).child("quantidade").setValue(qnt);
+        ref.child(key).child("total").setValue(total);
+        ref.child(key).child("periodo").setValue(periodo);
+        ref.child(key).child("obs").setValue(obs);
+        ref.child(key).child("updateAt").setValue(updateAt);
+        ref.child(key).child("deleted").setValue(false);
     }
 
     private void clearFields() {

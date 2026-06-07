@@ -16,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.database.BancoDadosBkp;
+import com.app.barcodecompras.database.DatabaseHelper;
 import com.app.barcodecompras.firebase.FirebaseHelper;
 import com.google.android.material.navigation.NavigationView;
 
@@ -68,7 +70,7 @@ public class EditComprasActivity extends AppCompatActivity {
         btnCancelar.setOnClickListener(v -> finish());
         btnExcluir.setOnClickListener(v -> excluirCompra());
 
-        // Drawer
+        // DRAWER INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
         navigationView = findViewById(R.id.edit_compras_nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -82,11 +84,21 @@ public class EditComprasActivity extends AppCompatActivity {
                     startActivity(new Intent(EditComprasActivity.this, AddItemBancoDados.class));
                 } else if (id == R.id.nav_busca_bancodados) {
                     startActivity(new Intent(EditComprasActivity.this, BuscarBancoDadosActivity.class));
+                } else if (id == R.id.nav_syncFirebase) {
+                    // USAR A VARIÁVEL GLOBAL firebaseHelper
+                    if (firebaseHelper != null) {
+                        firebaseHelper.syncCompleta();
+                        Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Erro: FirebaseHelper não inicializado", Toast.LENGTH_SHORT).show();
+                    }
+                   // startActivity(new Intent(EditComprasActivity.this, BuscarBancoDadosActivity.class));
                 }
             }, 200);
 
             return true;
         });
+        // DRAWER FIM
     }
 
     private void initViews() {
@@ -98,6 +110,7 @@ public class EditComprasActivity extends AppCompatActivity {
         etTotalCompras = findViewById(R.id.etTotalCompras);
         etPeriodoCompras = findViewById(R.id.etPeriodoCompras);
         etObsCompras = findViewById(R.id.etObsCompras);
+
         btnSalvar = findViewById(R.id.btnSalvar);
         btnCancelar = findViewById(R.id.btnCancelar);
         btnExcluir = findViewById(R.id.btnExcluir);
@@ -121,11 +134,10 @@ public class EditComprasActivity extends AppCompatActivity {
         }
     }
 
-    // CORRIGIDO: loadCompraData com verificação
+    // loadCompraData com verificação
     private void loadCompraData(long id) {
         Cursor cursor = null;
         try {
-            // USAR "id" como inteiro (sem aspas)
             cursor = db.rawQuery("SELECT * FROM compras_tab WHERE id = ?",
                     new String[]{String.valueOf(id)});
 
@@ -154,7 +166,7 @@ public class EditComprasActivity extends AppCompatActivity {
         }
     }
 
-    // CORRIGIDO: excluirCompra com mais verificações
+    // excluirCompra com mais verificações
     private void excluirCompra() {
         // Verificar se o ID é válido
         if (compraId == -1) {
@@ -188,7 +200,7 @@ public class EditComprasActivity extends AppCompatActivity {
 
                         // 2. Deletar do Firebase
                         if (firebaseHelper != null && originalBcCompras != null) {
-                            firebaseHelper.deletarItem(originalBcCompras);
+                            firebaseHelper.deletarItem(String.valueOf(compraId));
                             Toast.makeText(this, "Sincronizando com Firebase...", Toast.LENGTH_SHORT).show();
                         }
 
@@ -226,7 +238,7 @@ public class EditComprasActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // CORRIGIDO: salvarEdicao com verificação
+    // salvarEdicao com verificação
     private void salvarEdicao() {
         try {
             String bc = etBcCompras.getText().toString().trim();
@@ -260,7 +272,7 @@ public class EditComprasActivity extends AppCompatActivity {
             }
 
             double total = preco * quantidade;
-            long updatedAt = System.currentTimeMillis();
+            long updateAt = System.currentTimeMillis();
 
             ContentValues values = new ContentValues();
             values.put("bc_compras", bc);
@@ -271,7 +283,7 @@ public class EditComprasActivity extends AppCompatActivity {
             values.put("total_compras", total);
             values.put("periodo_compras", periodo);
             values.put("obs_compras", obs);
-            values.put("updated_at", updatedAt);
+            values.put("updated_at", updateAt);
 
             int rowsAffected = db.update(
                     "compras_tab",

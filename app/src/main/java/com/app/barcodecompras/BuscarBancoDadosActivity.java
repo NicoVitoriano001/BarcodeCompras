@@ -87,9 +87,10 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 200); // 250ms de delay
+            }, 500); // 250ms de delay
             return true;
         });//DRAWER -- FIM
+
     } // FIM ON CREATE
 
     // Resultado do scanner ZXing
@@ -147,7 +148,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         }
     }
 
-    // Método auxiliar para obter a instância do banco
+    // Metodo auxiliar para obter a instância do banco
     private SQLiteDatabase getDatabase() {
         if (db == null || !db.isOpen()) {
             DatabaseHelper dbHelper = new DatabaseHelper(this);
