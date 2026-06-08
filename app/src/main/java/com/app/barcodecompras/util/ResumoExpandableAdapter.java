@@ -1,17 +1,15 @@
-package com.app.barcodecompras;
+package com.app.barcodecompras.util;
+
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
-import android.widget.ExpandableListView;
 
 import java.util.List;
 import java.util.Map;
 
 public class ResumoExpandableAdapter extends BaseExpandableListAdapter {
-
     private Context context;
     private List<String> groups;
     private Map<String, String> children;

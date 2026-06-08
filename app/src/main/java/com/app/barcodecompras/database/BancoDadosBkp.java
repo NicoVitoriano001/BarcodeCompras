@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -78,12 +79,32 @@ public class BancoDadosBkp {
             String dataHora = LocalDateTime.now()
                     .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String nomeArquivoBKP = "comprasDB_" + dataHora + ".db";
+
             File arquivoBackup = new File(BACKUP_DIR, nomeArquivoBKP);
             File arquivoDB = context.getDatabasePath("comprasDB.db");
 
             if (!arquivoDB.exists()) {
                 Toast.makeText(context, "Banco de dados não encontrado!", Toast.LENGTH_SHORT).show();
                 return;
+            }
+
+
+            // 2026.06.07 OTIMIZAÇÃO DO BANCO ANTES DO BACKUP
+            SQLiteDatabase db = null;
+
+            try {
+                db = dbHelper.getWritableDatabase();
+
+                db.execSQL("PRAGMA wal_checkpoint(FULL);"); // garante consistência
+                db.execSQL("VACUUM;");                      // limpa e compacta
+                db.execSQL("ANALYZE;");                     // otimiza índices
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (db != null && db.isOpen()) {
+                    db.close();
+                }
             }
 
             copiarArquivo(arquivoDB, arquivoBackup);

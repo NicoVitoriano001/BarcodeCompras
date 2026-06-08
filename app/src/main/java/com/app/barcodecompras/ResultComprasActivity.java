@@ -4,13 +4,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,7 +16,12 @@ import android.widget.ExpandableListView;
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
 import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.util.DrawerUtil; //2026.06.07
+
+import com.app.barcodecompras.util.ResumoExpandableAdapter;
 import com.google.android.material.navigation.NavigationView;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,7 @@ public class ResultComprasActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private BancoDadosBkp bancoDadosBkp;
+    private FirebaseHelper firebaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +50,8 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
 
-        // INICIALIZAR VARIÁVEL GLOBAL
-        FirebaseHelper firebaseHelper = new FirebaseHelper(this, db);
+        // INICIALIZAR VARIÁVEL LOCAL
+        firebaseHelper = new FirebaseHelper(this, db);
 
         // Sincronizar Firebase para local AO ABRIR o app
         // firebaseHelper.syncFirebaseParaLocal();
@@ -81,47 +84,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         // DRAWER -- INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
         navigationView = findViewById(R.id.resul_compras_nav_view);
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            drawer.closeDrawer(GravityCompat.START);
-
-            // Adicione um pequeno delay para evitar travamentos
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, ResultComprasActivity.class));
-                } else if (id == R.id.nav_gallery) {
-                    // Ação para galeria
-                    Toast.makeText(this, "Galeria", Toast.LENGTH_SHORT).show();
-                } else if (id == R.id.nav_slideshow) {
-                    // Ação para slideshow
-                    Toast.makeText(this, "Slideshow", Toast.LENGTH_SHORT).show();
-                } else if (id == R.id.nav_add_bancodados) {
-                    Intent intent = new Intent(ResultComprasActivity.this, AddItemBancoDados.class);
-                    startActivity(intent);
-                } else if (id == R.id.nav_busca_bancodados) {
-                    Intent intent = new Intent(ResultComprasActivity.this, BuscarBancoDadosActivity.class);
-                    startActivity(intent);
-                } else if (id == R.id.nav_busca_compras) {
-                    Intent intent = new Intent(ResultComprasActivity.this, BuscarComprasActivity.class);
-                    startActivity(intent);
-                } else if (id == R.id.nav_syncFirebase) {
-                    // USAR A VARIÁVEL GLOBAL firebaseHelper
-                    if (firebaseHelper != null) {
-                        firebaseHelper.syncCompleta();
-                        Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Erro: FirebaseHelper não inicializado", Toast.LENGTH_SHORT).show();
-                    }
-                } else if (id == R.id.nav_backup) {
-                    bancoDadosBkp.showBackupConfirmationDialog();
-                } else if (id == R.id.nav_restore) {
-                    bancoDadosBkp.restaurarBackup();
-                }
-                // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 200); // 250ms de delay
-            return true;
-        });
-        // DRAWER -- FIM
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
 
         TextView tvMedia = findViewById(R.id.tvMedia);
         ExpandableListView expandable = findViewById(R.id.expandableResumo);

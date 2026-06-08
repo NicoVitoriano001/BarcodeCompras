@@ -1,6 +1,5 @@
 package com.app.barcodecompras;
 
-import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,11 +16,11 @@ import com.app.barcodecompras.firebase.FirebaseHelper;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.util.DatePickerUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -32,9 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.zxing.integration.android.IntentResult;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
+import com.app.barcodecompras.util.DrawerUtil; //2026.06.07
 
 public class MainActivity extends AppCompatActivity {
     private EditText bc_compras, descr_compras, cat_compras, preco_compras,
@@ -47,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle toggle;
     private BancoDadosBkp bancoDadosBkp;
     private FirebaseHelper firebaseHelper; // MOVER PARA VARIÁVEL GLOBAL
-    //private long compraId;
     private static final int REQUEST_CODE_ADD_ITEM = 1001;
 
 
@@ -86,9 +82,10 @@ public class MainActivity extends AppCompatActivity {
         qntEditText = qnt_compras;
         totalEditText = total_compras;
 
-        periodo_compras.setText(getDataHoraAtual());
-
-        periodo_compras.setOnClickListener(v -> showDatePickerDialog());
+        periodo_compras.setText(DatePickerUtil.getDataHoraAtual());
+        periodo_compras.setOnClickListener(v ->
+                DatePickerUtil.showDatePickerDialog(this, periodo_compras)
+        );
 
         saveButton.setOnClickListener(v -> saveData());
 
@@ -135,73 +132,10 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
 
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-
-            if (id == R.id.nav_home) {
-                startActivity(new Intent(this, MainActivity.class));
-            } else if (id == R.id.nav_gallery) {
-                // Ação para galeria
-                Toast.makeText(this, "Galeria", Toast.LENGTH_SHORT).show();
-            } else if (id == R.id.nav_slideshow) {
-                // Ação para slideshow
-                Toast.makeText(this, "Slideshow", Toast.LENGTH_SHORT).show();
-            } else if (id == R.id.nav_add_bancodados) {
-                Intent intent = new Intent(MainActivity.this, AddItemBancoDados.class);
-                startActivity(intent);
-            } else if (id == R.id.nav_busca_bancodados) {
-                Intent intent = new Intent(MainActivity.this, BuscarBancoDadosActivity.class);
-                startActivity(intent);
-            } else if (id == R.id.nav_busca_compras) {
-                Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
-                startActivity(intent);
-            } else if (id == R.id.nav_syncFirebase) {
-                // USAR A VARIÁVEL GLOBAL firebaseHelper
-                if (firebaseHelper != null) {
-                    firebaseHelper.syncCompleta();
-                    Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Erro: FirebaseHelper não inicializado", Toast.LENGTH_SHORT).show();
-                }
-            } else if (id == R.id.nav_backup) {
-                bancoDadosBkp.showBackupConfirmationDialog();
-            } else if (id == R.id.nav_restore) {
-                bancoDadosBkp.restaurarBackup();
-            }
-            drawer.closeDrawer(GravityCompat.START);
-            return true;
-        });
     }
-
     // FIM ONCREATE
-
-// inicio data calendário
-    private void showDatePickerDialog() {
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                (view, selectedYear, selectedMonth, selectedDay) -> {
-                    Calendar selectedDate = Calendar.getInstance();
-                    selectedDate.set(selectedYear, selectedMonth, selectedDay);
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
-                    periodo_compras.setText(sdf.format(selectedDate.getTime()));
-                },
-                year, month, day);
-        datePickerDialog.show();
-    }
-
-    public String getDataHoraAtual() {
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
-        return sdf.format(calendar.getTime());
-    }
-//fim data calendario
 
 // Resultado do scanner ZXing
     @Override
@@ -393,6 +327,5 @@ public class MainActivity extends AppCompatActivity {
         precoEditText.addTextChangedListener(watcher);
         qntEditText.addTextChangedListener(watcher);
     }
-
 
 }

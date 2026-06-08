@@ -4,17 +4,17 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -28,6 +28,8 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private SQLiteDatabase db;
     private Button scanButtonBuscaDB;
+    private BancoDadosBkp bancoDadosBkp;
+    private FirebaseHelper firebaseHelper;
 
 
     @Override
@@ -55,6 +57,10 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         // Banco de dados
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
+        bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
+
+        // INICIALIZAR VARIÁVEL LOCAL
+        firebaseHelper = new FirebaseHelper(this, db);
 
         // Configurar listeners
         btnBuscarBancoDados.setOnClickListener(v -> realizarBuscaBancoDados());
@@ -63,35 +69,10 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         //DRAWER -- INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
         navigationView = findViewById(R.id.busca_bancodados_nav_view);
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            drawer.closeDrawer(GravityCompat.START);
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
 
-            // Adicione um pequeno delay para evitar travamentos
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemBancoDados.class));
-                } else if (id == R.id.nav_busca_bancodados) {
-                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
-                } else if (id == R.id.nav_backup) {
-                    // Agora usando o padrão de Intent com extra
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.putExtra("ACTION", "BACKUP");
-                    startActivity(intent);
-                } else if (id == R.id.nav_restore) {
-                    // Agora usando o padrão de Intent com extra
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.putExtra("ACTION", "RESTORE");
-                    startActivity(intent);
-                }
-                // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 500); // 250ms de delay
-            return true;
-        });//DRAWER -- FIM
-
-    } // FIM ON CREATE
+    }
+    // FIM ON CREATE
 
     // Resultado do scanner ZXing
     @Override

@@ -75,11 +75,13 @@ public class EditBancoDadosActivity extends AppCompatActivity {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 200); // 250ms de delay
+            }, 250); // 250ms de delay
 
             return true;
-        }); //DRAWER -- INICIO
-    }//fim on create
+        });
+        //DRAWER -- INICIO
+    }
+    //fim on create
 
     private void initViews() {
         etBcBancoDados = findViewById(R.id.etBcBancoDados);
@@ -120,7 +122,6 @@ public class EditBancoDadosActivity extends AppCompatActivity {
             Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
             negativeButton.setTextColor(Color.WHITE);
         });
-
         dialog.show();
     }
 

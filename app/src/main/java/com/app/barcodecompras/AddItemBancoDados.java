@@ -1,19 +1,18 @@
 package com.app.barcodecompras;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
 
 public class AddItemBancoDados extends AppCompatActivity {
@@ -22,6 +21,8 @@ public class AddItemBancoDados extends AppCompatActivity {
     private SQLiteDatabase db;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private BancoDadosBkp bancoDadosBkp;
+    private FirebaseHelper firebaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,9 @@ public class AddItemBancoDados extends AppCompatActivity {
 
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
+        bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
+
+        firebaseHelper = new FirebaseHelper(this, db);
 
         // Configurar listeners
         saveButton.setOnClickListener(v -> saveItem());
@@ -49,24 +53,8 @@ public class AddItemBancoDados extends AppCompatActivity {
         //DRAWER -- INICIO
         drawer = findViewById(R.id.edit_drawer_layout);
         navigationView = findViewById(R.id.add_bancodados_nav_view);
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            drawer.closeDrawer(GravityCompat.START);
 
-            // Adicione um pequeno delay para evitar travamentos
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemBancoDados.class));
-                } else if (id == R.id.nav_busca_bancodados) {
-                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
-                }
-                // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 500); // 250ms de delay
-
-            return true;
-        }); //DRAWER -- FIM
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
 
     }//FIM ON CREATE
 
