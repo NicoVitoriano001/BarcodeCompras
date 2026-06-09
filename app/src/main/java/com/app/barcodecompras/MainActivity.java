@@ -38,14 +38,13 @@ public class MainActivity extends AppCompatActivity {
             qnt_compras, total_compras, periodo_compras, obs_compras;
 
     private EditText precoEditText, qntEditText, totalEditText;
-    private MaterialButton scanButton, saveButton, cancelButton;
+    private MaterialButton scanButton, saveButton, cancelButton, addButton;
     private SQLiteDatabase db;
     private DrawerLayout drawer;
     private ActionBarDrawerToggle toggle;
     private BancoDadosBkp bancoDadosBkp;
     private FirebaseHelper firebaseHelper; // MOVER PARA VARIÁVEL GLOBAL
     private static final int REQUEST_CODE_ADD_ITEM = 1001;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         periodo_compras = findViewById(R.id.periodo_compras);
         obs_compras = findViewById(R.id.obs_compras);
 
+        addButton = findViewById(R.id.addButtonMain);
         scanButton = findViewById(R.id.scanButtonMain);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 DatePickerUtil.showDatePickerDialog(this, periodo_compras)
         );
 
-        saveButton.setOnClickListener(v -> saveData());
+        addButton.setOnClickListener(v -> buscarItensParaAdicionar());
 
         scanButton.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(this);
@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
             integrator.setBeepEnabled(false);
             integrator.initiateScan();
         });
+
+        saveButton.setOnClickListener(v -> saveData());
 
         cancelButton.setOnClickListener(v -> {
             clearFields();
@@ -212,6 +214,120 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton("Não", null)
                 .show();
     }
+
+    private void buscarItensParaAdicionar() {
+
+        if (db == null || !db.isOpen()) {
+            DatabaseHelper dbHelper = new DatabaseHelper(this);
+            db = dbHelper.getWritableDatabase();
+        }
+
+        String codigo = bc_compras.getText().toString().trim();
+        String descricao = descr_compras.getText().toString().trim();
+        String categoria = cat_compras.getText().toString().trim();
+
+        if (descricao.isEmpty() && categoria.isEmpty()) {
+            Toast.makeText(this,
+                    "Informe Descrição ou Categoria",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (descricao.length() < 2 && categoria.length() < 2) {
+            Toast.makeText(this,
+                    "Digite pelo menos 2 caracteres para busca",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        StringBuilder query = new StringBuilder(
+                "SELECT bc_DB, descr_DB, cat_DB FROM bancodados_tab WHERE 1=1"
+        );
+
+        java.util.List<String> params = new java.util.ArrayList<>();
+
+        // APLICAR FILTROS
+        adicionarFiltro(query, params, "bc_DB", codigo, false);
+        adicionarFiltro(query, params, "descr_DB", descricao, true);
+        adicionarFiltro(query, params, "cat_DB", categoria, true);
+
+        query.append(" ORDER BY descr_DB");
+
+        Cursor cursor = db.rawQuery(query.toString(), params.toArray(new String[0]));
+
+        if (cursor == null || cursor.getCount() == 0) {
+            Toast.makeText(this, "Nenhum item encontrado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] itens = new String[cursor.getCount()];
+        String[] codigos = new String[cursor.getCount()];
+
+        int i = 0;
+        while (cursor.moveToNext()) {
+            String cod = cursor.getString(0);
+            String desc = cursor.getString(1);
+            String cat = cursor.getString(2);
+
+            codigos[i] = cod;
+            itens[i] = desc + "\n" + cat + "\n" + "────────────";
+            //itens[i] = cod + " - " + desc + " (" + cat + ")";
+            i++;
+        }
+
+        int totalItens = cursor.getCount();
+
+        cursor.close();
+
+        new AlertDialog.Builder(this)
+                .setTitle("Escolha um item (" + totalItens + ")")
+                .setItems(itens, (dialog, which) -> {
+
+                    String codigoSelecionado = codigos[which];
+
+                    // MESMA REGRA DO SCAN
+                    bc_compras.setText(codigoSelecionado);
+                    fetchItemDataBancoDadosTable(codigoSelecionado);
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+    private void adicionarFiltro(StringBuilder query,
+                                 java.util.List<String> params,
+                                 String campo,
+                                 String valor,
+                                 boolean usarReplace) {
+
+        if (valor == null || valor.trim().isEmpty()) return;
+
+        String[] termos = valor.trim().split(" ");
+
+        for (String termo : termos) {
+
+            if (termo.startsWith("-") && termo.length() > 1) {
+                // EXCLUSÃO (NOT LIKE)
+                String termoLimpo = termo.substring(1);
+
+                if (usarReplace) {
+                    query.append(" AND REPLACE(").append(campo).append(", ' ', '%') NOT LIKE ?");
+                    params.add("%" + termoLimpo.replace(" ", "%") + "%");
+                } else {
+                    query.append(" AND ").append(campo).append(" NOT LIKE ?");
+                    params.add("%" + termoLimpo + "%");
+                }
+
+            } else {
+                // INCLUSÃO (LIKE)
+                if (usarReplace) {
+                    query.append(" AND REPLACE(").append(campo).append(", ' ', '%') LIKE ?");
+                    params.add("%" + termo.replace(" ", "%") + "%");
+                } else {
+                    query.append(" AND ").append(campo).append(" LIKE ?");
+                    params.add("%" + termo + "%");
+                }
+            }
+        }
+    }
+
 
     private void saveData() {
 

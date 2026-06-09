@@ -8,12 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
-import android.app.DatePickerDialog;
 import android.widget.Toast;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
@@ -65,10 +60,12 @@ public class BuscarComprasActivity extends AppCompatActivity {
         // Banco de dados
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
+
         firebaseHelper = new FirebaseHelper(this, db);
+
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
 
-        etBuscaPeriodo.setText(DatePickerUtil.getDataHoraAtual());
+        etBuscaPeriodo.setText(DatePickerUtil.getDataHoraAtual2());
         etBuscaPeriodo.setOnClickListener(v ->
                 DatePickerUtil.showDatePickerDialog(this, etBuscaPeriodo)
         );

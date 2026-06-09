@@ -39,4 +39,10 @@ public class DatePickerUtil {
         SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
         return sdf.format(calendar.getTime());
     }
+
+    public static String getDataHoraAtual2() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
 }

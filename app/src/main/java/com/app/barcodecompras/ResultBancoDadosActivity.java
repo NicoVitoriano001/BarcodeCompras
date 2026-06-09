@@ -130,7 +130,7 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             cursor = db.rawQuery(query, params.toArray(new String[0]));
 
             if (cursor != null && cursor.getCount() > 0) {
-                itemCount = cursor.getCount(); // ✅ Obter total de itens
+                itemCount = cursor.getCount(); // Obter total de itens
 
                 while (cursor.moveToNext()) {
                     String bc = cursor.getString(0);
