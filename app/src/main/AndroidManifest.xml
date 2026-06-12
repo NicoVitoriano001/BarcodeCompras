@@ -6,7 +6,7 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- Necessário para Android 11+ -->
+<!-- Necessário para Android 11+ -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
@@ -19,7 +19,7 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_launcher_background"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -40,12 +40,12 @@
             android:theme="@style/Theme.BarcodeCompras"
             android:windowSoftInputMode="stateVisible"/>
 
-        <!-- 05.05.2025 Usar esse para padronizar igual ao Main (salvo Result compras) -->
+<!-- 2025.05.05 Usar esse para padronizar igual ao Main (salvo Result compras) -->
         <activity android:name=".BuscarComprasActivity"
             android:theme="@style/Theme.BarcodeCompras" />
         <activity android:name=".BuscarBancoDadosActivity"
             android:theme="@style/Theme.BarcodeCompras" />
-        <!--android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/> -->
+    <!--android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/> -->
 
         <activity android:name=".EditComprasActivity"
             android:theme="@style/Theme.BarcodeCompras" />
@@ -54,9 +54,12 @@
         <activity android:name=".EditBancoDadosActivity"
             android:theme="@style/Theme.BarcodeCompras" />
 
-           <!-- 05.05.2025 ResultComprasActivity deixa como está  -->
+<!-- 2025.05.05 ResultComprasActivity deixa como está  -->
         <activity android:name=".ResultComprasActivity" />
         <activity android:name=".ResultBancoDadosActivity" />
+
+<!-- 2026.06.11 Classe criada para editar Categorias  -->
+        <activity android:name=".ListarCategoriasActivity"/>
 
     </application>
 </manifest>

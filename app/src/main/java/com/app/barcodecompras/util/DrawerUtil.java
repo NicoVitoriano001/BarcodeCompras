@@ -12,6 +12,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.app.barcodecompras.AddItemBancoDados;
 import com.app.barcodecompras.BuscarBancoDadosActivity;
 import com.app.barcodecompras.BuscarComprasActivity;
+import com.app.barcodecompras.ListarCategoriasActivity;
 import com.app.barcodecompras.MainActivity;
 import com.app.barcodecompras.R;
 import com.app.barcodecompras.ResultComprasActivity;
@@ -47,6 +48,9 @@ public class DrawerUtil {
 
                 } else if (id == R.id.nav_busca_compras) {
                     activity.startActivity(new Intent(activity, BuscarComprasActivity.class));
+
+                }    else if (id == R.id.nav_listar_categorias) {
+                    activity.startActivity(new Intent(activity, ListarCategoriasActivity.class));
 
                 } else if (id == R.id.nav_syncFirebase) {
                     if (firebaseHelper != null) {

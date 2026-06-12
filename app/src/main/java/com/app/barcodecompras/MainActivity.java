@@ -135,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
 
         NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
-
     }
     // FIM ONCREATE
 
@@ -327,7 +326,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 
     private void saveData() {
 

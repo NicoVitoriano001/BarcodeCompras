@@ -74,6 +74,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
 
         // Configurar listeners
         btnBuscar.setOnClickListener(v -> realizarBusca());
+
         btnCancelar.setOnClickListener(v -> finish());
 
         //DRAWER -- INICIO
