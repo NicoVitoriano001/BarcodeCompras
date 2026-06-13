@@ -87,8 +87,21 @@ public class ListarCategoriasActivity extends AppCompatActivity {
         // click na lista
         listView.setOnItemClickListener((parent, view, position, id) -> {
             String categoriaSelecionada = adapter.getItem(position);
-            abrirDialogEdicao(categoriaSelecionada);
+
+            String[] opcoes = {"Editar", "Excluir"};
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Escolha uma ação")
+                    .setItems(opcoes, (dialog, which) -> {
+                        if (which == 0) {
+                            abrirDialogEdicao(categoriaSelecionada);
+                        } else {
+                            confirmarExclusao(categoriaSelecionada);
+                        }
+                    })
+                    .show();
         });
+
 
         // Layout container
         LinearLayout layout = new LinearLayout(this);
@@ -101,14 +114,51 @@ public class ListarCategoriasActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Categorias")
                 .setView(layout)
+                .setPositiveButton("Nova Categoria", (d, w) -> {
+                    abrirDialogCriacao();
+                })
                 .setNegativeButton("Fechar", (d, w) -> finish())
                 .show();
     }
+
+
+    private void abrirDialogCriacao() {
+        EditText input = new EditText(this);
+        input.setHint("Nome da categoria");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("Nova Categoria")
+                .setView(input)
+                .setPositiveButton("Salvar", null)
+                .setNegativeButton("Cancelar", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String novaCategoria = input.getText().toString().trim();
+
+            if (novaCategoria.isEmpty()) {
+                input.setError("Campo obrigatório");
+                return;
+            }
+
+            inserirCategoria(novaCategoria);
+            dialog.dismiss();
+        });
+    }
+
 
     private void abrirDialogEdicao(String categoriaAtual) {
 
         EditText input = new EditText(this);
         input.setHint("Nova categoria");
+
+        // ✅ PREENCHE COM O VALOR ATUAL
+        input.setText(categoriaAtual);
+
+        // ✅ POSICIONA O CURSOR NO FINAL
+        input.setSelection(categoriaAtual.length());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle("Editar Categoria")
@@ -127,6 +177,12 @@ public class ListarCategoriasActivity extends AppCompatActivity {
             if (novaCategoria.isEmpty()) {
                 input.setError("Campo obrigatório");
                 return; // NÃO FECHA SE CATEGORIA VAZIA
+            }
+
+            // ✅ opcional: evitar atualização desnecessária
+            if (novaCategoria.equals(categoriaAtual)) {
+                dialog.dismiss();
+                return;
             }
 
             atualizarCategoria(categoriaAtual, novaCategoria);
@@ -155,6 +211,49 @@ public class ListarCategoriasActivity extends AppCompatActivity {
 
         finish();
     }
+
+
+    private void inserirCategoria(String categoria) {
+        ContentValues values = new ContentValues();
+        values.put("cat_DB", categoria);
+
+        long result = db.insert("bancodados_tab", null, values);
+
+        if (result != -1) {
+            Toast.makeText(this, "Categoria criada com sucesso", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Erro ao criar categoria", Toast.LENGTH_SHORT).show();
+        }
+
+        finish(); // mantém mesma lógica da Activity
+    }
+
+
+    private void confirmarExclusao(String categoria) {
+        new AlertDialog.Builder(this)
+                .setTitle("Excluir")
+                .setMessage("Deseja excluir a categoria?\n" + categoria)
+                .setPositiveButton("Sim", (d, w) -> deletarCategoria(categoria))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void deletarCategoria(String categoria) {
+        int linhas = db.delete(
+                "bancodados_tab",
+                "cat_DB = ?",
+                new String[]{categoria}
+        );
+
+        if (linhas > 0) {
+            Toast.makeText(this, "Categoria excluída", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Erro ao excluir", Toast.LENGTH_SHORT).show();
+        }
+
+        finish();
+    }
+
 
     @Override
     protected void onDestroy() {
