@@ -21,8 +21,6 @@ import com.app.barcodecompras.util.DrawerUtil; //2026.06.07
 import com.app.barcodecompras.util.ResumoExpandableAdapter;
 import com.google.android.material.navigation.NavigationView;
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,9 +51,9 @@ public class ResultComprasActivity extends AppCompatActivity {
         // INICIALIZAR VARIÁVEL LOCAL
         firebaseHelper = new FirebaseHelper(this, db);
 
-        // Sincronizar Firebase para local AO ABRIR o app
+        // >>> Sincronizar Firebase para local AO ABRIR o app
         // firebaseHelper.syncFirebaseParaLocal();
-        // Sincronizar local para Firebase
+        // >>> Sincronizar local para Firebase
         // firebaseHelper.syncLocalParaFirebase();
 
         // Obter critérios de busca da intent
