@@ -10,7 +10,6 @@ public class BancoDados {
         this.descrIMDB = descrIMDB;
         this.catIMDB = catIMDB;
     }
-
     // Getters
     public String getBcIMDB() {
         return bcIMDB;

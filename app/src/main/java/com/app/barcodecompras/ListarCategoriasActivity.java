@@ -102,7 +102,6 @@ public class ListarCategoriasActivity extends AppCompatActivity {
                     .show();
         });
 
-
         // Layout container
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -148,16 +147,15 @@ public class ListarCategoriasActivity extends AppCompatActivity {
         });
     }
 
-
     private void abrirDialogEdicao(String categoriaAtual) {
 
         EditText input = new EditText(this);
         input.setHint("Nova categoria");
 
-        // ✅ PREENCHE COM O VALOR ATUAL
+        // PREENCHE COM O VALOR ATUAL
         input.setText(categoriaAtual);
 
-        // ✅ POSICIONA O CURSOR NO FINAL
+        // POSICIONA O CURSOR NO FINAL
         input.setSelection(categoriaAtual.length());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
@@ -179,7 +177,7 @@ public class ListarCategoriasActivity extends AppCompatActivity {
                 return; // NÃO FECHA SE CATEGORIA VAZIA
             }
 
-            // ✅ opcional: evitar atualização desnecessária
+            // opcional: evitar atualização desnecessária
             if (novaCategoria.equals(categoriaAtual)) {
                 dialog.dismiss();
                 return;

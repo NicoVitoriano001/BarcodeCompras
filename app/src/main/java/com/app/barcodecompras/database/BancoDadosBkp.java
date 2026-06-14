@@ -221,4 +221,5 @@ public class BancoDadosBkp {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
         }
     }
+
 }

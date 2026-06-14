@@ -3,12 +3,15 @@ package com.app.barcodecompras;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.ExpandableListView;
@@ -43,6 +46,22 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerViewCompras);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // ADICIONA O DIVISOR NO RV ENTRE OS ITENS 2026.06.14
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
+                recyclerView.getContext(),
+                LinearLayoutManager.VERTICAL
+        );
+
+        Drawable divider = ContextCompat.getDrawable(this, R.drawable.divider_itens_rv);
+        if (divider != null) {
+            dividerItemDecoration.setDrawable(divider);
+            recyclerView.addItemDecoration(dividerItemDecoration);
+        } else {
+            // Fallback: usa divisor padrão do sistema
+            recyclerView.addItemDecoration(dividerItemDecoration);
+        }
+        // ===== FIM DO DIVISOR =====
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 

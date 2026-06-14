@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
             return;
         }
-        if (descricao.length() < 2 && categoria.length() < 2) {
+        if (descricao.length() < 3 && categoria.length() < 3) {
             Toast.makeText(this,
                     "Digite pelo menos 2 caracteres para busca",
                     Toast.LENGTH_SHORT).show();
@@ -268,8 +268,8 @@ public class MainActivity extends AppCompatActivity {
             String cat = cursor.getString(2);
 
             codigos[i] = cod;
-            itens[i] = desc + "\n" + cat + "\n" + "────────────";
-            //itens[i] = cod + " - " + desc + " (" + cat + ")";
+            //itens[i] = desc + "\n" + cat + "\n" + "────────────";
+            itens[i] = cod + "\n" + desc + "\n" + cat + "\n" + "────────────";
             i++;
         }
 

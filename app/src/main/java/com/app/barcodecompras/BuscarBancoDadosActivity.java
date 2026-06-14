@@ -19,6 +19,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+
 public class BuscarBancoDadosActivity extends AppCompatActivity {
     private static final int EDIT_DB_REQUEST = 1;
     private static final int BUSCA_DB_REQUEST = 1001;
