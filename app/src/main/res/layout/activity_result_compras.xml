@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:text="Soma parcial: $"
             android:textStyle="bold"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:gravity="center"
             android:layout_marginBottom="16dp"
             android:textColor="@color/cinza_Gainsboro"/>
@@ -31,11 +31,11 @@
             android:id="@+id/tvMedia"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:gravity="center"
             android:layout_marginBottom="8dp"
-            android:textColor="@color/green"/>
+            android:gravity="center"
+            android:textColor="@color/yellow"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <ExpandableListView
             android:id="@+id/expandableResumo"
