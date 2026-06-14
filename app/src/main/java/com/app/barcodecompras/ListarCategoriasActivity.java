@@ -54,6 +54,8 @@ public class ListarCategoriasActivity extends AppCompatActivity {
         while (cursor.moveToNext()) {
             lista.add(cursor.getString(0));
         }
+
+        int quantidadeCategorias = cursor.getCount(); //pega quantidade que retorna
         cursor.close();
 
         // Cria componentes
@@ -111,7 +113,8 @@ public class ListarCategoriasActivity extends AppCompatActivity {
         layout.addView(listView);
 
         new AlertDialog.Builder(this)
-                .setTitle("Categorias")
+                .setTitle("Categorias (" + quantidadeCategorias + ")")
+                //.setTitle("Categorias")
                 .setView(layout)
                 .setPositiveButton("Nova Categoria", (d, w) -> {
                     abrirDialogCriacao();
