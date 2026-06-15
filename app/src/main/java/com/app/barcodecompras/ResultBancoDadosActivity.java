@@ -9,13 +9,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.app.barcodecompras.database.BancoDados;
 import com.app.barcodecompras.database.BancoDadosAdapter;
+import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.util.DrawerUtil;
+import com.google.android.material.navigation.NavigationView;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +34,10 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private List<BancoDados> BancoDadosList = new ArrayList<>();
     private TextView tvTitle; // Adicionar referência ao TextView
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
+    private BancoDadosBkp bancoDadosBkp;
+    private FirebaseHelper firebaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +108,19 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
 
             loadBancoDados(codigo, descricao, categoria);
         }
+
+        //inicializar corretamente
+        bancoDadosBkp = new BancoDadosBkp(this, dbHelper);
+        firebaseHelper = new FirebaseHelper(this, db);
+
+        // DRAWER -- INICIO
+        drawer = findViewById(R.id.result_bancodados_drawer_layout);
+        navigationView = findViewById(R.id.resul_bancodados_nav_view);
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
+
     }
+    // FIM ON CREATE
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -117,9 +139,7 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         // Verifica se todos os critérios estão vazios
         if (codigo.isEmpty() && descricao.isEmpty() && categoria.isEmpty()) {
             Toast.makeText(this, "Informe pelo menos um critério de busca", Toast.LENGTH_SHORT).show();
-            // Atualizar título mesmo sem resultados
-            tvTitle.setText("Itens do Banco de Dados (0 itens)");
-            adapter.notifyDataSetChanged();
+            finish(); // ✅ FECHA A ACTIVITY IMEDIATAMENTE
             return;
         }
 

@@ -59,7 +59,7 @@ public class EditBancoDadosActivity extends AppCompatActivity {
         btnExcluir.setOnClickListener(v -> excluirItem());
 
         //DRAWER -- INICIO
-        drawer = findViewById(R.id.edit_drawer_layout);
+        drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.edit_bancodados_nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -75,13 +75,13 @@ public class EditBancoDadosActivity extends AppCompatActivity {
                     startActivity(new Intent(this, BuscarBancoDadosActivity.class));
                 }
                 // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 250); // 250ms de delay
+            }, 200); // 250ms de delay
 
             return true;
         });
-        //DRAWER -- INICIO
+
     }
-    //fim on create
+    //FIM ON CREATE
 
     private void initViews() {
         etBcBancoDados = findViewById(R.id.etBcBancoDados);

@@ -2,6 +2,7 @@ package com.app.barcodecompras;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -16,11 +17,12 @@ import android.text.Editable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.util.CategoriaItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListarCategoriasActivity extends AppCompatActivity {
+public class ConfigCategoriasActivity extends AppCompatActivity {
 
     private SQLiteDatabase db;
 
@@ -39,7 +41,11 @@ public class ListarCategoriasActivity extends AppCompatActivity {
     private void listarCategorias() {
 
         Cursor cursor = db.rawQuery(
-                "SELECT cat_DB FROM bancodados_tab GROUP BY cat_DB",
+                "SELECT cat_DB, COUNT(*) AS quantidade " +
+                        "FROM bancodados_tab " +
+                        "WHERE cat_DB IS NOT NULL AND cat_DB != '' " +
+                        "GROUP BY cat_DB " +
+                        "ORDER BY cat_DB ASC",
                 null
         );
 
@@ -49,76 +55,78 @@ public class ListarCategoriasActivity extends AppCompatActivity {
             return;
         }
 
-        List<String> lista = new ArrayList<>();
+        List<CategoriaItem> lista = new ArrayList<>();
 
         while (cursor.moveToNext()) {
-            lista.add(cursor.getString(0));
+            String categoria = cursor.getString(0);
+            int quantidade = cursor.getInt(1);
+
+            lista.add(new CategoriaItem(categoria, quantidade));
         }
 
-        int quantidadeCategorias = cursor.getCount(); //pega quantidade que retorna
         cursor.close();
 
-        // Cria componentes
+        // COMPONENTES
         EditText searchInput = new EditText(this);
         searchInput.setHint("Buscar categoria...");
 
         ListView listView = new ListView(this);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        ArrayAdapter<CategoriaItem> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
                 new ArrayList<>(lista)
         );
-
+        toString();
         listView.setAdapter(adapter);
 
-        // FILTRO EM TEMPO REAL
+        // FILTRO
         searchInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 adapter.getFilter().filter(s);
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
+            @Override public void afterTextChanged(Editable s) {}
         });
 
-        // click na lista
+        // CLICK
         listView.setOnItemClickListener((parent, view, position, id) -> {
-            String categoriaSelecionada = adapter.getItem(position);
 
-            String[] opcoes = {"Editar", "Excluir"};
+            // IMPORTANTE: recuperar categoria REAL (sem o "(x)")
+            CategoriaItem item = adapter.getItem(position);
+            String categoriaSelecionada = item.nome;
+
+            String[] opcoes = {"Editar", "Excluir", "Configurar"};
 
             new AlertDialog.Builder(this)
                     .setTitle("Escolha uma ação")
                     .setItems(opcoes, (dialog, which) -> {
+
                         if (which == 0) {
                             abrirDialogEdicao(categoriaSelecionada);
-                        } else {
+
+                        } else if (which == 1) {
                             confirmarExclusao(categoriaSelecionada);
+
+                        } else if (which == 2) {
+                            abrirConfiguracao(categoriaSelecionada);
                         }
+
                     })
                     .show();
         });
 
-        // Layout container
+        // LAYOUT
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(32, 16, 32, 16);
-
         layout.addView(searchInput);
         layout.addView(listView);
 
         new AlertDialog.Builder(this)
-                .setTitle("Categorias (" + quantidadeCategorias + ")")
-                //.setTitle("Categorias")
+                .setTitle("Categorias (" + adapter.getCount() + ")")
                 .setView(layout)
-                .setPositiveButton("Nova Categoria", (d, w) -> {
-                    abrirDialogCriacao();
-                })
+                .setPositiveButton("Nova Categoria", (d, w) -> abrirDialogCriacao())
                 .setNegativeButton("Fechar", (d, w) -> finish())
                 .show();
     }
@@ -191,6 +199,20 @@ public class ListarCategoriasActivity extends AppCompatActivity {
             dialog.dismiss(); // fecha só se estiver válido
         });
     }
+
+
+    private void abrirConfiguracao(String categoria) {
+
+        Intent intent = new Intent(this, ResultBancoDadosActivity.class);
+
+        intent.putExtra("CODIGO", "");
+        intent.putExtra("DESCRICAO", "");
+        intent.putExtra("CATEGORIA", categoria);
+
+        startActivity(intent);
+    }
+
+
 
     private void atualizarCategoria(String categoriaAntiga, String novaCategoria) {
 

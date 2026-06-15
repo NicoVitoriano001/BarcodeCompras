@@ -59,7 +59,7 @@
         <activity android:name=".ResultBancoDadosActivity" />
 
 <!-- 2026.06.11 Classe criada para editar Categorias  -->
-        <activity android:name=".ListarCategoriasActivity"/>
+        <activity android:name=".ConfigCategoriasActivity"/>
 
     </application>
 </manifest>

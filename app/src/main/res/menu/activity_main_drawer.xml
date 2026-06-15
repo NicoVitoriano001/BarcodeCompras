@@ -29,7 +29,7 @@
             android:title="Busca BancoDados" />
         <item
             android:id="@+id/nav_listar_categorias"
-            android:title="Editar Categorias"
+            android:title="Configurar Categorias"
             android:icon="@drawable/ic_edit_24dp" />
     </group>
 

@@ -99,7 +99,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         });
 
         // DRAWER -- INICIO
-        drawer = findViewById(R.id.edit_drawer_layout);
+        drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.resul_compras_nav_view);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
 

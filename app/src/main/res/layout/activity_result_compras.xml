@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/edit_drawer_layout"
+    android:id="@+id/result_compras_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
@@ -59,7 +59,7 @@
             tools:itemCount="3"/>
     </LinearLayout>
 
-    <!-- Navigation View -->
+    <!-- MENU LATERAL -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/resul_compras_nav_view"
         android:layout_width="wrap_content"

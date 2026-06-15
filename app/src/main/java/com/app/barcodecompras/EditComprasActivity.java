@@ -80,12 +80,12 @@ public class EditComprasActivity extends AppCompatActivity {
         btnExcluir.setOnClickListener(v -> excluirCompra());
 
         // DRAWER INICIO
-        drawer = findViewById(R.id.edit_drawer_layout);
+        drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.edit_compras_nav_view);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
 
     }
-// ONCREATE FIM
+// FIM ON CREATE
 
     private void initViews() {
         bc_compras = findViewById(R.id.etBcCompras);

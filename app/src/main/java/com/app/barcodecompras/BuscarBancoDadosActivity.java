@@ -68,7 +68,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         btnCancelarBancoDados.setOnClickListener(v -> finish());
 
         //DRAWER -- INICIO
-        drawer = findViewById(R.id.edit_drawer_layout);
+        drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.busca_bancodados_nav_view);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
 

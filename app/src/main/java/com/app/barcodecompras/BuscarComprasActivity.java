@@ -69,8 +69,6 @@ public class BuscarComprasActivity extends AppCompatActivity {
         etBuscaPeriodo.setOnClickListener(v ->
                 DatePickerUtil.showDatePickerDialog(this, etBuscaPeriodo)
         );
-        //etBuscaPeriodo.setText(getDataHoraAtual());
-        //etBuscaPeriodo.setOnClickListener(v -> showDatePickerDialog());
 
         // Configurar listeners
         btnBuscar.setOnClickListener(v -> realizarBusca());
@@ -78,7 +76,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
         btnCancelar.setOnClickListener(v -> finish());
 
         //DRAWER -- INICIO
-        drawer = findViewById(R.id.edit_drawer_layout);
+        drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.busca_compras_nav_view);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);//        navigationView.setNavigationItemSelectedListener(item -> {
 
