@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
             return;
         }
-        if (descricao.length() < 3 && categoria.length() < 3) {
+        if (descricao.length() < 2 && categoria.length() < 2) {
             Toast.makeText(this,
                     "Digite pelo menos 2 caracteres para busca",
                     Toast.LENGTH_SHORT).show();
