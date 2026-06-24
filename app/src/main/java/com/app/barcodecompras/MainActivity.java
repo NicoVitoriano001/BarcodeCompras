@@ -12,7 +12,9 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.app.AlertDialog;
-import com.app.barcodecompras.firebase.FirebaseHelper;
+
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private ActionBarDrawerToggle toggle;
     private BancoDadosBkp bancoDadosBkp;
-    private FirebaseHelper firebaseHelper; // MOVER PARA VARIÁVEL GLOBAL
+    private FirebaseComprasHelper firebaseComprasHelper; // MOVER PARA VARIÁVEL GLOBAL
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
     private static final int REQUEST_CODE_ADD_ITEM = 1001;
 
     @Override
@@ -113,7 +116,9 @@ public class MainActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
 
-        firebaseHelper = new FirebaseHelper(this, db);
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
+
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
         // Sincronizar Firebase para local AO ABRIR o app
         // firebaseHelper.syncFirebaseParaLocal();
         // Sincronizar local para Firebase
@@ -134,8 +139,7 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
-        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
-    }
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);    }
     // FIM ONCREATE
 
 // Resultado do scanner ZXing

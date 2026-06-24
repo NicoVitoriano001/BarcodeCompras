@@ -13,7 +13,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
-import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -30,7 +31,8 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private Button scanButtonBuscaDB;
     private BancoDadosBkp bancoDadosBkp;
-    private FirebaseHelper firebaseHelper;
+    private FirebaseComprasHelper firebaseComprasHelper;
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
 
 
     @Override
@@ -61,7 +63,9 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
 
         // INICIALIZAR VARIÁVEL LOCAL
-        firebaseHelper = new FirebaseHelper(this, db);
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
+
 
         // Configurar listeners
         btnBuscarBancoDados.setOnClickListener(v -> realizarBuscaBancoDados());
@@ -70,7 +74,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         //DRAWER -- INICIO
         drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.busca_bancodados_nav_view);
-        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
 
     }
     // FIM ON CREATE

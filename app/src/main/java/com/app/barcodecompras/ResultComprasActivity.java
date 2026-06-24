@@ -18,7 +18,8 @@ import android.widget.ExpandableListView;
 
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
-import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.DrawerUtil; //2026.06.07
 
 import com.app.barcodecompras.util.ResumoExpandableAdapter;
@@ -37,7 +38,8 @@ public class ResultComprasActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private BancoDadosBkp bancoDadosBkp;
-    private FirebaseHelper firebaseHelper;
+    private FirebaseComprasHelper firebaseComprasHelper;
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +70,8 @@ public class ResultComprasActivity extends AppCompatActivity {
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
 
         // INICIALIZAR VARIÁVEL LOCAL
-        firebaseHelper = new FirebaseHelper(this, db);
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
 
         // >>> Sincronizar Firebase para local AO ABRIR o app
         // firebaseHelper.syncFirebaseParaLocal();
@@ -101,8 +104,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         // DRAWER -- INICIO
         drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.resul_compras_nav_view);
-        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
-
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
         TextView tvMedia = findViewById(R.id.tvMedia);
         ExpandableListView expandable = findViewById(R.id.expandableResumo);
 

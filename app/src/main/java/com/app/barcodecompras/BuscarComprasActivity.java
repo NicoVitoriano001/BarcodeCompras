@@ -12,7 +12,8 @@ import android.widget.Toast;
 
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
-import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.DatePickerUtil;
 import com.app.barcodecompras.util.DrawerUtil; //2026.06.07
 
@@ -29,7 +30,8 @@ public class BuscarComprasActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private SQLiteDatabase db;
     private Button scanButtonBuscaCompras;
-    private FirebaseHelper firebaseHelper;
+    private FirebaseComprasHelper firebaseComprasHelper;
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
     private BancoDadosBkp bancoDadosBkp;
 
     @Override
@@ -61,9 +63,9 @@ public class BuscarComprasActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
 
-        firebaseHelper = new FirebaseHelper(this, db);
-
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
 
         etBuscaPeriodo.setText(DatePickerUtil.getDataHoraAtual2());
         etBuscaPeriodo.setOnClickListener(v ->
@@ -78,7 +80,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
         //DRAWER -- INICIO
         drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.busca_compras_nav_view);
-        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);//        navigationView.setNavigationItemSelectedListener(item -> {
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
 
     }
     // FIM ON CREATE

@@ -16,7 +16,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
-import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.DatePickerUtil;
 import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
@@ -27,12 +28,13 @@ public class EditComprasActivity extends AppCompatActivity {
             qnt_compras, total_compras, periodo_compras, obs_compras;
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
-    private FirebaseHelper firebaseHelper;
     private long compraId;
     private String originalBcCompras;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private BancoDadosBkp bancoDadosBkp;
+    private FirebaseComprasHelper firebaseComprasHelper;
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
 
 
     @Override
@@ -46,7 +48,8 @@ public class EditComprasActivity extends AppCompatActivity {
 
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
 
-        firebaseHelper = new FirebaseHelper(this, db);
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
 
         periodo_compras.setText(DatePickerUtil.getDataHoraAtual());
         periodo_compras.setOnClickListener(v ->
@@ -82,8 +85,7 @@ public class EditComprasActivity extends AppCompatActivity {
         // DRAWER INICIO
         drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.edit_compras_nav_view);
-        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
-
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
     }
 // FIM ON CREATE
 
@@ -185,8 +187,8 @@ public class EditComprasActivity extends AppCompatActivity {
                         checkCursor.close();
 
                         // 2. Deletar do Firebase
-                        if (firebaseHelper != null && originalBcCompras != null) {
-                            firebaseHelper.deletarItem(String.valueOf(compraId));
+                        if (firebaseComprasHelper != null && originalBcCompras != null) {
+                            firebaseComprasHelper.deletarItem(String.valueOf(compraId));
                             Toast.makeText(this, "Sincronizando com Firebase...", Toast.LENGTH_SHORT).show();
                         }
 
@@ -280,9 +282,9 @@ public class EditComprasActivity extends AppCompatActivity {
 
             if (rowsAffected > 0) {
                 // Enviar atualização para o Firebase
-                if (firebaseHelper != null) {
+                if (firebaseComprasHelper != null) {
                     new Handler().postDelayed(() -> {
-                        firebaseHelper.syncLocalParaFirebase();
+                        firebaseComprasHelper.syncLocalParaFirebase();
                     }, 500);
                 }
 

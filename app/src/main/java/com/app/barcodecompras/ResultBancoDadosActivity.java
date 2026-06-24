@@ -18,7 +18,8 @@ import com.app.barcodecompras.database.BancoDados;
 import com.app.barcodecompras.database.BancoDadosAdapter;
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
-import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
 
@@ -37,7 +38,8 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private BancoDadosBkp bancoDadosBkp;
-    private FirebaseHelper firebaseHelper;
+    private FirebaseComprasHelper firebaseComprasHelper;
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,12 +113,14 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
 
         //inicializar corretamente
         bancoDadosBkp = new BancoDadosBkp(this, dbHelper);
-        firebaseHelper = new FirebaseHelper(this, db);
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);
+
 
         // DRAWER -- INICIO
         drawer = findViewById(R.id.result_bancodados_drawer_layout);
         navigationView = findViewById(R.id.resul_bancodados_nav_view);
-        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseHelper, bancoDadosBkp);
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
 
     }
     // FIM ON CREATE
@@ -139,11 +143,11 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         // Verifica se todos os critérios estão vazios
         if (codigo.isEmpty() && descricao.isEmpty() && categoria.isEmpty()) {
             Toast.makeText(this, "Informe pelo menos um critério de busca", Toast.LENGTH_SHORT).show();
-            finish(); // ✅ FECHA A ACTIVITY IMEDIATAMENTE
+            finish(); // FECHA A ACTIVITY IMEDIATAMENTE
             return;
         }
 
-        String query = "SELECT bc_DB, descr_DB, cat_DB FROM bancodados_tab WHERE 1=1";
+        String query = "SELECT id, bc_DB, descr_DB, cat_DB, updated_at FROM bancodados_tab WHERE 1=1";
 
         List<String> params = new ArrayList<>();
 
@@ -174,11 +178,13 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
                 itemCount = cursor.getCount(); // Obter total de itens
 
                 while (cursor.moveToNext()) {
-                    String bc = cursor.getString(0);
-                    String desc = cursor.getString(1);
-                    String cat = cursor.getString(2);
+                    long id = cursor.getLong(0);
+                    String bc = cursor.getString(1);
+                    String desc = cursor.getString(2);
+                    String cat = cursor.getString(3);
+                    long updatedAt = cursor.getLong(4);
 
-                    BancoDados bancodados = new BancoDados(bc, desc, cat);
+                    BancoDados bancodados = new BancoDados(id, bc, desc, cat, updatedAt);
                     BancoDadosList.add(bancodados);
                 }
 

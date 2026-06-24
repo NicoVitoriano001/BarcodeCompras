@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "comprasDB.db";
-    private static final int DATABASE_VERSION = 2; // aumente versão
+    private static final int DATABASE_VERSION = 3; // aumente versão
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -30,9 +30,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         //Tabela banco de dados
         db.execSQL("CREATE TABLE IF NOT EXISTS bancodados_tab (" +
-                "bc_DB TEXT PRIMARY KEY, " +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "bc_DB NUMBER, " +
                 "descr_DB TEXT, " +
-                "cat_DB TEXT)");
+                "cat_DB TEXT," +
+                "updated_at INTEGER)");
     }
 
     @Override

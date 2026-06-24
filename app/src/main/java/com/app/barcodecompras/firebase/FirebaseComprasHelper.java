@@ -18,14 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FirebaseHelper {
+public class FirebaseComprasHelper {
     private SQLiteDatabase db;
     private DatabaseReference ref;
     private Context context;
     private static final String TAG = "FirebaseHelper";
     private static final String FIELD_TIMESTAMP = "updateAt";  // camelCase, sem underline
 
-    public FirebaseHelper(Context context, SQLiteDatabase db) {
+    public FirebaseComprasHelper(Context context, SQLiteDatabase db) {
         this.context = context;
         this.db = db;
         this.ref = FirebaseDatabase.getInstance().getReference("compras");
