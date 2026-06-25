@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,7 +24,10 @@ public class FirebaseBancoDadosHelper {
     private static final String TAG = "FirebaseBancoDados";
     private static final String FIELD_TIMESTAMP = "updateAt";  // camelCase, sem underline
     private static final String TABLE_NAME = "bancodados_tab";
-    private static final String FIREBASE_NODE = "bancodados2"; // Novo nó no Firebase
+    private static final String FIREBASE_NODE = "bancodados2"; // Nó no Firebase
+    private static final String PREF_NAME = "sync_bancodados";
+    private static final String KEY_LAST_SYNC_FIREBASE_LOCAL = "last_sync_time_firebase_para_local";
+    private static final String KEY_LAST_SYNC_LOCAL_FIREBASE = "last_sync_time_local_para_firebase";
 
     public FirebaseBancoDadosHelper(Context context, SQLiteDatabase db) {
         this.context = context;
@@ -35,7 +37,7 @@ public class FirebaseBancoDadosHelper {
 
     // 2026.06.24 FIREBASE → LOCAL (mesma lógica do FirebaseComprasHelper)
     public void syncFirebaseParaLocal(Runnable onComplete) {
-        long lastSyncTime = getLastSyncTime();
+        long lastSyncTime = getLastSyncFirebaseParaLocalTime();
 
         Query query = ref.orderByChild(FIELD_TIMESTAMP).startAt(lastSyncTime + 1);
 
@@ -119,7 +121,7 @@ public class FirebaseBancoDadosHelper {
                 checkForDeletedItems();
 
                 if (newestTimestamp > lastSyncTime) {
-                    saveLastSyncTime(newestTimestamp);
+                    saveLastSyncFirebaseParaLocalTime(newestTimestamp);
                 }
 
                 if (onComplete != null) {
@@ -138,8 +140,8 @@ public class FirebaseBancoDadosHelper {
 
 
     // 2026.06.24 LOCAL → FIREBASE (mesma lógica do FirebaseComprasHelper)
-        public void syncLocalParaFirebase() {
-        long lastSyncTime = getLastSyncTime();
+    public void syncLocalParaFirebase() {
+        long lastSyncTime = getLastSyncLocalParaFirebaseTime();
 
         Cursor cursor = db.rawQuery(
                 "SELECT id, bc_DB, descr_DB, cat_DB, updated_at FROM " + TABLE_NAME +
@@ -178,7 +180,7 @@ public class FirebaseBancoDadosHelper {
         cursor.close();
 
         if (newestTimestamp > lastSyncTime) {
-            saveLastSyncTime(newestTimestamp);
+            saveLastSyncLocalParaFirebaseTime(newestTimestamp);
         }
     }
 
@@ -219,42 +221,15 @@ public class FirebaseBancoDadosHelper {
 
     // 2026.06.24 SYNC COMPLETA (BIDIRECIONAL)
     public void syncCompleta() {
+        // Banco Firebase já conhecido como não vazio.
+        // Evita ref.get(), que baixava o nó bancodados2 inteiro apenas para validar existência de filhos.
 
-        ref.get().addOnSuccessListener(snapshot -> {
+        // Firebase -> Local
+        // depois
+        // Local -> Firebase
 
-            if (!snapshot.hasChildren()) {
-                // FIREBASE VAZIO → SOBE TUDO DO LOCAL (SEM FILTRO)
-                Cursor cursor = db.rawQuery(
-                        "SELECT id, bc_DB, descr_DB, cat_DB, updated_at FROM " + TABLE_NAME,
-                        null
-                );
-
-                while (cursor.moveToNext()) {
-                    long id = cursor.getLong(0);
-
-                    Map<String, Object> itemMap = new HashMap<>();
-                    itemMap.put("id", id);
-                    itemMap.put("bc", cursor.getString(1));
-                    itemMap.put("descricao", cursor.getString(2));
-                    itemMap.put("categoria", cursor.getString(3));
-                    itemMap.put(FIELD_TIMESTAMP, cursor.getLong(4));
-
-                    ref.child(String.valueOf(id)).setValue(itemMap);
-                }
-
-                cursor.close();
-
-                saveLastSyncTime(System.currentTimeMillis());
-
-            } else {
-                // FLUXO NORMAL
-                syncFirebaseParaLocal(() -> syncLocalParaFirebase());
-            }
-
-        }).addOnFailureListener(e -> {
-        });
+        syncFirebaseParaLocal(() -> syncLocalParaFirebase());
     }
-
 
     // INSERIR ITEM
     public long inserirItem(String bc, String descr, String cat) {
@@ -268,8 +243,6 @@ public class FirebaseBancoDadosHelper {
 
         long id = db.insert(TABLE_NAME, null, values);
 
-
-
         if (id != -1) {
 
             Map<String, Object> itemMap = new HashMap<>();
@@ -279,12 +252,10 @@ public class FirebaseBancoDadosHelper {
             itemMap.put("categoria", cat);
             itemMap.put(FIELD_TIMESTAMP, updateAt);
 
-            // ✅ envio direto (correto)
+            // envio direto (correto)
             ref.child(String.valueOf(id)).setValue(itemMap);
         }
-        // Sincroniza com Firebase
-          // ver se deixa ou nao  syncLocalParaFirebase();
-            //Log.d(TAG, "Item inserido localmente e enviado para Firebase: ID=" + id);
+
         return id;
     }
 
@@ -302,7 +273,7 @@ public class FirebaseBancoDadosHelper {
 
         if (rows > 0) {
 
-            // ✅ monta objeto atualizado
+            // monta objeto atualizado
             Map<String, Object> itemMap = new HashMap<>();
             itemMap.put("id", id);
             itemMap.put("bc", bc);
@@ -310,11 +281,9 @@ public class FirebaseBancoDadosHelper {
             itemMap.put("categoria", cat);
             itemMap.put(FIELD_TIMESTAMP, updateAt);
 
-            // ✅ envia direto pro Firebase
+            // envia direto pro Firebase
             ref.child(String.valueOf(id)).setValue(itemMap);
 
-            // (opcional) manter como fallback
-            // syncLocalParaFirebase();
         }
     }
 
@@ -331,20 +300,32 @@ public class FirebaseBancoDadosHelper {
         db.delete(TABLE_NAME, "id = ?", new String[]{String.valueOf(id)});
 
         // Atualiza timestamp de sincronização
-        saveLastSyncTime(System.currentTimeMillis());
+        long now = System.currentTimeMillis();
+        saveLastSyncFirebaseParaLocalTime(now);
+        saveLastSyncLocalParaFirebaseTime(now);
     }
 
-
-    private long getLastSyncTime() {
-        return context.getSharedPreferences("sync_bancodados", Context.MODE_PRIVATE)
-                .getLong("last_sync_time", 0);
+    private long getLastSyncFirebaseParaLocalTime() {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+                .getLong(KEY_LAST_SYNC_FIREBASE_LOCAL, 0);
     }
 
-    private void saveLastSyncTime(long time) {
-        context.getSharedPreferences("sync_bancodados", Context.MODE_PRIVATE)
+    private void saveLastSyncFirebaseParaLocalTime(long time) {
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
                 .edit()
-                .putLong("last_sync_time", time)
+                .putLong(KEY_LAST_SYNC_FIREBASE_LOCAL, time)
                 .apply();
     }
 
+    private long getLastSyncLocalParaFirebaseTime() {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+                .getLong(KEY_LAST_SYNC_LOCAL_FIREBASE, 0);
+    }
+
+    private void saveLastSyncLocalParaFirebaseTime(long time) {
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putLong(KEY_LAST_SYNC_LOCAL_FIREBASE, time)
+                .apply();
+    }
 }
