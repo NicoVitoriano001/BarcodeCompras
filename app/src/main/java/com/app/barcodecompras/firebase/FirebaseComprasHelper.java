@@ -163,7 +163,7 @@ public class FirebaseComprasHelper {
                     }
                 }
 
-                checkForDeletedItems(newestTimestamp);
+              // 2026.06.25 EDITEI, ENTÃO, NÃO DELETAR COMPRAS, MAS SIM, EDITAR.  checkForDeletedItems(newestTimestamp);
 
                 if (newestTimestamp > lastSyncTime) {
                     saveLastSyncTime(newestTimestamp);
