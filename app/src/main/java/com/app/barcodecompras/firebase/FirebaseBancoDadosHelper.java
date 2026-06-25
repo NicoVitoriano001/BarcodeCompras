@@ -268,12 +268,23 @@ public class FirebaseBancoDadosHelper {
 
         long id = db.insert(TABLE_NAME, null, values);
 
-        if (id != -1) {
-            // Sincroniza com Firebase
-            syncLocalParaFirebase();
-            //Log.d(TAG, "Item inserido localmente e enviado para Firebase: ID=" + id);
-        }
 
+
+        if (id != -1) {
+
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", id);
+            itemMap.put("bc", bc);
+            itemMap.put("descricao", descr);
+            itemMap.put("categoria", cat);
+            itemMap.put(FIELD_TIMESTAMP, updateAt);
+
+            // ✅ envio direto (correto)
+            ref.child(String.valueOf(id)).setValue(itemMap);
+        }
+        // Sincroniza com Firebase
+          // ver se deixa ou nao  syncLocalParaFirebase();
+            //Log.d(TAG, "Item inserido localmente e enviado para Firebase: ID=" + id);
         return id;
     }
 
@@ -287,12 +298,23 @@ public class FirebaseBancoDadosHelper {
         values.put("cat_DB", cat);
         values.put("updated_at", updateAt);
 
-        // Atualiza local
         int rows = db.update(TABLE_NAME, values, "id = ?", new String[]{String.valueOf(id)});
 
         if (rows > 0) {
-            // Sincroniza com Firebase
-            syncLocalParaFirebase();
+
+            // ✅ monta objeto atualizado
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", id);
+            itemMap.put("bc", bc);
+            itemMap.put("descricao", descr);
+            itemMap.put("categoria", cat);
+            itemMap.put(FIELD_TIMESTAMP, updateAt);
+
+            // ✅ envia direto pro Firebase
+            ref.child(String.valueOf(id)).setValue(itemMap);
+
+            // (opcional) manter como fallback
+            // syncLocalParaFirebase();
         }
     }
 

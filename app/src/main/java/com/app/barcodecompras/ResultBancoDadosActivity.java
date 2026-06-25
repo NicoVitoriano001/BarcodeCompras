@@ -84,10 +84,16 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         // Configura o listener do adapter
         adapter.setOnItemClickListener(bancodados -> {
             Intent intent = new Intent(this, EditBancoDadosActivity.class);
+
             if (bancodados != null) {
+
+                // ✅ ESSA LINHA resolve seu problema
+                intent.putExtra("ID", bancodados.getId());
+
                 intent.putExtra("CODIGO", bancodados.getBcIMDB() != null ? bancodados.getBcIMDB() : "");
                 intent.putExtra("DESCRICAO", bancodados.getDescrIMDB() != null ? bancodados.getDescrIMDB() : "");
                 intent.putExtra("CATEGORIA", bancodados.getCatIMDB() != null ? bancodados.getCatIMDB() : "");
+
                 startActivityForResult(intent, EDIT_COLLECTED_REQUEST);
             } else {
                 Toast.makeText(this, "Item inválido", Toast.LENGTH_SHORT).show();

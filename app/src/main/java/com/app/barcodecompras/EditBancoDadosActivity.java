@@ -131,6 +131,11 @@ public class EditBancoDadosActivity extends AppCompatActivity {
         String novaDescricao = etDescrBancoDados.getText().toString().trim();
         String novaCategoria = etCatBancoDados.getText().toString().trim();
 
+        if (currentId == -1) {
+            Toast.makeText(this, "Erro: ID inválido", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (novoBarcode.isEmpty() || novaDescricao.isEmpty() || novaCategoria.isEmpty()) {
             Toast.makeText(this, "Preencha todos os campos!", Toast.LENGTH_SHORT).show();
             return;
