@@ -1,5 +1,4 @@
 package com.app.barcodecompras;
-//adapter ComprasAdapter.java
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,4 +72,5 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
             tvObsCompras = itemView.findViewById(R.id.tvObsCompras);
         }
     }
+
 }

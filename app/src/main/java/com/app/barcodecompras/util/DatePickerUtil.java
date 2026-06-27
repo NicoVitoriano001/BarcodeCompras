@@ -9,7 +9,6 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class DatePickerUtil {
-
     public static void showDatePickerDialog(Context context, EditText targetEditText) {
 
         final Calendar calendar = Calendar.getInstance();
@@ -45,4 +44,5 @@ public class DatePickerUtil {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM", Locale.getDefault());
         return sdf.format(calendar.getTime());
     }
+
 }

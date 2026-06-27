@@ -119,9 +119,9 @@ public class MainActivity extends AppCompatActivity {
         firebaseComprasHelper = new FirebaseComprasHelper(this, db);
 
         firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
-        // Sincronizar Firebase para local AO ABRIR o app
+    // Sincronizar Firebase para local AO ABRIR o app
         // firebaseHelper.syncFirebaseParaLocal();
-        // Sincronizar local para Firebase
+    // Sincronizar local para Firebase
         // firebaseHelper.syncLocalParaFirebase();
 
         setupTextWatchers();

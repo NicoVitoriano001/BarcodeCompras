@@ -1,7 +1,5 @@
 package com.app.barcodecompras.database;
-
 public class BancoDados {
-
     private long id;
     private String bc;
     private String descr;

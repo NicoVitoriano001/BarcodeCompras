@@ -16,7 +16,6 @@ import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
 import com.google.android.material.navigation.NavigationView;
 
 public class DrawerUtil {
-
     public static void setupDrawer(
             Activity activity,
             DrawerLayout drawer,
@@ -55,17 +54,17 @@ public class DrawerUtil {
 
                 } else if (id == R.id.nav_syncFirebase) {
 
-                    // ✅ sincroniza compras
+                    // sincroniza compras
                     if (firebaseComprasHelper != null) {
                         firebaseComprasHelper.syncCompleta();
                     }
 
-                    // ✅ sincroniza bancodados
+                    // sincroniza bancodados
                     if (firebaseBancoDadosHelper != null) {
                         firebaseBancoDadosHelper.syncCompleta();
                     }
 
-                    Toast.makeText(activity, "Sincronizando dados...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "Sync Compras e Banco dados...", Toast.LENGTH_SHORT).show();
 
                 } else if (id == R.id.nav_backup) {
 

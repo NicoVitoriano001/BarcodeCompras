@@ -33,7 +33,6 @@ public class ResumoExpandableAdapter extends BaseExpandableListAdapter {
     public Object getChild(int groupPosition, int childPosition) {
         return children.get(groups.get(groupPosition));
     }
-
     @Override
     public long getGroupId(int i) { return i; }
 
@@ -42,7 +41,6 @@ public class ResumoExpandableAdapter extends BaseExpandableListAdapter {
 
     @Override
     public boolean hasStableIds() { return false; }
-
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
@@ -65,7 +63,7 @@ public class ResumoExpandableAdapter extends BaseExpandableListAdapter {
 
         return tv;
     }
-
     @Override
     public boolean isChildSelectable(int i, int i1) { return false; }
+
 }

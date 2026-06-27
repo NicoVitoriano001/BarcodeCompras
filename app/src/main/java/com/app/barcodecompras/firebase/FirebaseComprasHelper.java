@@ -302,44 +302,6 @@ public class FirebaseComprasHelper {
         }
     }
 
-    // Sincronizar um único item
-//    public void syncSingleItem(long id) {
-//        Cursor cursor = db.rawQuery(
-//                "SELECT id, bc_compras, descr_compras, cat_compras, preco_compras, qnt_compras, total_compras, periodo_compras, obs_compras, updated_at FROM compras_tab WHERE id = ?",
-//                new String[]{String.valueOf(id)}
-//        );
-//
-//        if (cursor.moveToFirst()) {
-//            long itemId = cursor.getLong(0);
-//            String bc = cursor.getString(1);
-//            String descricao = cursor.getString(2);
-//            String categoria = cursor.getString(3);
-//            double preco = cursor.getDouble(4);
-//            double quantidade = cursor.getDouble(5);
-//            double total = cursor.getDouble(6);
-//            String periodo = cursor.getString(7);
-//            String obs = cursor.getString(8);
-//            long updateAt = cursor.getLong(9);
-//
-//            Map<String, Object> itemMap = new HashMap<>();
-//            itemMap.put("id", itemId);
-//            itemMap.put("bc", bc);
-//            itemMap.put("descricao", descricao);
-//            itemMap.put("categoria", categoria);
-//            itemMap.put("preco", preco);
-//            itemMap.put("quantidade", quantidade);
-//            itemMap.put("total", total);
-//            itemMap.put("periodo", periodo);
-//            itemMap.put("obs", obs);
-//            itemMap.put(FIELD_TIMESTAMP, updateAt);
-//            itemMap.put("deleted", false);
-//
-//            ref.child(String.valueOf(itemId)).setValue(itemMap);
-//            Log.d(TAG, "Item único sincronizado - ID: " + itemId);
-//        }
-//        cursor.close();
-//    }
-
     private long getLastSyncTime() {
         return context.getSharedPreferences("sync", Context.MODE_PRIVATE)
                 .getLong("last_sync_time", 0);

@@ -48,7 +48,6 @@ public class BuscarComprasActivity extends AppCompatActivity {
         btnBuscar = findViewById(R.id.btnBuscar);
         btnCancelar = findViewById(R.id.btnCancelarBusca);
 
-
         // Inicializar botão de scan
         scanButtonBuscaCompras = findViewById(R.id.scanButtonBuscaCompras);
         scanButtonBuscaCompras.setOnClickListener(v -> {

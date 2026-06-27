@@ -89,7 +89,7 @@ public class BancoDadosBkp {
             }
 
 
-            // 2026.06.07 OTIMIZAÇÃO DO BANCO ANTES DO BACKUP
+    // 2026.06.07 OTIMIZAÇÃO DO BANCO ANTES DO BACKUP
             SQLiteDatabase db = null;
 
             try {

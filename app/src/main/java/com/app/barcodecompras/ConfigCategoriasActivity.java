@@ -212,8 +212,6 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
-
     private void atualizarCategoria(String categoriaAntiga, String novaCategoria) {
 
         ContentValues values = new ContentValues();
@@ -251,7 +249,6 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
         finish(); // mantém mesma lógica da Activity
     }
 
-
     private void confirmarExclusao(String categoria) {
         new AlertDialog.Builder(this)
                 .setTitle("Excluir")
@@ -285,4 +282,5 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
         }
         super.onDestroy();
     }
+
 }

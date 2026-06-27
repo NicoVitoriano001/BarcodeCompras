@@ -34,7 +34,7 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
     private BancoDadosAdapter adapter;
     private SQLiteDatabase db;
     private List<BancoDados> BancoDadosList = new ArrayList<>();
-    private TextView tvTitle; // Adicionar referência ao TextView
+    private TextView tvTitle;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private BancoDadosBkp bancoDadosBkp;
@@ -131,7 +131,6 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
     }
     // FIM ON CREATE
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -216,4 +215,5 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             }
         }
     }
+
 }

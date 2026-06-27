@@ -11,6 +11,8 @@ public class CategoriaItem {
 
     @Override
     public String toString() {
+
         return nome + " (" + quantidade + ")";
     }
+
 }
