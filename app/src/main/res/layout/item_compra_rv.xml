@@ -3,27 +3,44 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="2dp"
+    android:padding="8dp"
     android:background="?attr/selectableItemBackground"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="4dp"
     android:elevation="1dp"
     android:backgroundTint="@android:color/white">
+
+    <!-- Linha com Barcode/código e Contagem -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvBcCompras"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="13sp"
+            android:textColor="@android:color/darker_gray"/>
+
+        <TextView
+            android:id="@+id/tvContagemOcorrencias"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:paddingStart="8dp"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvDescricao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="2dp"
         android:textSize="15sp"
         android:textStyle="bold"
         android:textColor="@color/teal_200"/>
-
-    <TextView
-        android:id="@+id/tvBcCompras"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="13sp"
-        android:textColor="@android:color/darker_gray"/>
 
     <TextView
         android:id="@+id/tvCategoria"
@@ -36,12 +53,14 @@
         android:id="@+id/tvPeriodo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"/>
+        android:layout_marginTop="2dp"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal"
         android:weightSum="3">
 
@@ -74,10 +93,12 @@
             android:textColor="@color/vermelho_forte"
             android:gravity="end"/>
     </LinearLayout>
+
     <TextView
         android:id="@+id/tvObsCompras"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
         android:textSize="13sp"
         android:textColor="@color/cinza_Gainsboro"/>
 </LinearLayout>

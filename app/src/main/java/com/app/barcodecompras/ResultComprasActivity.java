@@ -162,7 +162,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         String maiorPeriodo = "", maiorObs = "";
         String menorPeriodo = "", menorObs = "";
 
-        // Construir query dinâmica
+        // Construir query dinâmica para os itens
         String query = "SELECT * FROM compras_tab WHERE 1=1";
         List<String> params = new ArrayList<>();
 
@@ -213,6 +213,58 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
 
+
+        // ===== CONSTRUIR A MESMA QUERY PARA CONTAGEM (SEM ORDER BY) =====
+        String countQuery = "SELECT bc_compras, COUNT(*) as total FROM compras_tab WHERE 1=1";
+        List<String> countParams = new ArrayList<>(params); // Copia os parâmetros
+
+        // Reconstruir a query de contagem com os mesmos filtros
+        if (!codigo.isEmpty()) {
+            countQuery += " AND bc_compras LIKE ?";
+        }
+        if (!descricao.isEmpty()) {
+            String[] termos = descricao.split(" ");
+            for (String termo : termos) {
+                if (termo.startsWith("-") && termo.length() > 1) {
+                    countQuery += " AND descr_compras NOT LIKE ?";
+                } else {
+                    countQuery += " AND descr_compras LIKE ?";
+                }
+            }
+        }
+        if (!categoria.isEmpty()) {
+            String[] termos = categoria.split(" ");
+            for (String termo : termos) {
+                if (termo.startsWith("-") && termo.length() > 1) {
+                    countQuery += " AND cat_compras NOT LIKE ?";
+                } else {
+                    countQuery += " AND cat_compras LIKE ?";
+                }
+            }
+        }
+        if (!periodo.isEmpty()) {
+            countQuery += " AND periodo_compras LIKE ?";
+        }
+        if (!observacao.isEmpty()) {
+            countQuery += " AND obs_compras LIKE ?";
+        }
+
+        countQuery += " GROUP BY bc_compras";
+
+        // Executar query de contagem
+        java.util.Map<String, Integer> contagemPorFiltro = new java.util.HashMap<>();
+        Cursor countCursor = db.rawQuery(countQuery, countParams.toArray(new String[0]));
+
+        if (countCursor != null && countCursor.moveToFirst()) {
+            do {
+                String bc = countCursor.getString(countCursor.getColumnIndexOrThrow("bc_compras"));
+                int total = countCursor.getInt(countCursor.getColumnIndexOrThrow("total"));
+                contagemPorFiltro.put(bc, total);
+            } while (countCursor.moveToNext());
+            countCursor.close();
+        }
+        // ================================================================
+
         if (cursor.moveToFirst()) {
             do {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
@@ -232,6 +284,12 @@ public class ResultComprasActivity extends AppCompatActivity {
                 Compra compra = new Compra(
                         id, bc, descr, cat, preco, quantidade, total, periodoCompra, obs
                 );
+
+                // ===== ATRIBUI A CONTAGEM DO FILTRO ATUAL =====
+                int contagemFiltrada = contagemPorFiltro.getOrDefault(bc, 0);
+                compra.setContagemOcorrencias(contagemFiltrada);
+                // ============================================
+
                 comprasList.add(compra);
 
                 if (preco > maiorPreco) {
@@ -249,7 +307,7 @@ public class ResultComprasActivity extends AppCompatActivity {
 
             double mediaPreco = quantidadeItens > 0 ? somaPrecos / quantidadeItens : 0;
 
-            // EXIBIR SOMA TOTAL COM FORMATO: Soma total: R$ 127,50 (5 itens)
+            // EXIBIR SOMA TOTAL
             TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
             tvSomaTotal.setText(String.format("Soma total: R$ %.2f (%d itens)", somaTotal, quantidadeItens));
 
@@ -347,9 +405,14 @@ public class ResultComprasActivity extends AppCompatActivity {
         Intent intent = new Intent(ResultComprasActivity.this, ResultComprasActivity.class);
         intent.putExtra("CODIGO", compra.getBcCompras());
         intent.putExtra("DESCRICAO", compra.getDescrCompras());
-        intent.putExtra("CATEGORIA", "");    // Vazio para não filtrar por categoria
-        intent.putExtra("PERIODO", "");      // Vazio para não filtrar por período
-        intent.putExtra("OBSERVACAO", "");   // Vazio para não filtrar por observação
+
+
+        // Mantém os filtros que estavam sendo usados na tela atual
+        intent.putExtra("CATEGORIA", currentCategoria != null ? currentCategoria : "");
+        intent.putExtra("PERIODO", currentPeriodo != null ? currentPeriodo : "");
+        intent.putExtra("OBSERVACAO", currentObservacao != null ? currentObservacao : "");
+
+
         startActivity(intent);
        // finish(); // Opcional: fecha a activity atual
     }

@@ -5,6 +5,7 @@ public class Compra {
     private String bcCompras, descrCompras, catCompras, periodoCompras, obsCompras;
     private double precoCompras, totalCompras, qntCompras;
     private long updateAt;
+    private int contagemOcorrencias; // ← NOVO: quantas vezes este código aparece
 
     // Construtor com 9 parâmetros (sem os extras)
     public Compra(long id, String bcCompras, String descrCompras, String catCompras,
@@ -19,6 +20,7 @@ public class Compra {
         this.totalCompras = totalCompras;
         this.periodoCompras = periodoCompras;
         this.obsCompras = obsCompras;
+        this.contagemOcorrencias = 0; // Inicializa com 0
     }
 
     // Getters padrão (já existentes)
@@ -43,4 +45,11 @@ public class Compra {
     public double getTotal() { return totalCompras; }
     public String getPeriodo() { return periodoCompras; }
     public String getObs() { return obsCompras; }
+
+    // NOVO GETTER E SETTER
+    public int getContagemOcorrencias() {return contagemOcorrencias; }
+
+    public void setContagemOcorrencias(int contagemOcorrencias) {
+        this.contagemOcorrencias = contagemOcorrencias;
+    }
 }

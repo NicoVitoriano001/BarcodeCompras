@@ -37,14 +37,13 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     @Override
     public CompraViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_compra, parent, false);
+                .inflate(R.layout.item_compra_rv, parent, false);
         return new CompraViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull CompraViewHolder holder, int position) {
-        Compra compra = comprasList.get(position); // ← única declaração
-        // REMOVA a linha: Compra compra = compras.get(position);
+        Compra compra = comprasList.get(position);
 
         holder.tvBcCompras.setText(compra.getBcCompras());
         holder.tvDescricao.setText(compra.getDescrCompras());
@@ -54,6 +53,12 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         holder.tvTotal.setText(String.format("R$ %.2f", compra.getTotalCompras()));
         holder.tvPeriodo.setText(compra.getPeriodoCompras());
         holder.tvObsCompras.setText(compra.getObsCompras());
+
+
+        // ===== MOSTRAR CONTAGEM DE OCORRÊNCIAS =====
+        holder.tvContagemOcorrencias.setText(String.format("(%d)", compra.getContagemOcorrencias()));
+
+
 
         holder.itemView.setOnClickListener(v -> {
             if (clickListener != null) clickListener.onItemClick(compra);
@@ -74,7 +79,7 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
 
     static class CompraViewHolder extends RecyclerView.ViewHolder {
         TextView tvBcCompras, tvDescricao, tvCategoria, tvPreco, tvQuantidade, tvTotal, tvPeriodo, tvObsCompras;
-
+        TextView tvContagemOcorrencias;
         public CompraViewHolder(@NonNull View itemView) {
             super(itemView);
             tvBcCompras = itemView.findViewById(R.id.tvBcCompras);
@@ -85,6 +90,7 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
             tvTotal = itemView.findViewById(R.id.tvTotal);
             tvPeriodo = itemView.findViewById(R.id.tvPeriodo);
             tvObsCompras = itemView.findViewById(R.id.tvObsCompras);
+            tvContagemOcorrencias = itemView.findViewById(R.id.tvContagemOcorrencias); // ← NOVO
         }
     }
 }
