@@ -24,13 +24,14 @@ public class EditBancoDadosActivity extends AppCompatActivity {
     private EditText etBcBancoDados, etDescrBancoDados, etCatBancoDados;
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
+    private BancoDadosBkp bancoDadosBkp;
     private long currentId;
     private String currentBarcode;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private FirebaseBancoDadosHelper firebaseBancoHelper;
     private FirebaseComprasHelper firebaseComprasHelper;
-    private BancoDadosBkp bancoDadosBkp;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -54,11 +54,8 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         holder.tvPeriodo.setText(compra.getPeriodoCompras());
         holder.tvObsCompras.setText(compra.getObsCompras());
 
-
         // ===== MOSTRAR CONTAGEM DE OCORRÊNCIAS =====
         holder.tvContagemOcorrencias.setText(String.format("(%d)", compra.getContagemOcorrencias()));
-
-
 
         holder.itemView.setOnClickListener(v -> {
             if (clickListener != null) clickListener.onItemClick(compra);
@@ -93,4 +90,5 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
             tvContagemOcorrencias = itemView.findViewById(R.id.tvContagemOcorrencias); // ← NOVO
         }
     }
+
 }

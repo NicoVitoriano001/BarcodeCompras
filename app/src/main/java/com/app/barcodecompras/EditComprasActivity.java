@@ -28,12 +28,11 @@ public class EditComprasActivity extends AppCompatActivity {
             qnt_compras, total_compras, periodo_compras, obs_compras;
     private Button btnSalvar, btnCancelar, btnExcluir;
     private SQLiteDatabase db;
+    private BancoDadosBkp bancoDadosBkp;
     private long compraId;
-    private String originalBcCompras;
-    private String originalDescrCompras; // ← nova variável
+    private String originalBcCompras, originalDescrCompras;
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    private BancoDadosBkp bancoDadosBkp;
     private FirebaseComprasHelper firebaseComprasHelper;
     private FirebaseBancoDadosHelper firebaseBancoHelper;
 
@@ -305,7 +304,6 @@ public class EditComprasActivity extends AppCompatActivity {
 
         dialog.show();
     }
-
 
 
     @Override

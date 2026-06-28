@@ -25,14 +25,14 @@ public class BuscarComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
     private static final int BUSCA_COMPRA_REQUEST = 1001;
     private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria, etBuscaPeriodo , etBuscaOBS;
-    private Button btnBuscar, btnCancelar;
+    private Button btnBuscar, btnCancelar, scanButtonBuscaCompras;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private SQLiteDatabase db;
-    private Button scanButtonBuscaCompras;
+    private BancoDadosBkp bancoDadosBkp;
     private FirebaseComprasHelper firebaseComprasHelper;
     private FirebaseBancoDadosHelper firebaseBancoHelper;
-    private BancoDadosBkp bancoDadosBkp;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +46,11 @@ public class BuscarComprasActivity extends AppCompatActivity {
         etBuscaPeriodo = findViewById(R.id.etBuscaPeriodo);
         etBuscaOBS = findViewById(R.id.etBuscaOBS);
 
+        // Inicializar botão
         btnBuscar = findViewById(R.id.btnBuscar);
         btnCancelar = findViewById(R.id.btnCancelarBusca);
-
-        // Inicializar botão de scan
         scanButtonBuscaCompras = findViewById(R.id.scanButtonBuscaCompras);
+
         scanButtonBuscaCompras.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(BuscarComprasActivity.this);
             integrator.setPrompt("Escaneie o código de barras");
@@ -59,7 +59,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
             integrator.initiateScan();
         });
 
-        // Banco de dados
+        // instancia o Banco de dados
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
 

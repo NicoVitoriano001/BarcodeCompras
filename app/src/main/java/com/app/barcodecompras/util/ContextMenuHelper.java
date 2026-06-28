@@ -7,7 +7,6 @@ import com.app.barcodecompras.Compra;
 import com.app.barcodecompras.R;
 
 import java.lang.reflect.Method;
-
 public class ContextMenuHelper {
 
     public static void showContextMenu(View anchor, Compra compra,

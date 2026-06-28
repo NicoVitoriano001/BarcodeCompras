@@ -34,7 +34,6 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
     private FirebaseComprasHelper firebaseComprasHelper;
     private FirebaseBancoDadosHelper firebaseBancoHelper;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

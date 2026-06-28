@@ -42,9 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText precoEditText, qntEditText, totalEditText;
     private MaterialButton scanButton, saveButton, cancelButton, addButton;
     private SQLiteDatabase db;
+    private BancoDadosBkp bancoDadosBkp;
     private DrawerLayout drawer;
     private ActionBarDrawerToggle toggle;
-    private BancoDadosBkp bancoDadosBkp;
     private FirebaseComprasHelper firebaseComprasHelper; // MOVER PARA VARIÁVEL GLOBAL
     private FirebaseBancoDadosHelper firebaseBancoHelper;
     private static final int REQUEST_CODE_ADD_ITEM = 1001;
@@ -81,11 +81,6 @@ public class MainActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
-
-
-        //
-        // Dentro de onCreate, após a inicialização dos campos (após findViewById):
-
         Intent intent = getIntent();
         if (intent != null && intent.getBooleanExtra("CLONE_MODE", false)) {
             // Preencher campos com os dados do clone
@@ -101,14 +96,13 @@ public class MainActivity extends AppCompatActivity {
             periodo_compras.setText(intent.getStringExtra("periodo"));
             obs_compras.setText(intent.getStringExtra("obs"));
         }
-        //
-
-
-
 
         precoEditText = preco_compras;
         qntEditText = qnt_compras;
         totalEditText = total_compras;
+
+        //qnt_compras.setText("0");
+        //total_compras.setText("0.0");
 
         periodo_compras.setText(DatePickerUtil.getDataHoraAtual());
         periodo_compras.setOnClickListener(v ->
@@ -144,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseComprasHelper = new FirebaseComprasHelper(this, db);
 
         firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
+
     // Sincronizar Firebase para local AO ABRIR o app
         // firebaseHelper.syncFirebaseParaLocal();
     // Sincronizar local para Firebase
@@ -167,12 +162,7 @@ public class MainActivity extends AppCompatActivity {
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);    }
     // FIM ONCREATE
 
-
-
-
-
-
-// Resultado do scanner ZXing
+    // Resultado do scanner ZXing
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -302,7 +292,6 @@ public class MainActivity extends AppCompatActivity {
             String cat = cursor.getString(2);
 
             codigos[i] = cod;
-            //itens[i] = desc + "\n" + cat + "\n" + "────────────";
             itens[i] = cod + "\n" + desc + "\n" + cat + "\n" + "────────────";
             i++;
         }
