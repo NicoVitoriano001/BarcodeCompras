@@ -30,6 +30,7 @@ public class EditComprasActivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private long compraId;
     private String originalBcCompras;
+    private String originalDescrCompras; // ← nova variável
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private BancoDadosBkp bancoDadosBkp;
@@ -131,6 +132,7 @@ public class EditComprasActivity extends AppCompatActivity {
 
             if (cursor.moveToFirst()) {
                 originalBcCompras = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
+                originalDescrCompras = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras")); // verifica atnes de deletar
 
                 bc_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("bc_compras")));
                 descr_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("descr_compras")));
@@ -154,77 +156,6 @@ public class EditComprasActivity extends AppCompatActivity {
         }
     }
 
-    // excluirCompra com mais verificações
-    private void excluirCompra() {
-        // Verificar se o ID é válido
-        if (compraId == -1) {
-            Toast.makeText(this, "Erro: ID inválido para exclusão", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Verificar se o código original existe
-        if (originalBcCompras == null || originalBcCompras.isEmpty()) {
-            Toast.makeText(this, "Erro: Código do produto não encontrado", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Confirmar Exclusão")
-                .setMessage("Tem certeza que deseja excluir esta compra?\n\nProduto: " + originalBcCompras)
-                .setPositiveButton("Excluir", (dialog1, which) -> {
-
-                    try {
-                        // 1. Primeiro, verificar se o registro ainda existe
-                        Cursor checkCursor = db.rawQuery("SELECT id FROM compras_tab WHERE id = ?",
-                                new String[]{String.valueOf(compraId)});
-
-                        if (!checkCursor.moveToFirst()) {
-                            Toast.makeText(this, "Registro já foi excluído", Toast.LENGTH_SHORT).show();
-                            checkCursor.close();
-                            finish();
-                            return;
-                        }
-                        checkCursor.close();
-
-                        // 2. Deletar do Firebase
-                        if (firebaseComprasHelper != null && originalBcCompras != null) {
-                            firebaseComprasHelper.deletarItem(String.valueOf(compraId));
-                            Toast.makeText(this, "Sincronizando com Firebase...", Toast.LENGTH_SHORT).show();
-                        }
-
-                        // 3. Deletar do banco local
-                        int rowsDeleted = db.delete(
-                                "compras_tab",
-                                "id = ?",
-                                new String[]{String.valueOf(compraId)}
-                        );
-
-                        // 4. Verificar resultado
-                        if (rowsDeleted > 0) {
-                            Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
-                            setResult(RESULT_OK);
-                            finish();
-                        } else {
-                            Toast.makeText(this, "Erro ao excluir: registro não encontrado", Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Erro ao excluir: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        e.printStackTrace();
-                    }
-                })
-                .setNegativeButton("Cancelar", null)
-                .create();
-
-        dialog.setOnShowListener(dialogInterface -> {
-            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            positiveButton.setTextColor(Color.WHITE);
-            positiveButton.setBackgroundColor(Color.RED);
-            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-            negativeButton.setTextColor(Color.WHITE);
-        });
-
-        dialog.show();
-    }
 
     // salvarEdicao com verificação
     private void salvarEdicao() {
@@ -299,6 +230,83 @@ public class EditComprasActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+
+    // excluirCompra com mais verificações
+    private void excluirCompra() {
+        // Verificar se o ID é válido
+        if (compraId == -1) {
+            Toast.makeText(this, "Erro: ID inválido para exclusão", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Verificar se o código original existe
+        if (originalBcCompras == null || originalBcCompras.isEmpty()) {
+            Toast.makeText(this, "Erro: Código do produto não encontrado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Confirmar Exclusão")
+                .setMessage("Tem certeza que deseja excluir este Item?\n\n" +
+                        "Produto: " + originalDescrCompras + "\n" + // ← descrição
+                        "Código: " + originalBcCompras)            // ← código
+                .setPositiveButton("Excluir", (dialog1, which) -> {
+
+                    try {
+                        // 1. Primeiro, verificar se o registro ainda existe
+                        Cursor checkCursor = db.rawQuery("SELECT id FROM compras_tab WHERE id = ?",
+                                new String[]{String.valueOf(compraId)});
+
+                        if (!checkCursor.moveToFirst()) {
+                            Toast.makeText(this, "Registro já foi excluído", Toast.LENGTH_SHORT).show();
+                            checkCursor.close();
+                            finish();
+                            return;
+                        }
+                        checkCursor.close();
+
+                        // 2. Deletar do Firebase
+                        if (firebaseComprasHelper != null && originalBcCompras != null) {
+                            firebaseComprasHelper.deletarItem(String.valueOf(compraId));
+                            Toast.makeText(this, "Sincronizando com Firebase...", Toast.LENGTH_SHORT).show();
+                        }
+
+                        // 3. Deletar do banco local
+                        int rowsDeleted = db.delete(
+                                "compras_tab",
+                                "id = ?",
+                                new String[]{String.valueOf(compraId)}
+                        );
+
+                        // 4. Verificar resultado
+                        if (rowsDeleted > 0) {
+                            Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
+                            setResult(RESULT_OK);
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Erro ao excluir: registro não encontrado", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Erro ao excluir: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            positiveButton.setTextColor(Color.WHITE);
+            positiveButton.setBackgroundColor(Color.RED);
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            negativeButton.setTextColor(Color.WHITE);
+        });
+
+        dialog.show();
+    }
+
+
 
     @Override
     protected void onDestroy() {

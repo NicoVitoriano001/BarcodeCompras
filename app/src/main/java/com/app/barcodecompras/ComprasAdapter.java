@@ -10,14 +10,23 @@ import java.util.List;
 
 public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraViewHolder> {
     private List<Compra> comprasList;
-    private OnItemClickListener listener;
+    private OnItemClickListener clickListener; // ← mude de "listener" para "clickListener"
+    private OnItemLongClickListener longClickListener;
+
     public interface OnItemClickListener {
         void onItemClick(Compra compra);
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
+    public interface OnItemLongClickListener {
+        boolean onLongClick(View view, Compra compra);
+    }
 
-        this.listener = listener;
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.clickListener = listener; // ← agora usa clickListener
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+        this.longClickListener = listener;
     }
 
     public ComprasAdapter(List<Compra> comprasList) {
@@ -28,13 +37,15 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     @Override
     public CompraViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_compra, parent, false); //onCreateViewHolder que infla o res/layout/item_compra.xml
+                .inflate(R.layout.item_compra, parent, false);
         return new CompraViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CompraViewHolder holder, int position) { //O metodo onBindViewHolder do adapter preenche os dados de cada item (definido em item_compra.xml) com os dados da lista
-        Compra compra = comprasList.get(position);
+    public void onBindViewHolder(@NonNull CompraViewHolder holder, int position) {
+        Compra compra = comprasList.get(position); // ← única declaração
+        // REMOVA a linha: Compra compra = compras.get(position);
+
         holder.tvBcCompras.setText(compra.getBcCompras());
         holder.tvDescricao.setText(compra.getDescrCompras());
         holder.tvCategoria.setText(compra.getCatCompras());
@@ -44,19 +55,23 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         holder.tvPeriodo.setText(compra.getPeriodoCompras());
         holder.tvObsCompras.setText(compra.getObsCompras());
 
-        // No metodo onBindViewHolder do ComprasAdapter:
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(compra);
-            }
+            if (clickListener != null) clickListener.onItemClick(compra);
         });
 
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) {
+                return longClickListener.onLongClick(v, compra);
+            }
+            return false;
+        });
     }
 
     @Override
     public int getItemCount() {
         return comprasList.size();
     }
+
     static class CompraViewHolder extends RecyclerView.ViewHolder {
         TextView tvBcCompras, tvDescricao, tvCategoria, tvPreco, tvQuantidade, tvTotal, tvPeriodo, tvObsCompras;
 
@@ -72,5 +87,4 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
             tvObsCompras = itemView.findViewById(R.id.tvObsCompras);
         }
     }
-
 }

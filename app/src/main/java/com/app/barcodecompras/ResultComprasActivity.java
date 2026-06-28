@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -20,6 +22,7 @@ import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
 import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
 import com.app.barcodecompras.firebase.FirebaseComprasHelper;
+import com.app.barcodecompras.util.ContextMenuHelper;
 import com.app.barcodecompras.util.DrawerUtil; //2026.06.07
 
 import com.app.barcodecompras.util.ResumoExpandableAdapter;
@@ -87,6 +90,7 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         loadCompras(codigo, descricao, categoria, periodo, observacao);
 
+
         // Obter e armazenar critérios de busca atuais
         currentCodigo = getIntent().getStringExtra("CODIGO") != null ? getIntent().getStringExtra("CODIGO") : "";
         currentDescricao = getIntent().getStringExtra("DESCRICAO") != null ? getIntent().getStringExtra("DESCRICAO") : "";
@@ -97,9 +101,25 @@ public class ResultComprasActivity extends AppCompatActivity {
         // Configurar clique nos itens da lista
         adapter.setOnItemClickListener(compra -> {
             Intent intent = new Intent(ResultComprasActivity.this, EditComprasActivity.class);
-            intent.putExtra("compra_id", compra.getId());
+            intent.putExtra("compra_id", compra.getId()); // ← corrigido
             startActivityForResult(intent, EDIT_COMPRA_REQUEST);
         });
+
+        //2026.26.28
+        adapter.setOnItemLongClickListener((view, compra) -> {
+            ContextMenuHelper.showContextMenu(view, compra,
+                    () -> { // Editar
+                        Intent intent = new Intent(ResultComprasActivity.this, EditComprasActivity.class);
+                        intent.putExtra("compra_id", compra.getId());
+                        startActivityForResult(intent, EDIT_COMPRA_REQUEST);
+                    },
+                    () -> deletarCompra(compra),
+                    () -> clonarCompra(compra),
+                    () -> pesquisarCompra(compra)
+            );
+            return true;
+        });
+        //
 
         // DRAWER -- INICIO
         drawer = findViewById(R.id.result_compras_drawer_layout);
@@ -270,6 +290,72 @@ public class ResultComprasActivity extends AppCompatActivity {
             Toast.makeText(this, "Nenhum resultado encontrado", Toast.LENGTH_SHORT).show();
         }
     }
+
+
+    private void deletarCompra(Compra compra) {
+        // Monta a mensagem de confirmação já formatada
+        String mensagem = String.format(
+                "Tem certeza que deseja excluir esta compra?\n\n" +
+                        "Barcode: %s\n" +
+                        "Descr: %s",
+                compra.getBcCompras(),
+                compra.getDescrCompras());
+
+        // Exibe o dialog de confirmação
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar Exclusão")
+                .setMessage(mensagem)
+                .setPositiveButton("Excluir", (dialog, which) -> {
+                    try {
+                        if (firebaseComprasHelper != null) {
+                            firebaseComprasHelper.deletarItem(String.valueOf(compra.getId())); //Exclusão do Firebase
+                        }
+                        int rowsDeleted = db.delete("compras_tab", "id = ?", //Exclusão do banco local (SQLite)
+                                new String[]{String.valueOf(compra.getId())});
+                        if (rowsDeleted > 0) { //Atualização da lista em tempo real
+                            Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
+                            comprasList.remove(compra);
+                            adapter.notifyDataSetChanged();
+                        } else {
+                            Toast.makeText(this, "Erro ao excluir", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+
+    private void clonarCompra(Compra compra) {
+        Intent intent = new Intent(ResultComprasActivity.this, MainActivity.class);
+        intent.putExtra("CLONE_MODE", true);
+        intent.putExtra("bc", compra.getBcCompras());          // ← getBcCompras()
+        intent.putExtra("descricao", compra.getDescrCompras()); // ← getDescrCompras()
+        intent.putExtra("categoria", compra.getCatCompras());   // ← getCatCompras()
+        intent.putExtra("preco", compra.getPrecoCompras());     // ← getPrecoCompras()
+        intent.putExtra("quantidade", compra.getQntCompras());  // ← getQntCompras()
+        intent.putExtra("total", compra.getTotalCompras());     // ← getTotalCompras()
+        intent.putExtra("periodo", compra.getPeriodoCompras()); // ← getPeriodoCompras()
+        intent.putExtra("obs", compra.getObsCompras());         // ← getObsCompras()
+        startActivity(intent);
+    }
+
+
+    private void pesquisarCompra(Compra compra) {
+        Intent intent = new Intent(ResultComprasActivity.this, ResultComprasActivity.class);
+        intent.putExtra("CODIGO", compra.getBcCompras());
+        intent.putExtra("DESCRICAO", compra.getDescrCompras());
+        intent.putExtra("CATEGORIA", "");    // Vazio para não filtrar por categoria
+        intent.putExtra("PERIODO", "");      // Vazio para não filtrar por período
+        intent.putExtra("OBSERVACAO", "");   // Vazio para não filtrar por observação
+        startActivity(intent);
+       // finish(); // Opcional: fecha a activity atual
+    }
+
+
+
 
 }
 

@@ -44,6 +44,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         etBuscaCodigoBancoDados = findViewById(R.id.etBuscaCodigoBancoDados);
         etBuscaDescricaoBancoDados = findViewById(R.id.etBuscaDescricaoBancoDados);
         etBuscaCategoriaBancoDados = findViewById(R.id.etBuscaCategoriaBancoDados);
+
         btnBuscarBancoDados = findViewById(R.id.btnBuscarBancoDados);
         btnCancelarBancoDados = findViewById(R.id.btnCancelarBuscaBancoDados);
 
@@ -75,7 +76,6 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.busca_bancodados_nav_view);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
-
     }
     // FIM ON CREATE
 

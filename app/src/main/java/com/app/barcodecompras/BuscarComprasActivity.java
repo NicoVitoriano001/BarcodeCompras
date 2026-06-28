@@ -45,6 +45,7 @@ public class BuscarComprasActivity extends AppCompatActivity {
         etBuscaCategoria = findViewById(R.id.etBuscaCategoria);
         etBuscaPeriodo = findViewById(R.id.etBuscaPeriodo);
         etBuscaOBS = findViewById(R.id.etBuscaOBS);
+
         btnBuscar = findViewById(R.id.btnBuscar);
         btnCancelar = findViewById(R.id.btnCancelarBusca);
 
@@ -80,10 +81,8 @@ public class BuscarComprasActivity extends AppCompatActivity {
         drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.busca_compras_nav_view);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
-
     }
     // FIM ON CREATE
-
 
     private void realizarBusca() {
         Intent intent = new Intent(this, ResultComprasActivity.class);

@@ -81,6 +81,31 @@ public class MainActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
+
+
+        //
+        // Dentro de onCreate, após a inicialização dos campos (após findViewById):
+
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("CLONE_MODE", false)) {
+            // Preencher campos com os dados do clone
+            bc_compras.setText(intent.getStringExtra("bc"));
+            descr_compras.setText(intent.getStringExtra("descricao"));
+            cat_compras.setText(intent.getStringExtra("categoria"));
+            double preco = intent.getDoubleExtra("preco", 0);
+            double qnt = intent.getDoubleExtra("quantidade", 0);
+            double total = intent.getDoubleExtra("total", 0);
+            preco_compras.setText(String.valueOf(preco));
+            qnt_compras.setText(String.valueOf(qnt));
+            total_compras.setText(String.valueOf(total));
+            periodo_compras.setText(intent.getStringExtra("periodo"));
+            obs_compras.setText(intent.getStringExtra("obs"));
+        }
+        //
+
+
+
+
         precoEditText = preco_compras;
         qntEditText = qnt_compras;
         totalEditText = total_compras;
@@ -109,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton fabSearch = findViewById(R.id.fab_searchITEM);
         fabSearch.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, BuscarComprasActivity.class);
-            startActivity(intent);
+            Intent searchIntent = new Intent(MainActivity.this, BuscarComprasActivity.class);
+            startActivity(searchIntent);
         });
 
         DatabaseHelper dbHelper = new DatabaseHelper(this);
@@ -141,6 +166,11 @@ public class MainActivity extends AppCompatActivity {
         NavigationView navigationView = findViewById(R.id.nav_view_mainactivity);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);    }
     // FIM ONCREATE
+
+
+
+
+
 
 // Resultado do scanner ZXing
     @Override

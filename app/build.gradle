@@ -15,7 +15,7 @@ android {
         minSdk 26
         targetSdkVersion 34
         versionCode 1
-        versionName "0.1.61"
+        versionName "0.1.70"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,7 +39,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-auth'
     implementation platform('com.google.firebase:firebase-bom:34.14.0')
-    implementation 'com.google.android.material:material:1.9.0' // Verifique se há uma versão mais recente
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.12.0' // Verifique se há uma versão mais recente
     implementation libs.appcompat
     implementation libs.material
     implementation libs.constraintlayout
@@ -51,5 +52,4 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
     implementation libs.zxing.android.embedded
-    implementation 'com.google.android.material:material:1.6.0'
 }
