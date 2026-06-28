@@ -353,7 +353,7 @@ public class ResultComprasActivity extends AppCompatActivity {
     private void deletarCompra(Compra compra) {
         // Monta a mensagem de confirmação já formatada
         String mensagem = String.format(
-                "Tem certeza que deseja excluir esta compra?\n\n" +
+                "Tem certeza que deseja excluir este item?\n\n" +
                         "Barcode: %s\n" +
                         "Descr: %s",
                 compra.getBcCompras(),
