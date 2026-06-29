@@ -23,26 +23,35 @@ import com.app.barcodecompras.database.DatabaseHelper;
 import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
 import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.ContextMenuHelper;
-import com.app.barcodecompras.util.DrawerUtil; //2026.06.07
-
+import com.app.barcodecompras.util.DrawerUtil;
 import com.app.barcodecompras.util.ResumoExpandableAdapter;
 import com.google.android.material.navigation.NavigationView;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ResultComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
-    private String currentCodigo, currentDescricao, currentCategoria, currentPeriodo , currentObservacao;
+    private String currentCodigo, currentDescricao, currentCategoria, currentPeriodo, currentObservacao;
     private RecyclerView recyclerView;
     private ComprasAdapter adapter;
     private SQLiteDatabase db;
-    private List<Compra> comprasList = new ArrayList<>();
+    private List<CompraAgrupada> comprasGroupList = new ArrayList<>();
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private BancoDadosBkp bancoDadosBkp;
     private FirebaseComprasHelper firebaseComprasHelper;
     private FirebaseBancoDadosHelper firebaseBancoHelper;
+
+    // Variáveis para calcular diferença de preço
+    private double precoDiffItem1 = 0;
+    private double precoDiffItem2 = 0;
+    private int itemDiffPosition1 = -1;
+    private int itemDiffPosition2 = -1;
+    private boolean isFirstItemSelected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +61,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerViewCompras);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // ADICIONA O DIVISOR NO RV ENTRE OS ITENS 2026.06.14
+        // ADICIONA O DIVISOR NO RV ENTRE OS ITENS
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 recyclerView.getContext(),
                 LinearLayoutManager.VERTICAL
@@ -63,23 +72,15 @@ public class ResultComprasActivity extends AppCompatActivity {
             dividerItemDecoration.setDrawable(divider);
             recyclerView.addItemDecoration(dividerItemDecoration);
         } else {
-            // Fallback: usa divisor padrão do sistema
             recyclerView.addItemDecoration(dividerItemDecoration);
         }
-        // ===== FIM DO DIVISOR =====
 
         db = openOrCreateDatabase("comprasDB.db", MODE_PRIVATE, null);
 
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
 
-        // INICIALIZAR VARIÁVEL LOCAL
         firebaseComprasHelper = new FirebaseComprasHelper(this, db);
-        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
-
-        // >>> Sincronizar Firebase para local AO ABRIR o app
-        // firebaseHelper.syncFirebaseParaLocal();
-        // >>> Sincronizar local para Firebase
-        // firebaseHelper.syncLocalParaFirebase();
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);
 
         // Obter critérios de busca da intent
         String codigo = getIntent().getStringExtra("CODIGO");
@@ -88,71 +89,44 @@ public class ResultComprasActivity extends AppCompatActivity {
         String periodo = getIntent().getStringExtra("PERIODO");
         String observacao = getIntent().getStringExtra("OBSERVACAO");
 
+        // Obter e armazenar critérios de busca atuais
+        currentCodigo = codigo != null ? codigo : "";
+        currentDescricao = descricao != null ? descricao : "";
+        currentCategoria = categoria != null ? categoria : "";
+        currentPeriodo = periodo != null ? periodo : "";
+        currentObservacao = observacao != null ? observacao : "";
+
         loadCompras(codigo, descricao, categoria, periodo, observacao);
 
-
-        // Obter e armazenar critérios de busca atuais
-        currentCodigo = getIntent().getStringExtra("CODIGO") != null ? getIntent().getStringExtra("CODIGO") : "";
-        currentDescricao = getIntent().getStringExtra("DESCRICAO") != null ? getIntent().getStringExtra("DESCRICAO") : "";
-        currentCategoria = getIntent().getStringExtra("CATEGORIA") != null ? getIntent().getStringExtra("CATEGORIA") : "";
-        currentPeriodo = getIntent().getStringExtra("PERIODO") != null ? getIntent().getStringExtra("PERIODO") : "";
-        currentObservacao = getIntent().getStringExtra("OBSERVACAO") != null ? getIntent().getStringExtra("OBSERVACAO") : "";
-
-        // Configurar clique nos itens da lista
-        adapter.setOnItemClickListener(compra -> {
-            Intent intent = new Intent(ResultComprasActivity.this, EditComprasActivity.class);
-            intent.putExtra("compra_id", compra.getId()); // ← corrigido
-            startActivityForResult(intent, EDIT_COMPRA_REQUEST);
-        });
-
-        //2026.26.28
-        adapter.setOnItemLongClickListener((view, compra) -> {
-            ContextMenuHelper.showContextMenu(view, compra,
-                    () -> { // Editar
-                        Intent intent = new Intent(ResultComprasActivity.this, EditComprasActivity.class);
-                        intent.putExtra("compra_id", compra.getId());
-                        startActivityForResult(intent, EDIT_COMPRA_REQUEST);
-                    },
-                    () -> deletarCompra(compra),
-                    () -> clonarCompra(compra),
-                    () -> pesquisarCompra(compra)
-            );
-            return true;
-        });
-        //
-
-        // DRAWER -- INICIO
+        // DRAWER
         drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.resul_compras_nav_view);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
+
         TextView tvMedia = findViewById(R.id.tvMedia);
         ExpandableListView expandable = findViewById(R.id.expandableResumo);
 
         tvMedia.setOnClickListener(v -> {
-
             if (expandable.getVisibility() == View.GONE) {
                 expandable.setVisibility(View.VISIBLE);
             } else {
                 expandable.setVisibility(View.GONE);
             }
         });
-
     }
-    // FIM ONCREATE
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == EDIT_COMPRA_REQUEST && resultCode == RESULT_OK) {
-            // Recarregar os dados com os mesmos critérios de busca
             loadCompras(currentCodigo, currentDescricao, currentCategoria, currentPeriodo, currentObservacao);
             Toast.makeText(this, "Lista atualizada", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void loadCompras(String codigo, String descricao, String categoria, String periodo, String observacao) {
-        comprasList.clear();
+        comprasGroupList.clear();
 
         double somaTotal = 0.0;
         double somaPrecos = 0.0;
@@ -211,24 +185,24 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
 
-        Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
-
-
-        // ===== CONSTRUIR A MESMA QUERY PARA CONTAGEM (SEM ORDER BY) =====
+        // ===== CONSTRUIR A MESMA QUERY PARA CONTAGEM =====
         String countQuery = "SELECT bc_compras, COUNT(*) as total FROM compras_tab WHERE 1=1";
-        List<String> countParams = new ArrayList<>(params); // Copia os parâmetros
+        List<String> countParams = new ArrayList<>();
 
-        // Reconstruir a query de contagem com os mesmos filtros
         if (!codigo.isEmpty()) {
             countQuery += " AND bc_compras LIKE ?";
+            countParams.add("%" + codigo + "%");
         }
         if (!descricao.isEmpty()) {
             String[] termos = descricao.split(" ");
             for (String termo : termos) {
                 if (termo.startsWith("-") && termo.length() > 1) {
+                    String valor = termo.substring(1);
                     countQuery += " AND descr_compras NOT LIKE ?";
+                    countParams.add("%" + valor + "%");
                 } else {
                     countQuery += " AND descr_compras LIKE ?";
+                    countParams.add("%" + termo + "%");
                 }
             }
         }
@@ -236,23 +210,28 @@ public class ResultComprasActivity extends AppCompatActivity {
             String[] termos = categoria.split(" ");
             for (String termo : termos) {
                 if (termo.startsWith("-") && termo.length() > 1) {
+                    String valor = termo.substring(1);
                     countQuery += " AND cat_compras NOT LIKE ?";
+                    countParams.add("%" + valor + "%");
                 } else {
                     countQuery += " AND cat_compras LIKE ?";
+                    countParams.add("%" + termo + "%");
                 }
             }
         }
         if (!periodo.isEmpty()) {
             countQuery += " AND periodo_compras LIKE ?";
+            countParams.add("%" + periodo + "%");
         }
         if (!observacao.isEmpty()) {
             countQuery += " AND obs_compras LIKE ?";
+            countParams.add("%" + observacao + "%");
         }
 
         countQuery += " GROUP BY bc_compras";
 
         // Executar query de contagem
-        java.util.Map<String, Integer> contagemPorFiltro = new java.util.HashMap<>();
+        Map<String, Integer> contagemPorFiltro = new HashMap<>();
         Cursor countCursor = db.rawQuery(countQuery, countParams.toArray(new String[0]));
 
         if (countCursor != null && countCursor.moveToFirst()) {
@@ -263,7 +242,13 @@ public class ResultComprasActivity extends AppCompatActivity {
             } while (countCursor.moveToNext());
             countCursor.close();
         }
-        // ================================================================
+
+        // Executar query principal
+        Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
+
+        // Mapas para agrupar por código
+        Map<String, List<Compra>> comprasPorCodigo = new HashMap<>();
+        Map<String, CompraAgrupada> grupoInfo = new HashMap<>();
 
         if (cursor.moveToFirst()) {
             do {
@@ -285,12 +270,17 @@ public class ResultComprasActivity extends AppCompatActivity {
                         id, bc, descr, cat, preco, quantidade, total, periodoCompra, obs
                 );
 
-                // ===== ATRIBUI A CONTAGEM DO FILTRO ATUAL =====
+                // ATRIBUI A CONTAGEM DO FILTRO ATUAL
                 int contagemFiltrada = contagemPorFiltro.getOrDefault(bc, 0);
                 compra.setContagemOcorrencias(contagemFiltrada);
-                // ============================================
 
-                comprasList.add(compra);
+                // Agrupar por código
+                if (!comprasPorCodigo.containsKey(bc)) {
+                    comprasPorCodigo.put(bc, new ArrayList<>());
+                    CompraAgrupada group = new CompraAgrupada(bc, descr, cat, periodoCompra, obs, contagemFiltrada);
+                    grupoInfo.put(bc, group);
+                }
+                comprasPorCodigo.get(bc).add(compra);
 
                 if (preco > maiorPreco) {
                     maiorPreco = preco;
@@ -305,9 +295,15 @@ public class ResultComprasActivity extends AppCompatActivity {
                 }
             } while (cursor.moveToNext());
 
+            // Criar lista de grupos
+            for (String bc : comprasPorCodigo.keySet()) {
+                CompraAgrupada group = grupoInfo.get(bc);
+                group.setCompras(comprasPorCodigo.get(bc));
+                comprasGroupList.add(group);
+            }
+
             double mediaPreco = quantidadeItens > 0 ? somaPrecos / quantidadeItens : 0;
 
-            // EXIBIR SOMA TOTAL
             TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
             tvSomaTotal.setText(String.format("Soma total: R$ %.2f (%d itens)", somaTotal, quantidadeItens));
 
@@ -316,7 +312,7 @@ public class ResultComprasActivity extends AppCompatActivity {
 
             ExpandableListView expandable = findViewById(R.id.expandableResumo);
             List<String> groups = new ArrayList<>();
-            java.util.Map<String, String> children = new java.util.HashMap<>();
+            Map<String, String> children = new HashMap<>();
 
             groups.add("Maior preço");
             groups.add("Menor preço");
@@ -337,21 +333,101 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         cursor.close();
 
+        // Criar adapter com a lista de grupos
         if (adapter == null) {
-            adapter = new ComprasAdapter(comprasList);
+            adapter = new ComprasAdapter(comprasGroupList);
             recyclerView.setAdapter(adapter);
         } else {
             adapter.notifyDataSetChanged();
         }
 
-        if (comprasList.isEmpty()) {
+        // Configurar listeners
+        setupAdapters();
+
+        if (comprasGroupList.isEmpty()) {
             Toast.makeText(this, "Nenhum resultado encontrado", Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void setupAdapters() {
+        // Clique no item = expandir/recolher
+        adapter.setOnItemClickListener((group, position) -> {
+            adapter.expandItem(position);
+        });
+
+        // Long click no cabeçalho = menu de contexto
+        adapter.setOnItemLongClickListener((view, group, position) -> {
+            if (!group.getCompras().isEmpty()) {
+                Compra compra = group.getCompras().get(0);
+                ContextMenuHelper.showContextMenu(view, compra,
+                        () -> {
+                            Intent intent = new Intent(ResultComprasActivity.this, EditComprasActivity.class);
+                            intent.putExtra("compra_id", compra.getId());
+                            startActivityForResult(intent, EDIT_COMPRA_REQUEST);
+                        },
+                        () -> deletarCompra(compra),
+                        () -> clonarCompra(compra),
+                        () -> pesquisarCompra(compra)
+                );
+            }
+            return true;
+        });
+
+        // Long click nos detalhes = selecionar para calcular diferença
+        adapter.setOnItemLongClickListenerDetalhe((view, compra, groupPosition, itemPosition) -> {
+            calcularDiferencaPreco(compra, groupPosition, itemPosition);
+            return true;
+        });
+    }
+
+    // Método para calcular diferença de preço
+    private void calcularDiferencaPreco(Compra compra, int groupPosition, int itemPosition) {
+        double precoAtual = compra.getPrecoCompras();
+
+        if (!isFirstItemSelected) {
+            precoDiffItem1 = precoAtual;
+            itemDiffPosition1 = groupPosition;
+            isFirstItemSelected = true;
+            Toast.makeText(this, "Item 1 selecionado: R$ " + String.format("%.2f", precoAtual), Toast.LENGTH_SHORT).show();
+        } else {
+            precoDiffItem2 = precoAtual;
+            itemDiffPosition2 = groupPosition;
+            isFirstItemSelected = false;
+
+            double diferenca = precoDiffItem2 - precoDiffItem1;
+            double porcentagem = (precoDiffItem1 != 0) ? (diferenca / precoDiffItem1) * 100 : 0;
+
+            DecimalFormat df = new DecimalFormat("#,##0.00");
+            DecimalFormat dfPercent = new DecimalFormat("#,##0.00");
+
+            String mensagem = String.format(
+                    "Comparação de Preços:\n\n" +
+                            "Item 1 (grupo %d): R$ %s\n" +
+                            "Item 2 (grupo %d): R$ %s\n\n" +
+                            "Diferença: R$ %s\n" +
+                            "Percentual: %s%%",
+                    itemDiffPosition1 + 1,
+                    df.format(precoDiffItem1),
+                    itemDiffPosition2 + 1,
+                    df.format(precoDiffItem2),
+                    df.format(diferenca),
+                    dfPercent.format(porcentagem)
+            );
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Diferença de Preço")
+                    .setMessage(mensagem)
+                    .setPositiveButton("OK", null)
+                    .show();
+
+            precoDiffItem1 = 0;
+            precoDiffItem2 = 0;
+            itemDiffPosition1 = -1;
+            itemDiffPosition2 = -1;
+        }
+    }
 
     private void deletarCompra(Compra compra) {
-        // Monta a mensagem de confirmação já formatada
         String mensagem = String.format(
                 "Tem certeza que deseja excluir este item?\n\n" +
                         "Barcode: %s\n" +
@@ -359,21 +435,19 @@ public class ResultComprasActivity extends AppCompatActivity {
                 compra.getBcCompras(),
                 compra.getDescrCompras());
 
-        // Exibe o dialog de confirmação
         new AlertDialog.Builder(this)
                 .setTitle("Confirmar Exclusão")
                 .setMessage(mensagem)
                 .setPositiveButton("Excluir", (dialog, which) -> {
                     try {
                         if (firebaseComprasHelper != null) {
-                            firebaseComprasHelper.deletarItem(String.valueOf(compra.getId())); //Exclusão do Firebase
+                            firebaseComprasHelper.deletarItem(String.valueOf(compra.getId()));
                         }
-                        int rowsDeleted = db.delete("compras_tab", "id = ?", //Exclusão do banco local (SQLite)
+                        int rowsDeleted = db.delete("compras_tab", "id = ?",
                                 new String[]{String.valueOf(compra.getId())});
-                        if (rowsDeleted > 0) { //Atualização da lista em tempo real
+                        if (rowsDeleted > 0) {
                             Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
-                            comprasList.remove(compra);
-                            adapter.notifyDataSetChanged();
+                            loadCompras(currentCodigo, currentDescricao, currentCategoria, currentPeriodo, currentObservacao);
                         } else {
                             Toast.makeText(this, "Erro ao excluir", Toast.LENGTH_SHORT).show();
                         }
@@ -385,40 +459,27 @@ public class ResultComprasActivity extends AppCompatActivity {
                 .show();
     }
 
-
     private void clonarCompra(Compra compra) {
         Intent intent = new Intent(ResultComprasActivity.this, MainActivity.class);
         intent.putExtra("CLONE_MODE", true);
-        intent.putExtra("bc", compra.getBcCompras());          // ← getBcCompras()
-        intent.putExtra("descricao", compra.getDescrCompras()); // ← getDescrCompras()
-        intent.putExtra("categoria", compra.getCatCompras());   // ← getCatCompras()
-        intent.putExtra("preco", compra.getPrecoCompras());     // ← getPrecoCompras()
-        intent.putExtra("quantidade", compra.getQntCompras());  // ← getQntCompras()
-        intent.putExtra("total", compra.getTotalCompras());     // ← getTotalCompras()
-        intent.putExtra("periodo", compra.getPeriodoCompras()); // ← getPeriodoCompras()
-        intent.putExtra("obs", compra.getObsCompras());         // ← getObsCompras()
+        intent.putExtra("bc", compra.getBcCompras());
+        intent.putExtra("descricao", compra.getDescrCompras());
+        intent.putExtra("categoria", compra.getCatCompras());
+        intent.putExtra("preco", compra.getPrecoCompras());
+        intent.putExtra("quantidade", compra.getQntCompras());
+        intent.putExtra("total", compra.getTotalCompras());
+        intent.putExtra("periodo", compra.getPeriodoCompras());
+        intent.putExtra("obs", compra.getObsCompras());
         startActivity(intent);
     }
-
 
     private void pesquisarCompra(Compra compra) {
         Intent intent = new Intent(ResultComprasActivity.this, ResultComprasActivity.class);
         intent.putExtra("CODIGO", compra.getBcCompras());
         intent.putExtra("DESCRICAO", compra.getDescrCompras());
-
-
-        // Mantém os filtros que estavam sendo usados na tela atual
         intent.putExtra("CATEGORIA", currentCategoria != null ? currentCategoria : "");
         intent.putExtra("PERIODO", currentPeriodo != null ? currentPeriodo : "");
         intent.putExtra("OBSERVACAO", currentObservacao != null ? currentObservacao : "");
-
-
         startActivity(intent);
-       // finish(); // Opcional: fecha a activity atual
     }
-
-
-
-
 }
-

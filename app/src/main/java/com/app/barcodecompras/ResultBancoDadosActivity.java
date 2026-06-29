@@ -87,7 +87,6 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
 
             if (bancodados != null) {
 
-                // ✅ ESSA LINHA resolve seu problema
                 intent.putExtra("ID", bancodados.getId());
 
                 intent.putExtra("CODIGO", bancodados.getBcIMDB() != null ? bancodados.getBcIMDB() : "");
