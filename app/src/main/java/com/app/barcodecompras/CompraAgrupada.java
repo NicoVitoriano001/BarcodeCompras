@@ -10,7 +10,7 @@ public class CompraAgrupada {
     private String periodoCompras;
     private String obsCompras;
     private int contagemOcorrencias;
-    private List<Compra> compras = new ArrayList<>();
+    private List<Compra> compras = new ArrayList<>(); // ← Adicionar campo
 
     public CompraAgrupada(String bcCompras, String descrCompras, String catCompras,
                           String periodoCompras, String obsCompras, int contagemOcorrencias) {
@@ -28,6 +28,8 @@ public class CompraAgrupada {
     public String getPeriodoCompras() { return periodoCompras; }
     public String getObsCompras() { return obsCompras; }
     public int getContagemOcorrencias() { return contagemOcorrencias; }
+
+    // ← Adicionar getter e setter
     public List<Compra> getCompras() { return compras; }
     public void setCompras(List<Compra> compras) { this.compras = compras; }
 }

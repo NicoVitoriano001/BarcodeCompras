@@ -1,5 +1,8 @@
 package com.app.barcodecompras;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +10,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.app.barcodecompras.database.DatabaseHelper;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraViewHolder> {
@@ -14,6 +21,8 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     private OnItemClickListener clickListener;
     private OnItemLongClickListener longClickListener;
     private OnItemLongClickListenerDetalhe longClickListenerDetalhe;
+    private Context context;
+    private SQLiteDatabase db;
 
     private int expandedPosition = -1;
 
@@ -48,7 +57,8 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     @NonNull
     @Override
     public CompraViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        context = parent.getContext();
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_compra_rv, parent, false);
         return new CompraViewHolder(view);
     }
@@ -77,56 +87,69 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         boolean isExpanded = (expandedPosition == position);
         holder.expandableContent.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
 
-        // ===== LIMPAR O CONTEÚDO ANTES DE ADICIONAR NOVAMENTE =====
+        // Limpar conteúdo antes de adicionar novamente
         holder.expandableContent.removeAllViews();
 
-        // Preencher detalhes com todos os itens do grupo
-        if (isExpanded && !compras.isEmpty()) {
-            for (int i = 0; i < compras.size(); i++) {
-                Compra c = compras.get(i);
-                final int itemIndex = i;
+        // Preencher detalhes com TODOS os registros do código (ignorando filtros)
+        if (isExpanded) {
+            // Buscar TODOS os registros deste código no banco
+            List<Compra> todosRegistros = buscarTodosRegistrosPorCodigo(group.getBcCompras());
 
-                // Criar um LinearLayout para cada item
-                LinearLayout itemLayout = new LinearLayout(holder.itemView.getContext());
-                itemLayout.setOrientation(LinearLayout.VERTICAL);
-                itemLayout.setPadding(8, 8, 8, 8);
+            if (!todosRegistros.isEmpty()) {
+                for (int i = 0; i < todosRegistros.size(); i++) {
+                    Compra c = todosRegistros.get(i);
+                    final int itemIndex = i;
 
-                // Criar TextView para o item
-                TextView tvDetalhe = new TextView(holder.itemView.getContext());
-                String detalhe = String.format(
-                        "Item %d:\n  Preço: R$ %.2f\n  Qtd: %.1f\n  Total: R$ %.2f\n  Período: %s",
-                        i + 1,
-                        c.getPrecoCompras(),
-                        c.getQntCompras(),
-                        c.getTotalCompras(),
-                        c.getPeriodoCompras()
-                );
-                tvDetalhe.setText(detalhe);
-                tvDetalhe.setTextColor(0xFFFFFFFF);
-                tvDetalhe.setTextSize(14);
-                itemLayout.addView(tvDetalhe);
+                    // Criar um LinearLayout para cada item
+                    LinearLayout itemLayout = new LinearLayout(context);
+                    itemLayout.setOrientation(LinearLayout.VERTICAL);
+                    itemLayout.setPadding(8, 8, 8, 8);
 
-                // Separador (exceto para o último item)
-                if (i < compras.size() - 1) {
-                    View separator = new View(holder.itemView.getContext());
-                    separator.setLayoutParams(new ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, 1
-                    ));
-                    separator.setBackgroundColor(0xFF666666);
-                    itemLayout.addView(separator);
-                }
+                    // Criar TextView para o item
+                    TextView tvDetalhe = new TextView(context);
+                    String detalhe = String.format(
+                            "Item %d:\n  Preço: R$ %.2f\n  Qtd: %.1f\n  Total: R$ %.2f\n  Período: %s\n  Obs: %s",
+                            i + 1,
+                            c.getPrecoCompras(),
+                            c.getQntCompras(),
+                            c.getTotalCompras(),
+                            c.getPeriodoCompras(),
+                            c.getObsCompras()
+                    );
+                    tvDetalhe.setText(detalhe);
+                    tvDetalhe.setTextColor(0xFFFFFFFF);
+                    tvDetalhe.setTextSize(14);
+                    itemLayout.addView(tvDetalhe);
 
-                // Adicionar o layout do item ao expandableContent
-                holder.expandableContent.addView(itemLayout);
-
-                // Definir o long click no layout do item
-                final Compra compraFinal = c;
-                itemLayout.setOnLongClickListener(v -> {
-                    if (longClickListenerDetalhe != null) {
-                        return longClickListenerDetalhe.onLongClickDetalhe(v, compraFinal, position, itemIndex);
+                    // Separador (exceto para o último item)
+                    if (i < todosRegistros.size() - 1) {
+                        View separator = new View(context);
+                        separator.setLayoutParams(new ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT, 1
+                        ));
+                        separator.setBackgroundColor(0xFF666666);
+                        itemLayout.addView(separator);
                     }
-                    return false;
-                });
+
+                    // Adicionar o layout do item ao expandableContent
+                    holder.expandableContent.addView(itemLayout);
+
+                    // Definir o long click no layout do item
+                    final Compra compraFinal = c;
+                    itemLayout.setOnLongClickListener(v -> {
+                        if (longClickListenerDetalhe != null) {
+                            return longClickListenerDetalhe.onLongClickDetalhe(v, compraFinal, position, itemIndex);
+                        }
+                        return false;
+                    });
+                }
+            } else {
+                // Se não encontrar registros, mostrar mensagem
+                TextView tvEmpty = new TextView(context);
+                tvEmpty.setText("Nenhum registro encontrado para este código");
+                tvEmpty.setTextColor(0xFFFFFFFF);
+                tvEmpty.setPadding(8, 8, 8, 8);
+                holder.expandableContent.addView(tvEmpty);
             }
         }
 
@@ -144,6 +167,46 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
             }
             return false;
         });
+    }
+
+    // Método para buscar TODOS os registros de um código específico (ignorando filtros)
+    private List<Compra> buscarTodosRegistrosPorCodigo(String codigo) {
+        List<Compra> registros = new ArrayList<>();
+
+        try {
+            if (db == null) {
+                DatabaseHelper dbHelper = new DatabaseHelper(context);
+                db = dbHelper.getWritableDatabase();
+            }
+
+            // Query sem filtros, apenas pelo código exato
+            String query = "SELECT * FROM compras_tab WHERE bc_compras = ? ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
+            Cursor cursor = db.rawQuery(query, new String[]{codigo});
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
+                    String bc = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
+                    String descr = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras"));
+                    String cat = cursor.getString(cursor.getColumnIndexOrThrow("cat_compras"));
+                    double preco = cursor.getDouble(cursor.getColumnIndexOrThrow("preco_compras"));
+                    double quantidade = cursor.getDouble(cursor.getColumnIndexOrThrow("qnt_compras"));
+                    double total = cursor.getDouble(cursor.getColumnIndexOrThrow("total_compras"));
+                    String periodoCompra = cursor.getString(cursor.getColumnIndexOrThrow("periodo_compras"));
+                    String obs = cursor.getString(cursor.getColumnIndexOrThrow("obs_compras"));
+
+                    Compra compra = new Compra(
+                            id, bc, descr, cat, preco, quantidade, total, periodoCompra, obs
+                    );
+                    registros.add(compra);
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return registros;
     }
 
     @Override
