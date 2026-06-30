@@ -23,7 +23,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     private OnItemLongClickListenerDetalhe longClickListenerDetalhe;
     private Context context;
     private SQLiteDatabase db;
-
     private int expandedPosition = -1;
 
     public interface OnItemClickListener {

@@ -45,8 +45,6 @@ public class ResultComprasActivity extends AppCompatActivity {
     private BancoDadosBkp bancoDadosBkp;
     private FirebaseComprasHelper firebaseComprasHelper;
     private FirebaseBancoDadosHelper firebaseBancoHelper;
-
-    // Variáveis para calcular diferença de preço
     private double precoDiffItem1 = 0;
     private double precoDiffItem2 = 0;
     private int itemDiffPosition1 = -1;
@@ -135,6 +133,21 @@ public class ResultComprasActivity extends AppCompatActivity {
         double menorPreco = Double.MAX_VALUE;
         String maiorPeriodo = "", maiorObs = "";
         String menorPeriodo = "", menorObs = "";
+
+        // ===== CONTAGEM GLOBAL - TODOS OS REGISTROS DA TABELA =====
+        Map<String, Integer> contagemGlobal = new HashMap<>();
+        Cursor countGlobalCursor = db.rawQuery(
+                "SELECT bc_compras, COUNT(*) as total FROM compras_tab GROUP BY bc_compras",
+                null
+        );
+        if (countGlobalCursor != null && countGlobalCursor.moveToFirst()) {
+            do {
+                String bc = countGlobalCursor.getString(countGlobalCursor.getColumnIndexOrThrow("bc_compras"));
+                int total = countGlobalCursor.getInt(countGlobalCursor.getColumnIndexOrThrow("total"));
+                contagemGlobal.put(bc, total);
+            } while (countGlobalCursor.moveToNext());
+            countGlobalCursor.close();
+        }
 
         // Construir query dinâmica para os itens
         String query = "SELECT * FROM compras_tab WHERE 1=1";
@@ -270,14 +283,18 @@ public class ResultComprasActivity extends AppCompatActivity {
                         id, bc, descr, cat, preco, quantidade, total, periodoCompra, obs
                 );
 
+                // ATRIBUI A CONTAGEM GLOBAL (TODA A TABELA)
+                int contagemGlobalItem = contagemGlobal.getOrDefault(bc, 0);
+                compra.setContagemOcorrencias(contagemGlobalItem);
+
                 // ATRIBUI A CONTAGEM DO FILTRO ATUAL
-                int contagemFiltrada = contagemPorFiltro.getOrDefault(bc, 0);
-                compra.setContagemOcorrencias(contagemFiltrada);
+                //int contagemFiltrada = contagemPorFiltro.getOrDefault(bc, 0);
+                //compra.setContagemOcorrencias(contagemFiltrada);
 
                 // Agrupar por código
                 if (!comprasPorCodigo.containsKey(bc)) {
                     comprasPorCodigo.put(bc, new ArrayList<>());
-                    CompraAgrupada group = new CompraAgrupada(bc, descr, cat, periodoCompra, obs, contagemFiltrada);
+                    CompraAgrupada group = new CompraAgrupada(bc, descr, cat, periodoCompra, obs, contagemGlobalItem);
                     grupoInfo.put(bc, group);
                 }
                 comprasPorCodigo.get(bc).add(compra);
@@ -387,7 +404,6 @@ public class ResultComprasActivity extends AppCompatActivity {
         });
     }
 
-
     // Método auxiliar para buscar a primeira compra de um código
     private Compra buscarPrimeiraCompraPorCodigo(String codigo) {
         Compra compra = null;
@@ -420,10 +436,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         return compra;
     }
 
-
-
-
-    // Método para calcular diferença de preço
+  // Método para calcular diferença de preço
     private void calcularDiferencaPreco(Compra compra, int groupPosition, int itemPosition) {
         double precoAtual = compra.getPrecoCompras();
 
@@ -501,7 +514,6 @@ public class ResultComprasActivity extends AppCompatActivity {
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
-
     private void clonarCompra(Compra compra) {
         Intent intent = new Intent(ResultComprasActivity.this, MainActivity.class);
         intent.putExtra("CLONE_MODE", true);

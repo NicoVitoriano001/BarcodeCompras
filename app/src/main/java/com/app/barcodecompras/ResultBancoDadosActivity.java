@@ -23,9 +23,10 @@ import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
 
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ResultBancoDadosActivity extends AppCompatActivity {
     private static final int EDIT_COLLECTED_REQUEST = 1;
@@ -45,21 +46,17 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Verifica se já existe uma instância
         if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
             finish();
             return;
         }
         setContentView(R.layout.activity_result_bancodados);
 
-        // Inicializar TextView do título
         tvTitle = findViewById(R.id.tvTitle);
 
-        // Inicializa o RecyclerView primeiro
         recyclerView = findViewById(R.id.recyclerViewResultBancoDados);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // ADICIONA O DIVISOR NO RV ENTRE OS ITENS 2026.06.14
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 recyclerView.getContext(),
                 LinearLayoutManager.VERTICAL
@@ -70,29 +67,20 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             dividerItemDecoration.setDrawable(divider);
             recyclerView.addItemDecoration(dividerItemDecoration);
         } else {
-            // Fallback: usa divisor padrão do sistema
             recyclerView.addItemDecoration(dividerItemDecoration);
         }
-        // ===== FIM DO DIVISOR =====
 
-
-        // Inicializa o adapter com a lista vazia
         BancoDadosList = new ArrayList<>();
         adapter = new BancoDadosAdapter(BancoDadosList);
         recyclerView.setAdapter(adapter);
 
-        // Configura o listener do adapter
         adapter.setOnItemClickListener(bancodados -> {
             Intent intent = new Intent(this, EditBancoDadosActivity.class);
-
             if (bancodados != null) {
-
                 intent.putExtra("ID", bancodados.getId());
-
                 intent.putExtra("CODIGO", bancodados.getBcIMDB() != null ? bancodados.getBcIMDB() : "");
                 intent.putExtra("DESCRICAO", bancodados.getDescrIMDB() != null ? bancodados.getDescrIMDB() : "");
                 intent.putExtra("CATEGORIA", bancodados.getCatIMDB() != null ? bancodados.getCatIMDB() : "");
-
                 startActivityForResult(intent, EDIT_COLLECTED_REQUEST);
             } else {
                 Toast.makeText(this, "Item inválido", Toast.LENGTH_SHORT).show();
@@ -102,7 +90,6 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getReadableDatabase();
 
-        // Obter critérios de busca da intent
         Intent intent = getIntent();
         if (intent != null) {
             String codigo = intent.getStringExtra("CODIGO") != null ? intent.getStringExtra("CODIGO") : "";
@@ -116,26 +103,20 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             loadBancoDados(codigo, descricao, categoria);
         }
 
-        //inicializar corretamente
         bancoDadosBkp = new BancoDadosBkp(this, dbHelper);
         firebaseComprasHelper = new FirebaseComprasHelper(this, db);
         firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);
 
-
-        // DRAWER -- INICIO
         drawer = findViewById(R.id.result_bancodados_drawer_layout);
         navigationView = findViewById(R.id.resul_bancodados_nav_view);
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
-
     }
-    // FIM ON CREATE
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == EDIT_COLLECTED_REQUEST && resultCode == RESULT_OK) {
-            // Recarregar os dados com os mesmos critérios de busca
             loadBancoDados(currentCodigo, currentDescricao, currentCategoria);
             Toast.makeText(this, "Lista atualizada", Toast.LENGTH_SHORT).show();
         }
@@ -144,15 +125,29 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
     private void loadBancoDados(String codigo, String descricao, String categoria) {
         BancoDadosList.clear();
 
-        // Verifica se todos os critérios estão vazios
         if (codigo.isEmpty() && descricao.isEmpty() && categoria.isEmpty()) {
             Toast.makeText(this, "Informe pelo menos um critério de busca", Toast.LENGTH_SHORT).show();
-            finish(); // FECHA A ACTIVITY IMEDIATAMENTE
+            finish();
             return;
         }
 
-        String query = "SELECT id, bc_DB, descr_DB, cat_DB, updated_at FROM bancodados_tab WHERE 1=1";
+        // ===== CONTAGEM GLOBAL - TODOS OS REGISTROS DA TABELA compras_tab =====
+        Map<String, Integer> contagemGlobal = new HashMap<>();
+        Cursor countGlobalCursor = db.rawQuery(
+                "SELECT bc_compras, COUNT(*) as total FROM compras_tab GROUP BY bc_compras",
+                null
+        );
+        if (countGlobalCursor != null && countGlobalCursor.moveToFirst()) {
+            do {
+                String bc = countGlobalCursor.getString(countGlobalCursor.getColumnIndexOrThrow("bc_compras"));
+                int total = countGlobalCursor.getInt(countGlobalCursor.getColumnIndexOrThrow("total"));
+                contagemGlobal.put(bc, total);
+            } while (countGlobalCursor.moveToNext());
+            countGlobalCursor.close();
+        }
+        // ==========================================================
 
+        String query = "SELECT id, bc_DB, descr_DB, cat_DB, updated_at FROM bancodados_tab WHERE 1=1";
         List<String> params = new ArrayList<>();
 
         if (!codigo.isEmpty()) {
@@ -173,13 +168,13 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         query += " ORDER BY descr_DB ASC";
 
         Cursor cursor = null;
-        int itemCount = 0; // Contador de itens
+        int itemCount = 0;
 
         try {
             cursor = db.rawQuery(query, params.toArray(new String[0]));
 
             if (cursor != null && cursor.getCount() > 0) {
-                itemCount = cursor.getCount(); // Obter total de itens
+                itemCount = cursor.getCount();
 
                 while (cursor.moveToNext()) {
                     long id = cursor.getLong(0);
@@ -189,17 +184,19 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
                     long updatedAt = cursor.getLong(4);
 
                     BancoDados bancodados = new BancoDados(id, bc, desc, cat, updatedAt);
+
+                    // ===== ATRIBUI A CONTAGEM GLOBAL =====
+                    int contagem = contagemGlobal.getOrDefault(bc, 0);
+                    bancodados.setContagemOcorrencias(contagem);
+                    // ====================================
+
                     BancoDadosList.add(bancodados);
                 }
 
-                // Atualizar título com a quantidade de itens
                 tvTitle.setText(String.format("Itens do Banco de Dados (%d itens)", itemCount));
-
-                // Atualiza lista
                 adapter.notifyDataSetChanged();
 
             } else {
-                // Nenhum item encontrado
                 tvTitle.setText("Itens do Banco de Dados (0 itens)");
                 Toast.makeText(this, "Nenhum item encontrado", Toast.LENGTH_SHORT).show();
             }
@@ -214,5 +211,4 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             }
         }
     }
-
 }
