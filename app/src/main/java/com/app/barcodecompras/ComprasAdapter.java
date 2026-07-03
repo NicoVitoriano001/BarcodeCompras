@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.app.barcodecompras.database.DatabaseHelper;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +22,12 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     private OnItemClickListener clickListener;
     private OnItemLongClickListener longClickListener;
     private OnItemLongClickListenerDetalhe longClickListenerDetalhe;
+    private OnItemClickListenerDetalhe clickListenerDetalhe;
     private Context context;
     private SQLiteDatabase db;
     private int expandedPosition = -1;
+
+    private DecimalFormat df = new DecimalFormat("#,##0.00");
 
     public interface OnItemClickListener {
         void onItemClick(CompraAgrupada group, int position);
@@ -37,6 +41,10 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         boolean onLongClickDetalhe(View view, Compra compra, int groupPosition, int itemPosition);
     }
 
+    public interface OnItemClickListenerDetalhe {
+        void onClickDetalhe(Compra compra, int groupPosition, int itemPosition);
+    }
+
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.clickListener = listener;
     }
@@ -47,6 +55,10 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
 
     public void setOnItemLongClickListenerDetalhe(OnItemLongClickListenerDetalhe listener) {
         this.longClickListenerDetalhe = listener;
+    }
+
+    public void setOnItemClickListenerDetalhe(OnItemClickListenerDetalhe listener) {
+        this.clickListenerDetalhe = listener;
     }
 
     public ComprasAdapter(List<CompraAgrupada> comprasGroupList) {
@@ -91,20 +103,106 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
 
         // Preencher detalhes com TODOS os registros do código (ignorando filtros)
         if (isExpanded) {
-            // Buscar TODOS os registros deste código no banco
             List<Compra> todosRegistros = buscarTodosRegistrosPorCodigo(group.getBcCompras());
+
+            // ===== CALCULAR ESTATÍSTICAS =====
+            double somaPrecos = 0;
+            double maiorPreco = Double.MIN_VALUE;
+            double menorPreco = Double.MAX_VALUE;
+            int totalItens = todosRegistros.size();
+
+            // Variáveis para armazenar o período e observação do maior e menor preço
+            String maiorPeriodo = "";
+            String maiorObs = "";
+            String menorPeriodo = "";
+            String menorObs = "";
+
+            for (Compra c : todosRegistros) {
+                double preco = c.getPrecoCompras();
+                somaPrecos += preco;
+
+                if (preco > maiorPreco) {
+                    maiorPreco = preco;
+                    maiorPeriodo = c.getPeriodoCompras();
+                    maiorObs = c.getObsCompras();
+                }
+
+                if (preco < menorPreco) {
+                    menorPreco = preco;
+                    menorPeriodo = c.getPeriodoCompras();
+                    menorObs = c.getObsCompras();
+                }
+            }
+
+            double media = totalItens > 0 ? somaPrecos / totalItens : 0;
+            if (totalItens == 0) {
+                maiorPreco = 0;
+                menorPreco = 0;
+                maiorPeriodo = "";
+                maiorObs = "";
+                menorPeriodo = "";
+                menorObs = "";
+            }
+            // =================================
+
+            // ===== EXTRAIR APENAS A DATA DO PERÍODO =====
+            String maiorData = extrairData(maiorPeriodo);
+            String menorData = extrairData(menorPeriodo);
+            // ============================================
+
+// ===== INFLAR O LAYOUT DE RESUMO =====
+            View resumoView = LayoutInflater.from(context).inflate(R.layout.item_resumo_expandido, null);
+            TextView tvResumoMedia = resumoView.findViewById(R.id.tvResumoMedia);
+            TextView tvResumoMaior = resumoView.findViewById(R.id.tvResumoMaior);
+            TextView tvResumoMenor = resumoView.findViewById(R.id.tvResumoMenor);
+            TextView tvResumoMaiorPeriodo = resumoView.findViewById(R.id.tvResumoMaiorPeriodo);
+            TextView tvResumoMenorPeriodo = resumoView.findViewById(R.id.tvResumoMenorPeriodo);
+// Os TextViews das setas não precisam ser configurados, pois já têm texto fixo no XML
+
+            tvResumoMedia.setText(String.format("Média: R$ %s (%d itens)", df.format(media), totalItens));
+            tvResumoMaior.setText(String.format("R$ %s", df.format(maiorPreco)));
+            tvResumoMenor.setText(String.format("R$ %s", df.format(menorPreco)));
+
+// ===== ADICIONAR DATA E OBSERVAÇÃO AO LADO DOS VALORES =====
+// ===== ADICIONAR DATA E OBSERVAÇÃO AO LADO DOS VALORES =====
+            if (!maiorData.isEmpty()) {
+                if (!maiorObs.isEmpty()) {
+                    tvResumoMaiorPeriodo.setText(String.format("(%s - %s)", maiorData, maiorObs));
+                } else {
+                    tvResumoMaiorPeriodo.setText(String.format("(%s)", maiorData));
+                }
+            } else {
+                tvResumoMaiorPeriodo.setText("");
+            }
+
+            if (!menorData.isEmpty()) {
+                if (!menorObs.isEmpty()) {
+                    tvResumoMenorPeriodo.setText(String.format("(%s - %s)", menorData, menorObs));
+                } else {
+                    tvResumoMenorPeriodo.setText(String.format("(%s)", menorData));
+                }
+            } else {
+                tvResumoMenorPeriodo.setText("");
+            }
+// =============================================================
+// =============================================================
+
+            holder.expandableContent.addView(resumoView);
+// ====================================
 
             if (!todosRegistros.isEmpty()) {
                 for (int i = 0; i < todosRegistros.size(); i++) {
                     Compra c = todosRegistros.get(i);
                     final int itemIndex = i;
+                    final int groupPosition = position;
 
-                    // Criar um LinearLayout para cada item
                     LinearLayout itemLayout = new LinearLayout(context);
                     itemLayout.setOrientation(LinearLayout.VERTICAL);
                     itemLayout.setPadding(8, 8, 8, 8);
 
-                    // Criar TextView para o item
+                    // Extrair apenas a data para exibição nos detalhes também
+                    String dataApenas = extrairData(c.getPeriodoCompras());
+
                     TextView tvDetalhe = new TextView(context);
                     String detalhe = String.format(
                             "Item %d:\n  Preço: R$ %.2f\n  Qtd: %.1f\n  Total: R$ %.2f\n  Período: %s\n  Obs: %s",
@@ -112,7 +210,7 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
                             c.getPrecoCompras(),
                             c.getQntCompras(),
                             c.getTotalCompras(),
-                            c.getPeriodoCompras(),
+                            dataApenas, // ← Usando apenas a data
                             c.getObsCompras()
                     );
                     tvDetalhe.setText(detalhe);
@@ -120,7 +218,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
                     tvDetalhe.setTextSize(14);
                     itemLayout.addView(tvDetalhe);
 
-                    // Separador (exceto para o último item)
                     if (i < todosRegistros.size() - 1) {
                         View separator = new View(context);
                         separator.setLayoutParams(new ViewGroup.LayoutParams(
@@ -130,20 +227,23 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
                         itemLayout.addView(separator);
                     }
 
-                    // Adicionar o layout do item ao expandableContent
                     holder.expandableContent.addView(itemLayout);
 
-                    // Definir o long click no layout do item
                     final Compra compraFinal = c;
+                    itemLayout.setOnClickListener(v -> {
+                        if (clickListenerDetalhe != null) {
+                            clickListenerDetalhe.onClickDetalhe(compraFinal, groupPosition, itemIndex);
+                        }
+                    });
+
                     itemLayout.setOnLongClickListener(v -> {
                         if (longClickListenerDetalhe != null) {
-                            return longClickListenerDetalhe.onLongClickDetalhe(v, compraFinal, position, itemIndex);
+                            return longClickListenerDetalhe.onLongClickDetalhe(v, compraFinal, groupPosition, itemIndex);
                         }
                         return false;
                     });
                 }
             } else {
-                // Se não encontrar registros, mostrar mensagem
                 TextView tvEmpty = new TextView(context);
                 tvEmpty.setText("Nenhum registro encontrado para este código");
                 tvEmpty.setTextColor(0xFFFFFFFF);
@@ -168,7 +268,31 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         });
     }
 
-    // Método para buscar TODOS os registros de um código específico (ignorando filtros)
+
+
+
+    // ===== MÉTODO AUXILIAR PARA EXTRAIR APENAS A DATA =====
+    private String extrairData(String periodoCompleto) {
+        if (periodoCompleto == null || periodoCompleto.isEmpty()) {
+            return "";
+        }
+
+        // O formato é "sáb. 2026-07-01" - extrair apenas a data
+        // Procura por padrão de data YYYY-MM-DD
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\d{4}-\\d{2}-\\d{2}");
+        java.util.regex.Matcher matcher = pattern.matcher(periodoCompleto);
+
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        return periodoCompleto; // Se não encontrar o padrão, retorna o original
+    }
+// =====================================================
+
+
+
+
     private List<Compra> buscarTodosRegistrosPorCodigo(String codigo) {
         List<Compra> registros = new ArrayList<>();
 
@@ -178,7 +302,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
                 db = dbHelper.getWritableDatabase();
             }
 
-            // Query sem filtros, apenas pelo código exato
             String query = "SELECT * FROM compras_tab WHERE bc_compras = ? ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
             Cursor cursor = db.rawQuery(query, new String[]{codigo});
 

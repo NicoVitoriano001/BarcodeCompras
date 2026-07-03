@@ -66,8 +66,16 @@ public class EditBancoDadosActivity extends AppCompatActivity {
                     ", Código: " + currentBarcode);
         }
 
-        // Configurar listeners
-        btnSalvar.setOnClickListener(v -> salvarEdicao());
+
+
+        // ===== BOTÃO SALVAR COM CONFIRMAÇÃO =====
+        btnSalvar.setOnClickListener(v -> {
+            if (validarCampos()) {
+                mostrarConfirmacaoSalvar();
+            }
+        });
+        // ======================================
+       // btnSalvar.setOnClickListener(v -> salvarEdicao());
         btnCancelar.setOnClickListener(v -> finish());
         btnExcluir.setOnClickListener(v -> excluirItem());
 
@@ -85,6 +93,67 @@ public class EditBancoDadosActivity extends AppCompatActivity {
         btnCancelar = findViewById(R.id.btnCancelarBancoDados);
         btnExcluir = findViewById(R.id.btnExcluirBancoDados);
     }
+
+
+
+
+
+    // ===== MÉTODO PARA VALIDAR CAMPOS =====
+    private boolean validarCampos() {
+        String barcode = etBcBancoDados.getText().toString().trim();
+        String descricao = etDescrBancoDados.getText().toString().trim();
+        String categoria = etCatBancoDados.getText().toString().trim();
+
+        if (barcode.isEmpty()) {
+            Toast.makeText(this, "Código é obrigatório", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (descricao.isEmpty()) {
+            Toast.makeText(this, "Descrição é obrigatória", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (categoria.isEmpty()) {
+            Toast.makeText(this, "Categoria é obrigatória", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+    // =====================================
+
+    // ===== DIÁLOGO DE CONFIRMAÇÃO PARA SALVAR =====
+    private void mostrarConfirmacaoSalvar() {
+        String barcode = etBcBancoDados.getText().toString().trim();
+        String descricao = etDescrBancoDados.getText().toString().trim();
+        String categoria = etCatBancoDados.getText().toString().trim();
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Confirmar Alteração")
+                .setMessage("Tem certeza que deseja salvar as alterações deste item?\n\n" +
+                        "Código: " + barcode + "\n" +
+                        "Descrição: " + descricao + "\n" +
+                        "Categoria: " + categoria)
+                .setPositiveButton("Salvar", (dialog1, which) -> {
+                    salvarEdicao();
+                })
+                .setNegativeButton("Cancelar", null)
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            positiveButton.setTextColor(Color.WHITE);
+            positiveButton.setBackgroundColor(Color.GREEN);
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            negativeButton.setTextColor(Color.WHITE);
+        });
+
+        dialog.show();
+    }
+    // =============================================
+
+
 
     private void excluirItem() {
         AlertDialog dialog = new AlertDialog.Builder(this)

@@ -27,7 +27,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 
 public class EditComprasActivity extends AppCompatActivity {
-    private static final int REQUEST_CODE_ADD_ITEM = 1001; // ← NOVO
+    private static final int REQUEST_CODE_ADD_ITEM = 1001;
     private EditText bc_compras, descr_compras, cat_compras, preco_compras,
             qnt_compras, total_compras, periodo_compras, obs_compras;
     private Button btnSalvar, btnCancelar, btnExcluir;
@@ -92,7 +92,17 @@ public class EditComprasActivity extends AppCompatActivity {
             if (!hasFocus) calculateTotal();
         });
 
-        btnSalvar.setOnClickListener(v -> salvarEdicao());
+
+        // ===== BOTÃO SALVAR COM CONFIRMAÇÃO =====
+        btnSalvar.setOnClickListener(v -> {
+            // Primeiro verifica se os campos estão preenchidos
+            if (validarCampos()) {
+                mostrarConfirmacaoSalvar();
+            }
+        });
+        // ======================================
+
+        //btnSalvar.setOnClickListener(v -> salvarEdicao());
         btnCancelar.setOnClickListener(v -> finish());
         btnExcluir.setOnClickListener(v -> excluirCompra());
 
@@ -119,6 +129,58 @@ public class EditComprasActivity extends AppCompatActivity {
 
         scanButtonEditCompras = findViewById(R.id.scanButtonEditCompras);
     }
+
+
+
+    // ===== MÉTODO PARA VALIDAR CAMPOS =====
+    private boolean validarCampos() {
+        String bc = bc_compras.getText().toString().trim();
+        String descr = descr_compras.getText().toString().trim();
+
+        if (bc.isEmpty()) {
+            Toast.makeText(this, "Código é obrigatório", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (descr.isEmpty()) {
+            Toast.makeText(this, "Descrição é obrigatória", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+    // =====================================
+
+    // ===== DIÁLOGO DE CONFIRMAÇÃO PARA SALVAR =====
+    private void mostrarConfirmacaoSalvar() {
+        String bc = bc_compras.getText().toString().trim();
+        String descr = descr_compras.getText().toString().trim();
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Confirmar Alteração")
+                .setMessage("Tem certeza que deseja salvar as alterações deste item?\n\n" +
+                        "Produto: " + descr + "\n" +
+                        "Código: " + bc)
+                .setPositiveButton("Salvar", (dialog1, which) -> {
+                    salvarEdicao();
+                })
+                .setNegativeButton("Cancelar", null)
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            positiveButton.setTextColor(Color.WHITE);
+            positiveButton.setBackgroundColor(Color.GREEN);
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            negativeButton.setTextColor(Color.WHITE);
+        });
+
+        dialog.show();
+    }
+    // =============================================
+
+
+
 
     // ===== RESULTADO DO SCANNER =====
     @Override
@@ -237,8 +299,10 @@ public class EditComprasActivity extends AppCompatActivity {
         }
     }
 
-
     // salvarEdicao com verificação
+
+
+    // ===== SALVAR EDIÇÃO (AGORA CHAMADO PELO DIÁLOGO) =====
     private void salvarEdicao() {
         try {
             String bc = bc_compras.getText().toString().trim();
@@ -310,6 +374,7 @@ public class EditComprasActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+    // ===================================================
 
 
     // excluirCompra com mais verificações

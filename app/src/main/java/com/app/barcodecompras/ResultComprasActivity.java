@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,7 +15,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.ExpandableListView;
 
 import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
@@ -24,7 +22,6 @@ import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
 import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.ContextMenuHelper;
 import com.app.barcodecompras.util.DrawerUtil;
-import com.app.barcodecompras.util.ResumoExpandableAdapter;
 import com.google.android.material.navigation.NavigationView;
 
 import java.text.DecimalFormat;
@@ -103,15 +100,16 @@ public class ResultComprasActivity extends AppCompatActivity {
         DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
 
         TextView tvMedia = findViewById(R.id.tvMedia);
-        ExpandableListView expandable = findViewById(R.id.expandableResumo);
 
-        tvMedia.setOnClickListener(v -> {
-            if (expandable.getVisibility() == View.GONE) {
-                expandable.setVisibility(View.VISIBLE);
-            } else {
-                expandable.setVisibility(View.GONE);
-            }
-        });
+//        ExpandableListView expandable = findViewById(R.id.expandableResumo);
+//
+//        tvMedia.setOnClickListener(v -> {
+//            if (expandable.getVisibility() == View.GONE) {
+//                expandable.setVisibility(View.VISIBLE);
+//            } else {
+//                expandable.setVisibility(View.GONE);
+//            }
+//        });
     }
 
     @Override
@@ -261,7 +259,6 @@ public class ResultComprasActivity extends AppCompatActivity {
         // Executar query principal
         Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
 
-        // Mapas para agrupar por código
         // Mapas para agrupar por código (LinkedHashMap mantém ordem)
         Map<String, List<Compra>> comprasPorCodigo = new LinkedHashMap<>();
         Map<String, CompraAgrupada> grupoInfo = new LinkedHashMap<>();
@@ -311,7 +308,6 @@ public class ResultComprasActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
 
             // Criar lista de grupos
-            // Criar lista de grupos (já estará na ordem correta)
             for (String bc : comprasPorCodigo.keySet()) {
                 CompraAgrupada group = grupoInfo.get(bc);
                 group.setCompras(comprasPorCodigo.get(bc));
@@ -323,10 +319,14 @@ public class ResultComprasActivity extends AppCompatActivity {
             TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
             tvSomaTotal.setText(String.format("Soma total: R$ %.2f (%d itens)", somaTotal, quantidadeItens));
 
-            TextView tvMedia = findViewById(R.id.tvMedia);
-            tvMedia.setText(String.format("Preço médio: R$ %.2f", mediaPreco));
+//            TextView tvMedia = findViewById(R.id.tvMedia);
+//            tvMedia.setText(String.format("Preço médio: R$ %.2f", mediaPreco));
+//
+//
+            // REMOVER TODO O CÓDIGO DO ExpandableListView
+        /*
+           ExpandableListView expandable = findViewById(R.id.expandableResumo);
 
-            ExpandableListView expandable = findViewById(R.id.expandableResumo);
             List<String> groups = new ArrayList<>();
             Map<String, String> children = new HashMap<>();
 
@@ -345,6 +345,8 @@ public class ResultComprasActivity extends AppCompatActivity {
 
             ResumoExpandableAdapter expAdapter = new ResumoExpandableAdapter(this, groups, children);
             expandable.setAdapter(expAdapter);
+
+         */
         }
 
         cursor.close();
@@ -371,12 +373,18 @@ public class ResultComprasActivity extends AppCompatActivity {
             adapter.expandItem(position);
         });
 
+        // ===== CLICK NOS ITENS EXPANDIDOS =====
+        adapter.setOnItemClickListenerDetalhe((compra, groupPosition, itemPosition) -> {
+            Intent intent = new Intent(ResultComprasActivity.this, EditComprasActivity.class);
+            intent.putExtra("compra_id", compra.getId());
+            startActivityForResult(intent, EDIT_COMPRA_REQUEST);
+        });
+        // =====================================
+
         // Long click no cabeçalho = menu de contexto
         adapter.setOnItemLongClickListener((view, group, position) -> {
-            // Vamos buscar a primeira compra do banco para o menu de contexto
             String codigo = group.getBcCompras();
 
-            // Buscar um registro deste código para usar no menu
             Compra compraParaMenu = buscarPrimeiraCompraPorCodigo(codigo);
             if (compraParaMenu != null) {
                 ContextMenuHelper.showContextMenu(view, compraParaMenu,
@@ -387,7 +395,7 @@ public class ResultComprasActivity extends AppCompatActivity {
                         },
                         () -> deletarCompra(compraParaMenu),
                         () -> clonarCompra(compraParaMenu),
-                        () -> pesquisarCompra(compraParaMenu)//editar para editarDB
+                        () -> pesquisarCompra(compraParaMenu)
                 );
             } else {
                 Toast.makeText(this, "Erro ao carregar dados do item", Toast.LENGTH_SHORT).show();
@@ -527,12 +535,11 @@ public class ResultComprasActivity extends AppCompatActivity {
     }
 
 
-
     //////modificar nome do método para pesquisarCompraDB
     private void pesquisarCompra(Compra compra) {
         // Buscar no banco de dados de itens (bancodados_tab) usando código e descrição
-        Intent intent = new Intent(ResultComprasActivity.this, EditBancoDadosActivity.class);
-        //OKOK Intent intent = new Intent(ResultComprasActivity.this, ResultBancoDadosActivity.class);
+        Intent intent = new Intent(ResultComprasActivity.this, ResultBancoDadosActivity.class);
+        //OKOK Intent intent = new Intent(ResultComprasActivity.this, EditBancoDadosActivity.class);
 
         // Usa os dados da compra para buscar no banco de dados
         intent.putExtra("CODIGO", compra.getBcCompras() != null ? compra.getBcCompras() : "");

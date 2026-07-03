@@ -113,5 +113,46 @@
         android:layout_marginTop="8dp"
         android:padding="8dp"
         android:background="#333333"
-        android:visibility="gone"/>
+        android:visibility="gone">
+
+        <!-- ===== RESUMO (Média, Maior e Menor Preço) ===== -->
+        <LinearLayout
+            android:id="@+id/resumoLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:background="#444444"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvResumoMedia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Média: R$ 0,00"
+                android:textColor="#FFD700"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvResumoMaior"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Maior: R$ 0,00"
+                android:textColor="#FF6B6B"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/tvResumoMenor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Menor: R$ 0,00"
+                android:textColor="#4ECDC4"
+                android:textSize="14sp"/>
+        </LinearLayout>
+        <!-- ========================================== -->
+
+        <!-- Os itens serão adicionados dinamicamente aqui -->
+    </LinearLayout>
+
 </LinearLayout>

@@ -37,15 +37,8 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <ExpandableListView
-            android:id="@+id/expandableResumo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:dividerHeight="1dp"
-            android:groupIndicator="@null"/>
 
-        <!-- RecyclerView - Lista de resultados -->
+    <!-- RecyclerView - Lista de resultados -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewCompras"
             android:layout_width="match_parent"
