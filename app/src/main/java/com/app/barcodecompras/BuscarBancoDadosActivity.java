@@ -49,6 +49,7 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
 
         // Inicializar botão de scan
         scanButtonBuscaDB = findViewById(R.id.scanButtonBuscaDB);
+
         scanButtonBuscaDB.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(BuscarBancoDadosActivity.this);
             integrator.setPrompt("Escaneie o código de barras");

@@ -20,13 +20,18 @@ import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
 import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.DatePickerUtil;
 import com.app.barcodecompras.util.DrawerUtil;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 
 public class EditComprasActivity extends AppCompatActivity {
+    private static final int REQUEST_CODE_ADD_ITEM = 1001; // ← NOVO
     private EditText bc_compras, descr_compras, cat_compras, preco_compras,
             qnt_compras, total_compras, periodo_compras, obs_compras;
     private Button btnSalvar, btnCancelar, btnExcluir;
+    private MaterialButton scanButtonEditCompras;
     private SQLiteDatabase db;
     private BancoDadosBkp bancoDadosBkp;
     private long compraId;
@@ -49,19 +54,28 @@ public class EditComprasActivity extends AppCompatActivity {
         bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
 
         firebaseComprasHelper = new FirebaseComprasHelper(this, db);
-        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);
 
         periodo_compras.setText(DatePickerUtil.getDataHoraAtual());
         periodo_compras.setOnClickListener(v ->
                 DatePickerUtil.showDatePickerDialog(this, periodo_compras)
         );
 
+        // ===== CONFIGURAR BOTÃO DE SCANNER =====
+        scanButtonEditCompras.setOnClickListener(v -> {
+            IntentIntegrator integrator = new IntentIntegrator(EditComprasActivity.this);
+            integrator.setPrompt("Escaneie o código de barras");
+            integrator.setOrientationLocked(true);
+            integrator.setBeepEnabled(true);
+            integrator.initiateScan();
+        });
+        // ======================================
+
         // Receber dados da compra selecionada
         Intent intent = getIntent();
         if (intent != null) {
             compraId = intent.getLongExtra("compra_id", -1);
 
-            // VERIFICAR SE O ID É VÁLIDO
             if (compraId == -1) {
                 Toast.makeText(this, "Erro: ID da compra inválido", Toast.LENGTH_SHORT).show();
                 finish();
@@ -102,7 +116,75 @@ public class EditComprasActivity extends AppCompatActivity {
         btnSalvar = findViewById(R.id.btnSalvar);
         btnCancelar = findViewById(R.id.btnCancelar);
         btnExcluir = findViewById(R.id.btnExcluir);
+
+        scanButtonEditCompras = findViewById(R.id.scanButtonEditCompras);
     }
+
+    // ===== RESULTADO DO SCANNER =====
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
+        // ESCANEAMENTO
+        if (result != null && result.getContents() != null) {
+            String barcode = result.getContents();
+            //bc_compras.setText(barcode);
+            fetchItemDataBancoDadosTable(barcode);
+        } else if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
+            // voltou do cadastro → busca novamente
+            String barcode = bc_compras.getText().toString();
+            fetchItemDataBancoDadosTable(barcode);
+        } else {
+            Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
+        }
+    }
+    // =================================
+
+    // ===== BUSCAR DADOS NA TABELA bancodados_tab =====
+    private void fetchItemDataBancoDadosTable(String barcodeValue) {
+        if (db == null || !db.isOpen()) {
+            Toast.makeText(this, "Banco de dados não disponível", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Cursor cursor = db.rawQuery(
+                "SELECT descr_DB, cat_DB FROM bancodados_tab WHERE bc_DB = ?",
+                new String[]{barcodeValue}
+        );
+
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    descr_compras.setText(cursor.getString(0)); // descr_DB
+                    cat_compras.setText(cursor.getString(1));   // cat_DB
+                    Toast.makeText(this, "Item encontrado no banco de dados!", Toast.LENGTH_SHORT).show();
+                } else {
+                    // ===== NÃO ENCONTROU → PERGUNTAR SE DESEJA CADASTRAR =====
+                    showAddItemDialog(barcodeValue);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+    }
+    // =================================================
+
+    // ===== DIALOG PARA CADASTRAR ITEM NÃO ENCONTRADO =====
+    private void showAddItemDialog(String barcodeValue) {
+        new AlertDialog.Builder(this)
+                .setTitle("Produto não encontrado")
+                .setMessage("Deseja cadastrar esse item no banco de dados?")
+                .setPositiveButton("Sim", (dialog, which) -> {
+                    Intent intent = new Intent(EditComprasActivity.this, AddItemBancoDados.class);
+                    intent.putExtra("BARCODE_VALUE", barcodeValue);
+                    startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
+                })
+                .setNegativeButton("Não", null)
+                .show();
+    }
+    // ====================================================
 
     private void calculateTotal() {
         try {
@@ -131,7 +213,7 @@ public class EditComprasActivity extends AppCompatActivity {
 
             if (cursor.moveToFirst()) {
                 originalBcCompras = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
-                originalDescrCompras = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras")); // verifica atnes de deletar
+                originalDescrCompras = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras"));
 
                 bc_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("bc_compras")));
                 descr_compras.setText(cursor.getString(cursor.getColumnIndexOrThrow("descr_compras")));
@@ -211,7 +293,6 @@ public class EditComprasActivity extends AppCompatActivity {
             );
 
             if (rowsAffected > 0) {
-                // Enviar atualização para o Firebase
                 if (firebaseComprasHelper != null) {
                     new Handler().postDelayed(() -> {
                         firebaseComprasHelper.syncLocalParaFirebase();
@@ -233,13 +314,11 @@ public class EditComprasActivity extends AppCompatActivity {
 
     // excluirCompra com mais verificações
     private void excluirCompra() {
-        // Verificar se o ID é válido
         if (compraId == -1) {
             Toast.makeText(this, "Erro: ID inválido para exclusão", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Verificar se o código original existe
         if (originalBcCompras == null || originalBcCompras.isEmpty()) {
             Toast.makeText(this, "Erro: Código do produto não encontrado", Toast.LENGTH_SHORT).show();
             return;
@@ -248,12 +327,11 @@ public class EditComprasActivity extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Confirmar Exclusão")
                 .setMessage("Tem certeza que deseja excluir este Item?\n\n" +
-                        "Produto: " + originalDescrCompras + "\n" + // ← descrição
-                        "Código: " + originalBcCompras)            // ← código
+                        "Produto: " + originalDescrCompras + "\n" +
+                        "Código: " + originalBcCompras)
                 .setPositiveButton("Excluir", (dialog1, which) -> {
 
                     try {
-                        // 1. Primeiro, verificar se o registro ainda existe
                         Cursor checkCursor = db.rawQuery("SELECT id FROM compras_tab WHERE id = ?",
                                 new String[]{String.valueOf(compraId)});
 
@@ -265,20 +343,17 @@ public class EditComprasActivity extends AppCompatActivity {
                         }
                         checkCursor.close();
 
-                        // 2. Deletar do Firebase
                         if (firebaseComprasHelper != null && originalBcCompras != null) {
                             firebaseComprasHelper.deletarItem(String.valueOf(compraId));
                             Toast.makeText(this, "Sincronizando com Firebase...", Toast.LENGTH_SHORT).show();
                         }
 
-                        // 3. Deletar do banco local
                         int rowsDeleted = db.delete(
                                 "compras_tab",
                                 "id = ?",
                                 new String[]{String.valueOf(compraId)}
                         );
 
-                        // 4. Verificar resultado
                         if (rowsDeleted > 0) {
                             Toast.makeText(this, "Compra excluída com sucesso!", Toast.LENGTH_SHORT).show();
                             setResult(RESULT_OK);

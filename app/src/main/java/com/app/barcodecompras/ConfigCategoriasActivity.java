@@ -92,7 +92,6 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
         // CLICK
         listView.setOnItemClickListener((parent, view, position, id) -> {
 
-            // IMPORTANTE: recuperar categoria REAL (sem o "(x)")
             CategoriaItem item = adapter.getItem(position);
             String categoriaSelecionada = item.nome;
 

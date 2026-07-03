@@ -15,6 +15,6 @@
 
     <item
         android:id="@+id/menu_pesquisar"
-        android:title="Pesquisar"
-        android:icon="@drawable/ic_search_24dp" />
+        android:title="Editar BD"
+        android:icon="@drawable/ic_edit_db_24dp" />
 </menu>

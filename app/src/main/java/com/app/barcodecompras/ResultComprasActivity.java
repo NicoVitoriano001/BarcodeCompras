@@ -30,6 +30,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -196,7 +197,8 @@ public class ResultComprasActivity extends AppCompatActivity {
             params.add("%" + observacao + "%");
         }
 
-        query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
+        query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, descr_compras ASC";
+      //query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
 
         // ===== CONSTRUIR A MESMA QUERY PARA CONTAGEM =====
         String countQuery = "SELECT bc_compras, COUNT(*) as total FROM compras_tab WHERE 1=1";
@@ -260,8 +262,9 @@ public class ResultComprasActivity extends AppCompatActivity {
         Cursor cursor = db.rawQuery(query, params.toArray(new String[0]));
 
         // Mapas para agrupar por código
-        Map<String, List<Compra>> comprasPorCodigo = new HashMap<>();
-        Map<String, CompraAgrupada> grupoInfo = new HashMap<>();
+        // Mapas para agrupar por código (LinkedHashMap mantém ordem)
+        Map<String, List<Compra>> comprasPorCodigo = new LinkedHashMap<>();
+        Map<String, CompraAgrupada> grupoInfo = new LinkedHashMap<>();
 
         if (cursor.moveToFirst()) {
             do {
@@ -287,10 +290,6 @@ public class ResultComprasActivity extends AppCompatActivity {
                 int contagemGlobalItem = contagemGlobal.getOrDefault(bc, 0);
                 compra.setContagemOcorrencias(contagemGlobalItem);
 
-                // ATRIBUI A CONTAGEM DO FILTRO ATUAL
-                //int contagemFiltrada = contagemPorFiltro.getOrDefault(bc, 0);
-                //compra.setContagemOcorrencias(contagemFiltrada);
-
                 // Agrupar por código
                 if (!comprasPorCodigo.containsKey(bc)) {
                     comprasPorCodigo.put(bc, new ArrayList<>());
@@ -298,7 +297,6 @@ public class ResultComprasActivity extends AppCompatActivity {
                     grupoInfo.put(bc, group);
                 }
                 comprasPorCodigo.get(bc).add(compra);
-
                 if (preco > maiorPreco) {
                     maiorPreco = preco;
                     maiorPeriodo = periodoCompra;
@@ -313,6 +311,7 @@ public class ResultComprasActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
 
             // Criar lista de grupos
+            // Criar lista de grupos (já estará na ordem correta)
             for (String bc : comprasPorCodigo.keySet()) {
                 CompraAgrupada group = grupoInfo.get(bc);
                 group.setCompras(comprasPorCodigo.get(bc));
@@ -374,7 +373,6 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         // Long click no cabeçalho = menu de contexto
         adapter.setOnItemLongClickListener((view, group, position) -> {
-            // Agora o grupo não tem mais a lista de compras
             // Vamos buscar a primeira compra do banco para o menu de contexto
             String codigo = group.getBcCompras();
 
@@ -389,7 +387,7 @@ public class ResultComprasActivity extends AppCompatActivity {
                         },
                         () -> deletarCompra(compraParaMenu),
                         () -> clonarCompra(compraParaMenu),
-                        () -> pesquisarCompra(compraParaMenu)
+                        () -> pesquisarCompra(compraParaMenu)//editar para editarDB
                 );
             } else {
                 Toast.makeText(this, "Erro ao carregar dados do item", Toast.LENGTH_SHORT).show();
@@ -404,7 +402,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         });
     }
 
-    // Método auxiliar para buscar a primeira compra de um código
+    // Metodo auxiliar para buscar a primeira compra de um código
     private Compra buscarPrimeiraCompraPorCodigo(String codigo) {
         Compra compra = null;
         Cursor cursor = null;
@@ -436,7 +434,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         return compra;
     }
 
-  // Método para calcular diferença de preço
+  // Metodo para calcular diferença de preço
     private void calcularDiferencaPreco(Compra compra, int groupPosition, int itemPosition) {
         double precoAtual = compra.getPrecoCompras();
 
@@ -528,13 +526,19 @@ public class ResultComprasActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+
+
+    //////modificar nome do método para pesquisarCompraDB
     private void pesquisarCompra(Compra compra) {
-        Intent intent = new Intent(ResultComprasActivity.this, ResultComprasActivity.class);
-        intent.putExtra("CODIGO", compra.getBcCompras());
-        intent.putExtra("DESCRICAO", compra.getDescrCompras());
-        intent.putExtra("CATEGORIA", currentCategoria != null ? currentCategoria : "");
-        intent.putExtra("PERIODO", currentPeriodo != null ? currentPeriodo : "");
-        intent.putExtra("OBSERVACAO", currentObservacao != null ? currentObservacao : "");
+        // Buscar no banco de dados de itens (bancodados_tab) usando código e descrição
+        Intent intent = new Intent(ResultComprasActivity.this, EditBancoDadosActivity.class);
+        //OKOK Intent intent = new Intent(ResultComprasActivity.this, ResultBancoDadosActivity.class);
+
+        // Usa os dados da compra para buscar no banco de dados
+        intent.putExtra("CODIGO", compra.getBcCompras() != null ? compra.getBcCompras() : "");
+        intent.putExtra("DESCRICAO", compra.getDescrCompras() != null ? compra.getDescrCompras() : "");
+        intent.putExtra("CATEGORIA", compra.getCatCompras() != null ? compra.getCatCompras() : "");
+      //OKOK intent.putExtra("CATEGORIA", currentCategoria != null ? currentCategoria : "");
         startActivity(intent);
     }
 }
