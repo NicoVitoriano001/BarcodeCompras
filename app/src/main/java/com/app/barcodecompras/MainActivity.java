@@ -31,6 +31,7 @@ import com.app.barcodecompras.util.DatePickerUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.zxing.integration.android.IntentIntegrator;
 
 //FIREBASE REALTIME
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText precoEditText, qntEditText, totalEditText;
     private MaterialButton scanButton, saveButton, cancelButton, addButton;
+    private SwitchMaterial switchExpandir; // ← NOVO
     private SQLiteDatabase db;
     private BancoDadosBkp bancoDadosBkp;
     private DrawerLayout drawer;
@@ -100,6 +102,10 @@ public class MainActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
+        // ===== INICIALIZAR SWITCH =====
+        switchExpandir = findViewById(R.id.switchExpandir);
+        // ==============================
+
         // ===== INICIALIZAR VIEWS DE EXPANSÃO =====
         scrollExpandableMain = findViewById(R.id.scrollExpandableMain);
         expandableContentMain = findViewById(R.id.expandableContentMain);
@@ -135,16 +141,42 @@ public class MainActivity extends AppCompatActivity {
                 DatePickerUtil.showDatePickerDialog(this, periodo_compras)
         );
 
-        // ===== CLICK NO CAMPO DESCRIÇÃO PARA EXPANDIR =====
-        descr_compras.setOnClickListener(v -> {
-            if (isExpanded) {
+// ===== SWITCH PARA ATIVAR/DESATIVAR EXPANSÃO =====
+        switchExpandir.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                String codigoBarras = bc_compras.getText().toString().trim();
+
+                if (codigoBarras.isEmpty()) {
+                    Toast.makeText(this, "Informe um código de barras primeiro", Toast.LENGTH_SHORT).show();
+                    switchExpandir.setChecked(false);
+                    return;
+                }
+
+                // Verifica se há registros no banco
+                Cursor checkCursor = db.rawQuery(
+                        "SELECT COUNT(*) FROM compras_tab WHERE bc_compras = ?",
+                        new String[]{codigoBarras}
+                );
+
+                int count = 0;
+                if (checkCursor != null && checkCursor.moveToFirst()) {
+                    count = checkCursor.getInt(0);
+                    checkCursor.close();
+                }
+
+                if (count == 0) {
+                    Toast.makeText(this, "Nenhum registro encontrado para este código. Adicione uma compra primeiro.", Toast.LENGTH_LONG).show();
+                    switchExpandir.setChecked(false);
+                    return;
+                }
+
+                carregarEstatisticasItem();
+            } else {
                 scrollExpandableMain.setVisibility(View.GONE);
                 isExpanded = false;
-            } else {
-                carregarEstatisticasItem();
             }
         });
-        // =================================================
+// =================================================
 
         addButton.setOnClickListener(v -> buscarItensParaAdicionar());
 
@@ -162,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
             clearFields();
             scrollExpandableMain.setVisibility(View.GONE);
             isExpanded = false;
+            switchExpandir.setChecked(false); // Desmarca o switch
             Toast.makeText(this, "Campos limpos", Toast.LENGTH_SHORT).show();
         });
 
@@ -203,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (codigoBarras.isEmpty()) {
             Toast.makeText(this, "Informe um código de barras primeiro", Toast.LENGTH_SHORT).show();
+            switchExpandir.setChecked(false); // Desmarca o switch
             return;
         }
 
@@ -214,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
         if (cursor == null || cursor.getCount() == 0) {
             Toast.makeText(this, "Nenhum registro encontrado para este código", Toast.LENGTH_SHORT).show();
             if (cursor != null) cursor.close();
+            switchExpandir.setChecked(false); // Desmarca o switch
             return;
         }
 
@@ -352,14 +387,31 @@ public class MainActivity extends AppCompatActivity {
 
             String barcode = result.getContents();
 
-            bc_compras.setText(barcode);
+            // ===== SÓ PREENCHE O CÓDIGO SE TIVER RETORNO =====
+            // Verifica se o código existe no banco antes de preencher
+            Cursor checkCursor = db.rawQuery(
+                    "SELECT bc_DB FROM bancodados_tab WHERE bc_DB = ?",
+                    new String[]{barcode}
+            );
 
-            fetchItemDataBancoDadosTable(barcode);
+            if (checkCursor != null && checkCursor.moveToFirst()) {
+                // Existe → preenche o campo
+                bc_compras.setText(barcode);
+                fetchItemDataBancoDadosTable(barcode);
+                checkCursor.close();
+            } else {
+                // Não existe → NÃO preenche o campo, apenas pergunta
+                if (checkCursor != null) checkCursor.close();
+                // Não preenche bc_compras
+                showAddItemDialog(barcode);
+            }
 
         } else if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
 
             String barcode = bc_compras.getText().toString();
-            fetchItemDataBancoDadosTable(barcode);
+            if (!barcode.isEmpty()) {
+                fetchItemDataBancoDadosTable(barcode);
+            }
 
         } else {
             Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();
@@ -386,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
                     descr_compras.setText(cursor.getString(0));
                     cat_compras.setText(cursor.getString(1));
 
-                    Toast.makeText(this, "Item encontrado! Clique no campo Descrição para ver todos os registros.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Item encontrado! Ative o Switch para ver os registros.", Toast.LENGTH_LONG).show();
 
                 } else {
 
@@ -410,7 +462,10 @@ public class MainActivity extends AppCompatActivity {
 
                     startActivityForResult(intent, REQUEST_CODE_ADD_ITEM);
                 })
-                .setNegativeButton("Não", null)
+                .setNegativeButton("Não", (dialog, which) -> {
+                    // Se cancelar, NÃO preenche o código
+                    Toast.makeText(this, "Código não foi preenchido", Toast.LENGTH_SHORT).show();
+                })
                 .show();
     }
 
@@ -487,6 +542,8 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
+
+
 
     private void adicionarFiltro(StringBuilder query,
                                  java.util.List<String> params,

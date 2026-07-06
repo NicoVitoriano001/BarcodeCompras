@@ -49,47 +49,32 @@
                 android:textColorHint="@color/hint_cinza"
                 android:inputType="textCapCharacters|textMultiLine" />
 
-            <EditText
-                android:id="@+id/preco_compras"
+            <!-- Campo Preço com Switch ao lado -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/preco"
-                android:textColorHint="@color/hint_cinza"
-                android:inputType="numberDecimal" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <EditText
-                android:id="@+id/qnt_compras"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/quantidade"
-                android:textColorHint="@color/hint_cinza"
-                android:inputType="numberDecimal" />
+                <EditText
+                    android:id="@+id/preco_compras"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/preco"
+                    android:textColorHint="@color/hint_cinza"
+                    android:inputType="numberDecimal" />
 
-            <EditText
-                android:id="@+id/total_compras"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:focusable="false"
-                android:hint="@string/total_qnt"
-                android:textColorHint="@color/hint_cinza"
-                android:inputType="none" />
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchExpandir"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Expandir"
+                    android:checked="false" />
+            </LinearLayout>
 
-            <EditText
-                android:id="@+id/periodo_compras"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/periodo"
-                android:inputType="number|textCapCharacters" />
-
-            <EditText
-                android:id="@+id/obs_compras"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/observacao"
-                android:textColorHint="@color/hint_cinza"
-                android:inputType="textCapCharacters|textMultiLine"/>
-
-            <!-- Conteúdo Expansível (igual ao ResultComprasActivity) -->
+            <!-- Conteúdo Expansível (agora abaixo do preço) -->
             <ScrollView
                 android:id="@+id/scrollExpandableMain"
                 android:layout_width="match_parent"
@@ -223,6 +208,38 @@
 
                 </LinearLayout>
             </ScrollView>
+
+            <EditText
+                android:id="@+id/qnt_compras"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/quantidade"
+                android:textColorHint="@color/hint_cinza"
+                android:inputType="numberDecimal" />
+
+            <EditText
+                android:id="@+id/total_compras"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:hint="@string/total_qnt"
+                android:textColorHint="@color/hint_cinza"
+                android:inputType="none" />
+
+            <EditText
+                android:id="@+id/periodo_compras"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/periodo"
+                android:inputType="number|textCapCharacters" />
+
+            <EditText
+                android:id="@+id/obs_compras"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/observacao"
+                android:textColorHint="@color/hint_cinza"
+                android:inputType="textCapCharacters|textMultiLine"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
