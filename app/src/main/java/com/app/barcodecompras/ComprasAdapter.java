@@ -26,7 +26,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     private Context context;
     private SQLiteDatabase db;
     private int expandedPosition = -1;
-
     private DecimalFormat df = new DecimalFormat("#,##0.00");
 
     public interface OnItemClickListener {
@@ -185,7 +184,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
                 tvResumoMenorPeriodo.setText("");
             }
 // =============================================================
-// =============================================================
 
             holder.expandableContent.addView(resumoView);
 // ====================================
@@ -268,9 +266,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         });
     }
 
-
-
-
     // ===== MÉTODO AUXILIAR PARA EXTRAIR APENAS A DATA =====
     private String extrairData(String periodoCompleto) {
         if (periodoCompleto == null || periodoCompleto.isEmpty()) {
@@ -289,9 +284,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         return periodoCompleto; // Se não encontrar o padrão, retorna o original
     }
 // =====================================================
-
-
-
 
     private List<Compra> buscarTodosRegistrosPorCodigo(String codigo) {
         List<Compra> registros = new ArrayList<>();
