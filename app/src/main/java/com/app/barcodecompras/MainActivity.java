@@ -361,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
     }
     // =============================================
 
-    // ===== MÉTODO AUXILIAR PARA EXTRAIR APENAS A DATA =====
+    // ===== METODO AUXILIAR PARA EXTRAIR APENAS A DATA =====
     private String extrairData(String periodoCompleto) {
         if (periodoCompleto == null || periodoCompleto.isEmpty()) {
             return "";
@@ -387,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
 
             String barcode = result.getContents();
 
-            // ===== SÓ PREENCHE O CÓDIGO SE TIVER RETORNO =====
+            // SÓ PREENCHE O CÓDIGO SE TIVER RETORNO
             // Verifica se o código existe no banco antes de preencher
             Cursor checkCursor = db.rawQuery(
                     "SELECT bc_DB FROM bancodados_tab WHERE bc_DB = ?",
@@ -408,10 +408,22 @@ public class MainActivity extends AppCompatActivity {
 
         } else if (requestCode == REQUEST_CODE_ADD_ITEM && resultCode == RESULT_OK) {
 
-            String barcode = bc_compras.getText().toString();
-            if (!barcode.isEmpty()) {
-                fetchItemDataBancoDadosTable(barcode);
+            // 2026.07.21 Capturar dados retornados do AddItemBancoDados =====
+            if (data != null) {
+                String barcode = data.getStringExtra(AddItemBancoDados.EXTRA_BARCODE);
+                String description = data.getStringExtra(AddItemBancoDados.EXTRA_DESCRIPTION);
+                String category = data.getStringExtra(AddItemBancoDados.EXTRA_CATEGORY);
+
+                if (barcode != null && !barcode.isEmpty()) {
+                    // 2026.07.21 Preenche os campos da MainActivity com os dados cadastrados
+                    bc_compras.setText(barcode);
+                    descr_compras.setText(description != null ? description : "");
+                    cat_compras.setText(category != null ? category : "");
+
+                    Toast.makeText(this, "Item cadastrado e carregado!", Toast.LENGTH_SHORT).show();
+                }
             }
+            // ==============================================================
 
         } else {
             Toast.makeText(this, "Nenhum código escaneado", Toast.LENGTH_SHORT).show();

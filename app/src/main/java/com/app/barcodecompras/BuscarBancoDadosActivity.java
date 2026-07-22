@@ -152,4 +152,5 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         intent.putExtra("CATEGORIA", etBuscaCategoriaBancoDados.getText().toString());
         startActivity(intent);
     }
+
 }

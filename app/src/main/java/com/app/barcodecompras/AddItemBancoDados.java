@@ -1,6 +1,6 @@
 package com.app.barcodecompras;
 
-import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -36,6 +36,11 @@ public class AddItemBancoDados extends AppCompatActivity {
     private FirebaseComprasHelper firebaseComprasHelper;
     private FirebaseBancoDadosHelper firebaseBancoHelper;
 
+    // Constantes para retorno dos dados
+    public static final String EXTRA_BARCODE = "EXTRA_BARCODE";
+    public static final String EXTRA_DESCRIPTION = "EXTRA_DESCRIPTION";
+    public static final String EXTRA_CATEGORY = "EXTRA_CATEGORY";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +70,11 @@ public class AddItemBancoDados extends AppCompatActivity {
 
         // Configurar listeners
         saveButton.setOnClickListener(v -> saveItem());
-        cancelButton.setOnClickListener(v -> finish());
+        cancelButton.setOnClickListener(v -> {
+            // Ao cancelar, retorna sem dados
+            setResult(RESULT_CANCELED);
+            finish();
+        });
         catImdbAdd.setOnClickListener(v -> abrirDialogCategorias());
 
         // DRAWER
@@ -85,19 +94,18 @@ public class AddItemBancoDados extends AppCompatActivity {
         }
 
         try {
-            long updateAt = System.currentTimeMillis();
-
-            ContentValues values = new ContentValues();
-            values.put("bc_DB", barcode);
-            values.put("descr_DB", description);
-            values.put("cat_DB", category);
-            values.put("updated_at", updateAt);
-
             long result = firebaseBancoHelper.inserirItem(barcode, description, category);
 
             if (result != -1) {
                 Toast.makeText(this, "Item salvo com sucesso", Toast.LENGTH_SHORT).show();
-                setResult(RESULT_OK);
+
+                // Cria Intent para retornar os dados
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra(EXTRA_BARCODE, barcode);
+                resultIntent.putExtra(EXTRA_DESCRIPTION, description);
+                resultIntent.putExtra(EXTRA_CATEGORY, category);
+
+                setResult(RESULT_OK, resultIntent);
                 finish();
             } else {
                 Toast.makeText(this, "Erro ao salvar item", Toast.LENGTH_SHORT).show();

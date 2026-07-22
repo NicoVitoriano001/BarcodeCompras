@@ -101,15 +101,6 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         TextView tvMedia = findViewById(R.id.tvMedia);
 
-//        ExpandableListView expandable = findViewById(R.id.expandableResumo);
-//
-//        tvMedia.setOnClickListener(v -> {
-//            if (expandable.getVisibility() == View.GONE) {
-//                expandable.setVisibility(View.VISIBLE);
-//            } else {
-//                expandable.setVisibility(View.GONE);
-//            }
-//        });
     }
 
     @Override
@@ -319,34 +310,6 @@ public class ResultComprasActivity extends AppCompatActivity {
             TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
             tvSomaTotal.setText(String.format("Soma total: R$ %.2f (%d itens)", somaTotal, quantidadeItens));
 
-//            TextView tvMedia = findViewById(R.id.tvMedia);
-//            tvMedia.setText(String.format("Preço médio: R$ %.2f", mediaPreco));
-//
-//
-            // REMOVER TODO O CÓDIGO DO ExpandableListView
-        /*
-           ExpandableListView expandable = findViewById(R.id.expandableResumo);
-
-            List<String> groups = new ArrayList<>();
-            Map<String, String> children = new HashMap<>();
-
-            groups.add("Maior preço");
-            groups.add("Menor preço");
-
-            children.put("Maior preço",
-                    "Preço: R$ " + String.format("%.2f", maiorPreco) +
-                            "\nPeríodo: " + maiorPeriodo +
-                            "\nObs: " + maiorObs);
-
-            children.put("Menor preço",
-                    "Preço: R$ " + String.format("%.2f", menorPreco) +
-                            "\nPeríodo: " + menorPeriodo +
-                            "\nObs: " + menorObs);
-
-            ResumoExpandableAdapter expAdapter = new ResumoExpandableAdapter(this, groups, children);
-            expandable.setAdapter(expAdapter);
-
-         */
         }
 
         cursor.close();

@@ -208,7 +208,7 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
                             c.getPrecoCompras(),
                             c.getQntCompras(),
                             c.getTotalCompras(),
-                            dataApenas, // ← Usando apenas a data
+                            dataApenas,
                             c.getObsCompras()
                     );
                     tvDetalhe.setText(detalhe);

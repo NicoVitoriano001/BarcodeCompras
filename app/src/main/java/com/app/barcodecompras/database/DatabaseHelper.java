@@ -47,4 +47,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } catch (Exception ignored) {}
         }
     }
+
 }

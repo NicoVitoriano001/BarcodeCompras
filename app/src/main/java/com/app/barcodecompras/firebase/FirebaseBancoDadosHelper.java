@@ -328,4 +328,5 @@ public class FirebaseBancoDadosHelper {
                 .putLong(KEY_LAST_SYNC_LOCAL_FIREBASE, time)
                 .apply();
     }
+
 }

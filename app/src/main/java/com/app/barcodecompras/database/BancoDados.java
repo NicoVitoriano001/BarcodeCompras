@@ -1,5 +1,4 @@
 package com.app.barcodecompras.database;
-
 public class BancoDados {
     private long id;
     private String bc;
@@ -37,7 +36,6 @@ public class BancoDados {
         return updatedAt;
     }
 
-    // NOVO GETTER E SETTER
     public int getContagemOcorrencias() {
         return contagemOcorrencias;
     }

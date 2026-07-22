@@ -70,4 +70,5 @@ public class BancoDadosAdapter extends RecyclerView.Adapter<BancoDadosAdapter.Ba
             tvContagemOcorrenciasDB = itemView.findViewById(R.id.tvContagemOcorrenciasDB); // ← NOVO
         }
     }
+
 }
