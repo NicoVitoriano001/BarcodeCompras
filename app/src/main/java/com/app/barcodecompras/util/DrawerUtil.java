@@ -54,17 +54,9 @@ public class DrawerUtil {
 
                 } else if (id == R.id.nav_syncFirebase) {
 
-                    // sincroniza compras
-                    if (firebaseComprasHelper != null) {
-                        firebaseComprasHelper.syncCompleta();
-                    }
-
-                    // sincroniza bancodados
-                    if (firebaseBancoDadosHelper != null) {
-                        firebaseBancoDadosHelper.syncCompleta();
-                    }
-
-                    Toast.makeText(activity, "Sync Compras e Banco dados...", Toast.LENGTH_SHORT).show();
+                    // Abre tela de resumo de sincronização
+                    Intent syncIntent = new Intent(activity, SyncSummaryActivity.class);
+                    activity.startActivity(syncIntent);
 
                 } else if (id == R.id.nav_backup) {
 

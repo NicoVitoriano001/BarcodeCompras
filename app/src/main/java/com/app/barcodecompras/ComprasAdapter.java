@@ -1,7 +1,6 @@
 package com.app.barcodecompras;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.util.CompraUtil;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -27,6 +26,10 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
     private SQLiteDatabase db;
     private int expandedPosition = -1;
     private DecimalFormat df = new DecimalFormat("#,##0.00");
+
+    public void setDatabase(SQLiteDatabase db) {
+        this.db = db;
+    }
 
     public interface OnItemClickListener {
         void onItemClick(CompraAgrupada group, int position);
@@ -102,7 +105,9 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
 
         // Preencher detalhes com TODOS os registros do código (ignorando filtros)
         if (isExpanded) {
-            List<Compra> todosRegistros = buscarTodosRegistrosPorCodigo(group.getBcCompras());
+            List<Compra> todosRegistros = (db != null)
+                    ? CompraUtil.buscarComprasPorCodigo(db, group.getBcCompras())
+                    : new ArrayList<>();
 
             // ===== CALCULAR ESTATÍSTICAS =====
             double somaPrecos = 0;
@@ -284,44 +289,6 @@ public class ComprasAdapter extends RecyclerView.Adapter<ComprasAdapter.CompraVi
         return periodoCompleto; // Se não encontrar o padrão, retorna o original
     }
 // =====================================================
-
-    private List<Compra> buscarTodosRegistrosPorCodigo(String codigo) {
-        List<Compra> registros = new ArrayList<>();
-
-        try {
-            if (db == null) {
-                DatabaseHelper dbHelper = new DatabaseHelper(context);
-                db = dbHelper.getWritableDatabase();
-            }
-
-            String query = "SELECT * FROM compras_tab WHERE bc_compras = ? ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
-            Cursor cursor = db.rawQuery(query, new String[]{codigo});
-
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
-                    String bc = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
-                    String descr = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras"));
-                    String cat = cursor.getString(cursor.getColumnIndexOrThrow("cat_compras"));
-                    double preco = cursor.getDouble(cursor.getColumnIndexOrThrow("preco_compras"));
-                    double quantidade = cursor.getDouble(cursor.getColumnIndexOrThrow("qnt_compras"));
-                    double total = cursor.getDouble(cursor.getColumnIndexOrThrow("total_compras"));
-                    String periodoCompra = cursor.getString(cursor.getColumnIndexOrThrow("periodo_compras"));
-                    String obs = cursor.getString(cursor.getColumnIndexOrThrow("obs_compras"));
-
-                    Compra compra = new Compra(
-                            id, bc, descr, cat, preco, quantidade, total, periodoCompra, obs
-                    );
-                    registros.add(compra);
-                } while (cursor.moveToNext());
-                cursor.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return registros;
-    }
 
     @Override
     public int getItemCount() {

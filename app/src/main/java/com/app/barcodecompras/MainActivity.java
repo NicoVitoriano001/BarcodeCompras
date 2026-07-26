@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
             double total = intent.getDoubleExtra("total", 0);
             preco_compras.setText(String.valueOf(preco));
             qnt_compras.setText(String.valueOf(qnt));
-            total_compras.setText(String.valueOf(total));
+            total_compras.setText(String.format("%.2f", total));
             periodo_compras.setText(intent.getStringExtra("periodo"));
             obs_compras.setText(intent.getStringExtra("obs"));
         }
@@ -625,7 +625,35 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        double total = preco * qnt;
+        double total = Math.round((preco * qnt) * 100.0) / 100.0;
+
+        // ===== VERIFICAR DUPLICATA (bc_compras + descr_compras + periodo_compras + obs_compras) =====
+        String[] duplicata = firebaseComprasHelper.verificarDuplicataCompras(bc, descr, periodo, obs);
+        if (duplicata != null) {
+            String idExistente = duplicata[0];
+            String bcExistente = duplicata[1];
+            String descrExistente = duplicata[2];
+            String periodoExistente = duplicata[3];
+            String obsExistente = duplicata[4];
+
+            new AlertDialog.Builder(this)
+                    .setTitle("⚠️ Compra Já Existe")
+                    .setMessage("Já existe uma compra com os mesmos dados:\n\n" +
+                            "📦 Código: " + bcExistente + "\n" +
+                            "📝 Descrição: " + descrExistente + "\n" +
+                            "📅 Período: " + periodoExistente + "\n" +
+                            "💬 Obs: " + obsExistente + "\n\n" +
+                            "Deseja editar a compra existente?")
+                    .setPositiveButton("Editar", (dialog, which) -> {
+                        Intent editIntent = new Intent(MainActivity.this, EditComprasActivity.class);
+                        editIntent.putExtra("compra_id", Long.parseLong(idExistente));
+                        startActivity(editIntent);
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+            return;
+        }
+        // ===================================================
 
         long updateAt = System.currentTimeMillis();
 
@@ -695,7 +723,7 @@ public class MainActivity extends AppCompatActivity {
                     if (!precoStr.isEmpty() && !qntStr.isEmpty()) {
                         double preco = Double.parseDouble(precoStr);
                         double qnt = Double.parseDouble(qntStr);
-                        totalEditText.setText(String.valueOf(preco * qnt));
+                        totalEditText.setText(String.format("%.2f", preco * qnt));
                     } else {
                         totalEditText.setText("");
                     }

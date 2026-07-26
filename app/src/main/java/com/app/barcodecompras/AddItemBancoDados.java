@@ -93,6 +93,36 @@ public class AddItemBancoDados extends AppCompatActivity {
             return;
         }
 
+        // ===== VERIFICAR DUPLICATA (bc_DB + descr_DB) =====
+        String[] duplicata = firebaseBancoHelper.verificarDuplicata(barcode, description);
+        if (duplicata != null) {
+            String idExistente = duplicata[0];
+            String bcExistente = duplicata[1];
+            String descrExistente = duplicata[2];
+            String catExistente = duplicata[3];
+
+            new AlertDialog.Builder(this)
+                    .setTitle("⚠️ Item Já Existe")
+                    .setMessage("Já existe um item com este código e descrição:\n\n" +
+                            "📦 Código: " + bcExistente + "\n" +
+                            "📝 Descrição: " + descrExistente + "\n" +
+                            "📂 Categoria: " + catExistente + "\n\n" +
+                            "Deseja editar o item existente?")
+                    .setPositiveButton("Editar", (dialog, which) -> {
+                        Intent editIntent = new Intent(AddItemBancoDados.this, EditBancoDadosActivity.class);
+                        editIntent.putExtra("ID", Long.parseLong(idExistente));
+                        editIntent.putExtra("CODIGO", bcExistente);
+                        editIntent.putExtra("DESCRICAO", descrExistente);
+                        editIntent.putExtra("CATEGORIA", catExistente);
+                        startActivity(editIntent);
+                        finish();
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+            return;
+        }
+        // ===================================================
+
         try {
             long result = firebaseBancoHelper.inserirItem(barcode, description, category);
 

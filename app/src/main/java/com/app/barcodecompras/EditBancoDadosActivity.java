@@ -211,6 +211,26 @@ public class EditBancoDadosActivity extends AppCompatActivity {
             return;
         }
 
+        // ===== VERIFICAR DUPLICATA (ignorando o próprio item) =====
+        String[] duplicata = firebaseBancoHelper.verificarDuplicata(novoBarcode, novaDescricao);
+        if (duplicata != null) {
+            long duplicataId = Long.parseLong(duplicata[0]);
+            // Se a duplicata é o PRÓPRIO item que está sendo editado, permitir
+            if (duplicataId != currentId) {
+                new AlertDialog.Builder(this)
+                        .setTitle("⚠️ Item Já Existe")
+                        .setMessage("Já existe outro item com este código e descrição:\n\n" +
+                                "📦 Código: " + duplicata[1] + "\n" +
+                                "📝 Descrição: " + duplicata[2] + "\n" +
+                                "📂 Categoria: " + duplicata[3] + "\n\n" +
+                                "Não é possível salvar esta alteração.")
+                        .setPositiveButton("OK", null)
+                        .show();
+                return;
+            }
+        }
+        // =========================================================
+
         try {
             long updateAt = System.currentTimeMillis();
 

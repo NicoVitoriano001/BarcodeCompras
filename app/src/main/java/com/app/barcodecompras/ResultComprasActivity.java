@@ -20,6 +20,7 @@ import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
 import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
 import com.app.barcodecompras.firebase.FirebaseComprasHelper;
+import com.app.barcodecompras.util.CompraUtil;
 import com.app.barcodecompras.util.ContextMenuHelper;
 import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
@@ -317,6 +318,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         // Criar adapter com a lista de grupos
         if (adapter == null) {
             adapter = new ComprasAdapter(comprasGroupList);
+            adapter.setDatabase(db);
             recyclerView.setAdapter(adapter);
         } else {
             adapter.notifyDataSetChanged();
@@ -375,34 +377,7 @@ public class ResultComprasActivity extends AppCompatActivity {
 
     // Metodo auxiliar para buscar a primeira compra de um código
     private Compra buscarPrimeiraCompraPorCodigo(String codigo) {
-        Compra compra = null;
-        Cursor cursor = null;
-        try {
-            cursor = db.rawQuery(
-                    "SELECT * FROM compras_tab WHERE bc_compras = ? LIMIT 1",
-                    new String[]{codigo}
-            );
-            if (cursor != null && cursor.moveToFirst()) {
-                long id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
-                String bc = cursor.getString(cursor.getColumnIndexOrThrow("bc_compras"));
-                String descr = cursor.getString(cursor.getColumnIndexOrThrow("descr_compras"));
-                String cat = cursor.getString(cursor.getColumnIndexOrThrow("cat_compras"));
-                double preco = cursor.getDouble(cursor.getColumnIndexOrThrow("preco_compras"));
-                double quantidade = cursor.getDouble(cursor.getColumnIndexOrThrow("qnt_compras"));
-                double total = cursor.getDouble(cursor.getColumnIndexOrThrow("total_compras"));
-                String periodoCompra = cursor.getString(cursor.getColumnIndexOrThrow("periodo_compras"));
-                String obs = cursor.getString(cursor.getColumnIndexOrThrow("obs_compras"));
-
-                compra = new Compra(id, bc, descr, cat, preco, quantidade, total, periodoCompra, obs);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return compra;
+        return CompraUtil.buscarPrimeiraCompraPorCodigo(db, codigo);
     }
 
   // Metodo para calcular diferença de preço

@@ -321,6 +321,26 @@ public class EditComprasActivity extends AppCompatActivity {
                 return;
             }
 
+            // ===== VERIFICAR DUPLICATA (ignorando o próprio item) =====
+            String[] duplicata = firebaseComprasHelper.verificarDuplicataCompras(bc, descr, periodo, obs);
+            if (duplicata != null) {
+                long duplicataId = Long.parseLong(duplicata[0]);
+                if (duplicataId != compraId) {
+                    new AlertDialog.Builder(this)
+                            .setTitle("⚠️ Compra Já Existe")
+                            .setMessage("Já existe outra compra com os mesmos dados:\n\n" +
+                                    "📦 Código: " + duplicata[1] + "\n" +
+                                    "📝 Descrição: " + duplicata[2] + "\n" +
+                                    "📅 Período: " + duplicata[3] + "\n" +
+                                    "💬 Obs: " + duplicata[4] + "\n\n" +
+                                    "Não é possível salvar esta alteração.")
+                            .setPositiveButton("OK", null)
+                            .show();
+                    return;
+                }
+            }
+            // =========================================================
+
             double preco = 0;
             double quantidade = 0;
 
