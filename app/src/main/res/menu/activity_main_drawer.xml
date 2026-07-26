@@ -21,18 +21,22 @@
     <group android:id="@+id/group_bancodados">
         <item
             android:id="@+id/nav_add_bancodados"
-            android:icon="@drawable/add_24dp"
+            android:icon="@drawable/ic_add_24dp"
             android:title="Adiciona BancoDados" />
         <item
             android:id="@+id/nav_busca_bancodados"
-            android:icon="@drawable/search_24dp"
+            android:icon="@drawable/ic_search_24dp"
             android:title="Busca BancoDados" />
+        <item
+            android:id="@+id/nav_listar_categorias"
+            android:title="Configurar Categorias"
+            android:icon="@drawable/ic_edit_24dp" />
     </group>
 
     <group android:id="@+id/group_compras">
         <item
             android:id="@+id/nav_busca_compras"
-            android:icon="@drawable/search_24dp"
+            android:icon="@drawable/ic_search_24dp"
             android:title="Busca Compras" />
     </group>
 

@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "comprasDB.db";
-    private static final int DATABASE_VERSION = 2; // aumente versão
+    private static final int DATABASE_VERSION = 4; // v4: sync_log table
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -30,19 +30,54 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         //Tabela banco de dados
         db.execSQL("CREATE TABLE IF NOT EXISTS bancodados_tab (" +
-                "bc_DB TEXT PRIMARY KEY, " +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "bc_DB NUMBER, " +
                 "descr_DB TEXT, " +
-                "cat_DB TEXT)");
+                "cat_DB TEXT," +
+                "updated_at INTEGER)");
+
+        // Tabela de log para sincronização de deleções
+        db.execSQL("CREATE TABLE IF NOT EXISTS sync_log (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "item_id INTEGER NOT NULL, " +
+                "table_name TEXT NOT NULL, " +
+                "action TEXT NOT NULL DEFAULT 'DELETE', " +
+                "timestamp INTEGER NOT NULL, " +
+                "synced INTEGER DEFAULT 0)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        //Atualização segura (sem apagar dados)
+        // Atualização segura (sem apagar dados)
         if (oldVersion < 2) {
             try {
                 db.execSQL("ALTER TABLE compras_tab ADD COLUMN updated_at INTEGER");
             } catch (Exception ignored) {}
         }
+        if (oldVersion < 4) {
+            try {
+                db.execSQL("CREATE TABLE IF NOT EXISTS sync_log (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "item_id INTEGER NOT NULL, " +
+                        "table_name TEXT NOT NULL, " +
+                        "action TEXT NOT NULL DEFAULT 'DELETE', " +
+                        "timestamp INTEGER NOT NULL, " +
+                        "synced INTEGER DEFAULT 0)");
+            } catch (Exception ignored) {}
+        }
     }
+
+    // Cria sync_log se não existir (chamado na abertura)
+    public static void garantirTabelaSyncLog(SQLiteDatabase db) {
+        try {
+            db.execSQL("CREATE TABLE IF NOT EXISTS sync_log (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "item_id INTEGER NOT NULL, " +
+                    "table_name TEXT NOT NULL, " +
+                    "action TEXT NOT NULL DEFAULT 'DELETE', " +
+                    "timestamp INTEGER NOT NULL, " +
+                    "synced INTEGER DEFAULT 0)");
+        } catch (Exception ignored) {}
+    }
+
 }

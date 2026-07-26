@@ -1,12 +1,11 @@
 package com.app.barcodecompras.database;
-
 public class CompraFirebase {
-    // Nomes EXATAMENTE iguais aos do Firebase
     public String bc;
     public String descricao;
 
     public String categoria;
     public double preco;
+
     public double quantidade;
     public double total;
     public String periodo;

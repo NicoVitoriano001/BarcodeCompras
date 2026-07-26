@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/edit_drawer_layout"
+    android:id="@+id/result_compras_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -78,7 +78,7 @@
             android:text="Escanear Código de Barras"
             android:textColor="?attr/colorOnSurface"
             android:layout_marginTop="8dp"
-            app:icon="@drawable/barcode_scanner_32dp"
+            app:icon="@drawable/ic_barcode_scanner_32dp"
             app:iconTint="?attr/colorOnSurface"/> <!-- Cor do ícone adaptável -->
 
 
@@ -98,7 +98,7 @@
                 android:text="Buscar"
                 android:layout_marginEnd="4dp"
                 android:textColor="?attr/colorOnSurface"
-                app:icon="@drawable/search_24dp"
+                app:icon="@drawable/ic_search_24dp"
                 app:iconTint="?attr/colorOnSurface"/>
 
             <com.google.android.material.button.MaterialButton
@@ -110,7 +110,7 @@
                 android:text="Cancelar"
                 android:layout_marginStart="4dp"
                 android:textColor="?attr/colorOnSurface"
-                app:icon="@drawable/close_24dp"
+                app:icon="@drawable/ic_close_24dp"
                 app:iconTint="?attr/colorOnSurface"/>
         </LinearLayout>
     </LinearLayout>

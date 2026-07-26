@@ -14,6 +14,7 @@ import java.util.List;
 public class BancoDadosAdapter extends RecyclerView.Adapter<BancoDadosAdapter.BancoDadosViewHolder> {
     private List<BancoDados> BancoDadosList;
     private OnItemClickListener listener;
+
     public interface OnItemClickListener {
         void onItemClick(BancoDados bancodados);
     }
@@ -23,7 +24,7 @@ public class BancoDadosAdapter extends RecyclerView.Adapter<BancoDadosAdapter.Ba
     }
 
     public BancoDadosAdapter(List<BancoDados> bancodadosList) {
-        this.BancoDadosList = bancodadosList; // Atualizado para usar BancoDadosList
+        this.BancoDadosList = bancodadosList;
     }
 
     @NonNull
@@ -36,10 +37,14 @@ public class BancoDadosAdapter extends RecyclerView.Adapter<BancoDadosAdapter.Ba
 
     @Override
     public void onBindViewHolder(@NonNull BancoDadosViewHolder holder, int position) {
-        BancoDados bancodados = BancoDadosList.get(position); // Atualizado para BancoDadosList
+        BancoDados bancodados = BancoDadosList.get(position);
+
         holder.tvBcBancoDados.setText(bancodados.getBcIMDB());
         holder.tvDescricao.setText(bancodados.getDescrIMDB());
         holder.tvCategoria.setText(bancodados.getCatIMDB());
+
+        // ===== EXIBIR CONTAGEM DE OCORRÊNCIAS =====
+        holder.tvContagemOcorrenciasDB.setText(String.format("(%d)", bancodados.getContagemOcorrencias()));
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -50,18 +55,20 @@ public class BancoDadosAdapter extends RecyclerView.Adapter<BancoDadosAdapter.Ba
 
     @Override
     public int getItemCount() {
-        return BancoDadosList != null ? BancoDadosList.size() : 0; // Adicionada verificação de null
+        return BancoDadosList != null ? BancoDadosList.size() : 0;
     }
 
     static class BancoDadosViewHolder extends RecyclerView.ViewHolder {
         TextView tvBcBancoDados, tvDescricao, tvCategoria;
+        TextView tvContagemOcorrenciasDB; // ← NOVO
 
         public BancoDadosViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Verifique se esses IDs correspondem ao seu item_bancodados.xml
             tvBcBancoDados = itemView.findViewById(R.id.tvBancoDadosBarcode);
             tvDescricao = itemView.findViewById(R.id.tvBancoDadosDescription);
             tvCategoria = itemView.findViewById(R.id.tvBancoDadosCategory);
+            tvContagemOcorrenciasDB = itemView.findViewById(R.id.tvContagemOcorrenciasDB); // ← NOVO
         }
     }
+
 }

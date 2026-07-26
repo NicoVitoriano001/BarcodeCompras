@@ -4,22 +4,19 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import android.app.DatePickerDialog;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
+import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
-import com.app.barcodecompras.firebase.FirebaseHelper;
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
+import com.app.barcodecompras.util.DatePickerUtil;
+import com.app.barcodecompras.util.DrawerUtil; //2026.06.07
+
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -28,12 +25,14 @@ public class BuscarComprasActivity extends AppCompatActivity {
     private static final int EDIT_COMPRA_REQUEST = 1;
     private static final int BUSCA_COMPRA_REQUEST = 1001;
     private EditText etBuscaCodigo, etBuscaDescricao, etBuscaCategoria, etBuscaPeriodo , etBuscaOBS;
-    private Button btnBuscar, btnCancelar;
+    private Button btnBuscar, btnCancelar, scanButtonBuscaCompras;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private SQLiteDatabase db;
-    private Button scanButtonBuscaCompras;
-    private FirebaseHelper firebaseHelper;
+    private BancoDadosBkp bancoDadosBkp;
+    private FirebaseComprasHelper firebaseComprasHelper;
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +45,12 @@ public class BuscarComprasActivity extends AppCompatActivity {
         etBuscaCategoria = findViewById(R.id.etBuscaCategoria);
         etBuscaPeriodo = findViewById(R.id.etBuscaPeriodo);
         etBuscaOBS = findViewById(R.id.etBuscaOBS);
+
+        // Inicializar botão
         btnBuscar = findViewById(R.id.btnBuscar);
         btnCancelar = findViewById(R.id.btnCancelarBusca);
-
-
-        // Inicializar botão de scan
         scanButtonBuscaCompras = findViewById(R.id.scanButtonBuscaCompras);
+
         scanButtonBuscaCompras.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(BuscarComprasActivity.this);
             integrator.setPrompt("Escaneie o código de barras");
@@ -60,82 +59,30 @@ public class BuscarComprasActivity extends AppCompatActivity {
             integrator.initiateScan();
         });
 
-        // Banco de dados
+        // instancia o Banco de dados
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
-        firebaseHelper = new FirebaseHelper(this, db);
 
-        // Configurar data atual no campo de período
-        etBuscaPeriodo.setText(getDataHoraAtual());
-        // Configurar listener para abrir o date picker
-        etBuscaPeriodo.setOnClickListener(v -> showDatePickerDialog());
+        bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
+
+        etBuscaPeriodo.setText(DatePickerUtil.getDataHoraAtual2());
+        etBuscaPeriodo.setOnClickListener(v ->
+                DatePickerUtil.showDatePickerDialog(this, etBuscaPeriodo)
+        );
 
         // Configurar listeners
         btnBuscar.setOnClickListener(v -> realizarBusca());
+
         btnCancelar.setOnClickListener(v -> finish());
 
         //DRAWER -- INICIO
-        drawer = findViewById(R.id.edit_drawer_layout);
+        drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.busca_compras_nav_view);
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            drawer.closeDrawer(GravityCompat.START);
-
-            // Adicione um pequeno delay para evitar travamentos
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemBancoDados.class));
-                } else if (id == R.id.nav_busca_bancodados) {
-                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
-                } else if (id == R.id.nav_syncFirebase) {
-                    // USAR A VARIÁVEL GLOBAL firebaseHelper
-                    if (firebaseHelper != null) {
-                        firebaseHelper.syncCompleta();
-                        Toast.makeText(this, "Sincronizando...", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Erro: FirebaseHelper não inicializado", Toast.LENGTH_SHORT).show();
-                    }
-                    // startActivity(new Intent(EditComprasActivity.this, BuscarBancoDadosActivity.class));
-                } else if (id == R.id.nav_backup) {
-                    startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_restore) {
-                    startActivity(new Intent(this, MainActivity.class));
-                }
-                // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 200); // 250ms de delay
-            return true;
-        });//DRAWER -- FIM
-
-    }// FIM ON CREATE
-
-
-// INICIO PEGAR DATA
-    private void showDatePickerDialog() {
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                (view, selectedYear, selectedMonth, selectedDay) -> {
-                    Calendar selectedDate = Calendar.getInstance();
-                    selectedDate.set(selectedYear, selectedMonth, selectedDay);
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("EEE yyyy-MM-dd", Locale.getDefault());
-                    etBuscaPeriodo.setText(sdf.format(selectedDate.getTime()));
-                },
-                year, month, day);
-        datePickerDialog.show();
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
     }
-    public String getDataHoraAtual() {
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM", Locale.getDefault());
-        return sdf.format(calendar.getTime());
-    }
-    // FIM PEGAR DATA
+    // FIM ON CREATE
 
     private void realizarBusca() {
         Intent intent = new Intent(this, ResultComprasActivity.class);
@@ -173,7 +120,6 @@ public class BuscarComprasActivity extends AppCompatActivity {
             finish();
         }
     }
-
 
     // Busca descrição e categoria na tabela bancodados_tab
     private void fetchItemDataBancoDadosTable(String barcodeValue) {

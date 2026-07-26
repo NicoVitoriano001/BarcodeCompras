@@ -2,7 +2,7 @@
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/edit_drawer_layout"
+    android:id="@+id/result_compras_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -73,7 +73,7 @@
                 android:text="Adicionar"
                 android:layout_marginStart="4dp"
                 android:textColor="?attr/colorOnSurface"
-                app:icon="@drawable/save_24dp"
+                app:icon="@drawable/ic_save_24dp"
                 app:iconTint="?attr/colorOnSurface"/>
 
             <com.google.android.material.button.MaterialButton
@@ -85,7 +85,7 @@
                 android:text="Cancelar"
                 android:layout_marginStart="4dp"
                 android:textColor="?attr/colorOnSurface"
-                app:icon="@drawable/cancel_24dp"
+                app:icon="@drawable/ic_cancel_24dp"
                 app:iconTint="?attr/colorOnSurface"/>
         </LinearLayout>
     </LinearLayout>

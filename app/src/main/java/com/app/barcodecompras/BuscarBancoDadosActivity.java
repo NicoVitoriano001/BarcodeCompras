@@ -4,20 +4,22 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.app.barcodecompras.database.BancoDadosBkp;
 import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
+import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
 
 public class BuscarBancoDadosActivity extends AppCompatActivity {
     private static final int EDIT_DB_REQUEST = 1;
@@ -28,7 +30,9 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private SQLiteDatabase db;
     private Button scanButtonBuscaDB;
-
+    private BancoDadosBkp bancoDadosBkp;
+    private FirebaseComprasHelper firebaseComprasHelper;
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +43,13 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         etBuscaCodigoBancoDados = findViewById(R.id.etBuscaCodigoBancoDados);
         etBuscaDescricaoBancoDados = findViewById(R.id.etBuscaDescricaoBancoDados);
         etBuscaCategoriaBancoDados = findViewById(R.id.etBuscaCategoriaBancoDados);
+
         btnBuscarBancoDados = findViewById(R.id.btnBuscarBancoDados);
         btnCancelarBancoDados = findViewById(R.id.btnCancelarBuscaBancoDados);
 
         // Inicializar botão de scan
         scanButtonBuscaDB = findViewById(R.id.scanButtonBuscaDB);
+
         scanButtonBuscaDB.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(BuscarBancoDadosActivity.this);
             integrator.setPrompt("Escaneie o código de barras");
@@ -55,43 +61,23 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         // Banco de dados
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
+        bancoDadosBkp = new BancoDadosBkp(this, new DatabaseHelper(this));
+
+        // INICIALIZAR VARIÁVEL LOCAL
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);//2026.06.22 banco dados
+
 
         // Configurar listeners
         btnBuscarBancoDados.setOnClickListener(v -> realizarBuscaBancoDados());
         btnCancelarBancoDados.setOnClickListener(v -> finish());
 
         //DRAWER -- INICIO
-        drawer = findViewById(R.id.edit_drawer_layout);
+        drawer = findViewById(R.id.result_compras_drawer_layout);
         navigationView = findViewById(R.id.busca_bancodados_nav_view);
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            drawer.closeDrawer(GravityCompat.START);
-
-            // Adicione um pequeno delay para evitar travamentos
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (id == R.id.nav_home) {
-                    startActivity(new Intent(this, MainActivity.class));
-                } else if (id == R.id.nav_add_bancodados) {
-                    startActivity(new Intent(this, AddItemBancoDados.class));
-                } else if (id == R.id.nav_busca_bancodados) {
-                    startActivity(new Intent(this, BuscarBancoDadosActivity.class));
-                } else if (id == R.id.nav_backup) {
-                    // Agora usando o padrão de Intent com extra
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.putExtra("ACTION", "BACKUP");
-                    startActivity(intent);
-                } else if (id == R.id.nav_restore) {
-                    // Agora usando o padrão de Intent com extra
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.putExtra("ACTION", "RESTORE");
-                    startActivity(intent);
-                }
-                // Não chame finish() aqui - deixe o sistema gerenciar
-            }, 500); // 250ms de delay
-            return true;
-        });//DRAWER -- FIM
-
-    } // FIM ON CREATE
+        DrawerUtil.setupDrawer(this, drawer, navigationView, firebaseComprasHelper, firebaseBancoHelper, bancoDadosBkp);
+    }
+    // FIM ON CREATE
 
     // Resultado do scanner ZXing
     @Override
@@ -166,4 +152,5 @@ public class BuscarBancoDadosActivity extends AppCompatActivity {
         intent.putExtra("CATEGORIA", etBuscaCategoriaBancoDados.getText().toString());
         startActivity(intent);
     }
+
 }

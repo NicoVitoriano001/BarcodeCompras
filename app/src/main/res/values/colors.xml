@@ -25,5 +25,8 @@
     <color name="indigo">#FF4B0082</color> <!-- Índigo -->
     <color name="violet">#FFEE82EE</color> <!-- Violeta -->
 
+    <!-- 2026.06.11 cinza para hint do mainactivity -->
+    <color name="hint_cinza">#969393</color>
+
 
 </resources>
