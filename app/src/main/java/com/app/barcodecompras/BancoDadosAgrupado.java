@@ -9,19 +9,22 @@ import java.util.List;
  * Cada grupo contém um item do banco de dados e suas compras relacionadas.
  */
 public class BancoDadosAgrupado {
+    private long id;
     private String bcDB;
     private String descrDB;
     private String catDB;
     private int contagemOcorrencias;
     private List<Compra> comprasRelacionadas = new ArrayList<>();
 
-    public BancoDadosAgrupado(String bcDB, String descrDB, String catDB, int contagemOcorrencias) {
+    public BancoDadosAgrupado(long id, String bcDB, String descrDB, String catDB, int contagemOcorrencias) {
+        this.id = id;
         this.bcDB = bcDB;
         this.descrDB = descrDB;
         this.catDB = catDB;
         this.contagemOcorrencias = contagemOcorrencias;
     }
 
+    public long getId() { return id; }
     public String getBcDB() { return bcDB; }
     public String getDescrDB() { return descrDB; }
     public String getCatDB() { return catDB; }

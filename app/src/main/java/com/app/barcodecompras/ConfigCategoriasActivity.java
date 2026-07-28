@@ -20,7 +20,9 @@ import com.app.barcodecompras.database.DatabaseHelper;
 import com.app.barcodecompras.util.CategoriaItem;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigCategoriasActivity extends AppCompatActivity {
 
@@ -55,13 +57,31 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
             return;
         }
 
+        // ===== CONTAGEM DE ITENS DO BANCODADOS QUE TÊM COMPRAS =====
+        Map<String, Integer> comprasCountMap = new HashMap<>();
+        Cursor comprasCursor = db.rawQuery(
+                "SELECT b.cat_DB, COUNT(DISTINCT b.bc_DB) FROM bancodados_tab b " +
+                "INNER JOIN compras_tab c ON b.bc_DB = c.bc_compras " +
+                "WHERE b.cat_DB IS NOT NULL AND b.cat_DB != '' " +
+                "GROUP BY b.cat_DB",
+                null
+        );
+        if (comprasCursor != null) {
+            while (comprasCursor.moveToNext()) {
+                comprasCountMap.put(comprasCursor.getString(0), comprasCursor.getInt(1));
+            }
+            comprasCursor.close();
+        }
+        // ===========================================================
+
         List<CategoriaItem> lista = new ArrayList<>();
 
         while (cursor.moveToNext()) {
             String categoria = cursor.getString(0);
             int quantidade = cursor.getInt(1);
+            int comprasCount = comprasCountMap.getOrDefault(categoria, 0);
 
-            lista.add(new CategoriaItem(categoria, quantidade));
+            lista.add(new CategoriaItem(categoria, quantidade, comprasCount));
         }
 
         cursor.close();
@@ -95,7 +115,7 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
             CategoriaItem item = adapter.getItem(position);
             String categoriaSelecionada = item.nome;
 
-            String[] opcoes = {"Editar", "Excluir", "Configurar"};
+            String[] opcoes = {"Editar Categoria", "Excluir Categoria", "Configurar Itens"};
 
             new AlertDialog.Builder(this)
                     .setTitle("Escolha uma ação")
@@ -122,8 +142,24 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
         layout.addView(searchInput);
         layout.addView(listView);
 
+        // ===== CONTAGEM TOTAL DE ITENS DO BANCODADOS QUE TÊM COMPRAS =====
+        int totalComprasCount = 0;
+        Cursor countComprasCursor = db.rawQuery(
+                "SELECT COUNT(DISTINCT b.bc_DB) FROM bancodados_tab b " +
+                "INNER JOIN compras_tab c ON b.bc_DB = c.bc_compras " +
+                "WHERE b.cat_DB IS NOT NULL AND b.cat_DB != ''",
+                null
+        );
+        if (countComprasCursor != null) {
+            if (countComprasCursor.moveToFirst()) {
+                totalComprasCount = countComprasCursor.getInt(0);
+            }
+            countComprasCursor.close();
+        }
+        // =================================================================
+
         new AlertDialog.Builder(this)
-                .setTitle("Categorias (" + adapter.getCount() + ")")
+                .setTitle("Categorias (" + adapter.getCount() + ") [" + totalComprasCount + "]")
                 .setView(layout)
                 .setPositiveButton("Nova Categoria", (d, w) -> abrirDialogCriacao())
                 .setNegativeButton("Fechar", (d, w) -> finish())

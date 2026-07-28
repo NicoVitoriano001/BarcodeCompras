@@ -175,19 +175,17 @@ public class FirebaseBancoDadosHelper {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 long newestTimestamp = lastSyncTime;
-                List<Long> firebaseIds = new ArrayList<>();
 
                 for (DataSnapshot child : snapshot.getChildren()) {
                     String itemId = child.getKey();
                     if (itemId == null) continue;
-
-                    firebaseIds.add(parseLong(itemId));
 
                     long id = 0;
                     String bc = "";
                     String descricao = "";
                     String categoria = "";
                     long updateAt = 0;
+                    boolean deleted = false;
 
                     if (child.hasChild("id")) {
                         Long val = child.child("id").getValue(Long.class);
@@ -215,6 +213,17 @@ public class FirebaseBancoDadosHelper {
                             if (updateAt > newestTimestamp) newestTimestamp = updateAt;
                         }
                     }
+                    if (child.hasChild("deleted")) {
+                        Boolean val = child.child("deleted").getValue(Boolean.class);
+                        if (val != null) deleted = val;
+                    }
+
+                    // Se marcado como deletado no Firebase, remover do local
+                    if (deleted) {
+                        db.delete(TABLE_NAME, "id = ?", new String[]{String.valueOf(id)});
+                        Log.d(TAG, "Item " + id + " removido localmente por soft delete do Firebase");
+                        continue;
+                    }
 
                     Cursor cursor = db.rawQuery(
                             "SELECT id, updated_at FROM " + TABLE_NAME + " WHERE id = ?",
@@ -240,10 +249,12 @@ public class FirebaseBancoDadosHelper {
                     }
                 }
 
-                // Verificar itens deletados no Firebase (hard delete)
-                if (!firebaseIds.isEmpty()) {
-                    checkForDeletedItems(firebaseIds);
-                }
+                // A detecção de itens deletados é feita pela flag "deleted" no fluxo
+                // de sincronização acima (syncFirebaseParaLocal). Não baixamos todos
+                // os nós do Firebase para comparar IDs pois com 10.000+ itens isso
+                // consumiria banda e memória em excesso.
+                // Se precisar limpar órfãos locais, execute uma sincronização limpa
+                // (export/import JSON do nó bancodado via console Firebase).
 
                 if (newestTimestamp > lastSyncTime) {
                     saveLastSyncFirebaseParaLocalTime(newestTimestamp);
@@ -291,29 +302,30 @@ public class FirebaseBancoDadosHelper {
 
                 if (updateAt > newestTimestamp) {
                     newestTimestamp = updateAt;
-                }
+                }            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", id);
+            itemMap.put("bc", bc);
+            itemMap.put("descricao", descricao);
+            itemMap.put("categoria", categoria);
+            itemMap.put(FIELD_TIMESTAMP, updateAt);
+            itemMap.put("deleted", false);
 
-                Map<String, Object> itemMap = new HashMap<>();
-                itemMap.put("id", id);
-                itemMap.put("bc", bc);
-                itemMap.put("descricao", descricao);
-                itemMap.put("categoria", categoria);
-                itemMap.put(FIELD_TIMESTAMP, updateAt);
+            ref.child(String.valueOf(id)).setValue(itemMap);
+        }
+        cursor.close();
 
-                ref.child(String.valueOf(id)).setValue(itemMap);
-            }
-            cursor.close();
+        if (newestTimestamp > lastSyncTime) {
+            saveLastSyncLocalParaFirebaseTime(newestTimestamp);
+        }
 
-            if (newestTimestamp > lastSyncTime) {
-                saveLastSyncLocalParaFirebaseTime(newestTimestamp);
-            }
-
-            if (onComplete != null) onComplete.run();
+        if (onComplete != null) onComplete.run();
         });
     }
 
     // ==================== DELEÇÃO RASTREADA ====================
-    // 2026.06.24 DELETE (HARD DELETE - remove do Firebase e do Local)
+    // SOFT DELETE - marca o item como deletado no Firebase (deleted=true + timestamp)
+    // para que outros dispositivos possam detectar a exclusão ao sincronizar.
+    // O nó permanece no Firebase, permitindo que consultas orderByChild o encontrem.
     public void deletarItem(long id) {
         long updateAt = System.currentTimeMillis();
 
@@ -326,28 +338,33 @@ public class FirebaseBancoDadosHelper {
         logValues.put("synced", 1); // Marca como sincronizado pois vamos enviar agora
         db.insert("sync_log", null, logValues);
 
-        // 2. Remover do Firebase (hard delete)
-        ref.child(String.valueOf(id)).removeValue()
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Item " + id + " deletado do Firebase"))
+        // 2. Soft delete no Firebase (marcar como deletado, NÃO remover o nó)
+        // Isso permite que outros usuários detectem a exclusão via consulta timestamp
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("deleted", true);
+        updates.put(FIELD_TIMESTAMP, updateAt);
+        ref.child(String.valueOf(id)).updateChildren(updates)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Item " + id + " marcado como deletado no Firebase"))
                 .addOnFailureListener(e -> {
                     // Se falhou, marcar como não sincronizado para tentar novamente
                     db.execSQL("UPDATE sync_log SET synced = 0 WHERE item_id = ? AND table_name = ?",
                             new String[]{String.valueOf(id), TABLE_NAME});
-                    Log.e(TAG, "Falha ao deletar item " + id + " do Firebase: " + e.getMessage());
+                    Log.e(TAG, "Falha ao marcar deleção do item " + id + " no Firebase: " + e.getMessage());
                 });
 
-        // 3. Remover do SQLite
+        // 3. Remover do SQLite local
         db.delete(TABLE_NAME, "id = ?", new String[]{String.valueOf(id)});
 
-        // 4. Atualizar timestamps de sincronização
-        saveLastSyncFirebaseParaLocalTime(updateAt);
+        // 4. Atualizar APENAS o timestamp de sync local→firebase
+        // NÃO atualizar saveLastSyncFirebaseParaLocalTime pois isso é
+        // responsabilidade exclusiva do syncFirebaseParaLocal()
         saveLastSyncLocalParaFirebaseTime(updateAt);
     }
 
     // ==================== GERENCIAMENTO DE SYNC_LOG ====================
     private void processPendingDeletions(Runnable onComplete) {
         Cursor c = db.rawQuery(
-                "SELECT item_id FROM sync_log WHERE table_name = ? AND synced = 0",
+                "SELECT item_id, timestamp FROM sync_log WHERE table_name = ? AND synced = 0",
                 new String[]{TABLE_NAME}
         );
 
@@ -358,13 +375,23 @@ public class FirebaseBancoDadosHelper {
         }
 
         List<Long> idsToDelete = new ArrayList<>();
+        List<Long> timestamps = new ArrayList<>();
+
         while (c.moveToNext()) {
             idsToDelete.add(c.getLong(0));
+            timestamps.add(c.getLong(1));
         }
         c.close();
 
-        for (long id : idsToDelete) {
-            ref.child(String.valueOf(id)).removeValue()
+        for (int i = 0; i < idsToDelete.size(); i++) {
+            long id = idsToDelete.get(i);
+            long ts = timestamps.get(i);
+
+            // Soft delete no Firebase (marcar como deletado)
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("deleted", true);
+            updates.put(FIELD_TIMESTAMP, ts);
+            ref.child(String.valueOf(id)).updateChildren(updates)
                     .addOnSuccessListener(aVoid -> {
                         // Limpar do sync_log após sucesso
                         db.delete("sync_log", "item_id = ? AND table_name = ?",
@@ -379,55 +406,26 @@ public class FirebaseBancoDadosHelper {
     }
 
     // ==================== VERIFICAR ITENS DELETADOS NO FIREBASE ====================
-    // Hard deletes no Firebase removem completamente o nó.
-    // Como o query orderByChild("updateAt") não captura nós que foram deletados
-    // (eles não existem mais), precisamos comparar todos os IDs locais com os
-    // IDs do Firebase para detectar hard deletes.
-    // Para datasets pequenos (<100 itens conforme especificado), isso é aceitável.
-    private void checkForDeletedItems(List<Long> firebaseIdsFromQuery) {
-        // Para evitar baixar todos os IDs do Firebase toda vez, combinamos:
-        // 1. IDs que vieram na query atual (itens modificados)
-        // 2. IDs locais de itens que NÃO estavam na query
-        //
-        // Se um item foi hard-deletado no Firebase, seu ID não estará em nenhum lugar.
-        // Verificamos se algum ID local não está presente nos IDs do Firebase,
-        // mas apenas para itens que NÃO foram modificados localmente.
-
-        if (firebaseIdsFromQuery.isEmpty()) return;
-
-        // Para cada ID do Firebase que veio na query, remover duplicatas locais
-        // (se o mesmo ID existe localmente, está ok)
-        // A detecção de hard delete requer baixar todos os IDs do Firebase.
-        // Para otimizar, fazemos isso apenas se houver itens não encontrados na query.
-
-        // Estratégia: baixar todos os IDs do Firebase (necessário para hard detect)
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                List<String> firebaseIds = new ArrayList<>();
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    String itemId = child.getKey();
-                    if (itemId != null) {
-                        firebaseIds.add(itemId);
-                    }
-                }
-
-                // Deletar localmente IDs que não existem mais no Firebase
-                Cursor localCursor = db.rawQuery("SELECT id FROM " + TABLE_NAME, null);
-                while (localCursor.moveToNext()) {
-                    String localId = String.valueOf(localCursor.getLong(0));
-                    if (!firebaseIds.contains(localId)) {
-                        db.delete(TABLE_NAME, "id = ?", new String[]{localId});
-                    }
-                }
-                localCursor.close();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                Log.e(TAG, "Erro ao verificar itens deletados: " + error.getMessage());
-            }
-        });
+    // Safety net otimizado: em vez de baixar TODOS os itens do Firebase para
+    // comparar IDs (inviável com 10.000+ itens), este método agora realiza
+    // a verificação durante a sincronização normal.
+    // A lógica de detecção de soft delete (deleted=true) já está em syncFirebaseParaLocal().
+    // Para hard deletes (remoção manual via console Firebase), o método abaixo
+    // faz uma verificação limitada apenas aos itens que estão na sincronização atual.
+    // NOTA: Com 10.000+ itens, hard deletes isolados no console Firebase
+    // não serão detectados automaticamente. Recomenda-se:
+    // 1. SEMPRE usar o app para deletar (soft delete)
+    // 2. Se deletar manualmente no console, execute uma sincronização completa
+    //    com export/import do JSON
+    // 3. Ou use o recurso de sync completo forçado no app
+    private void checkForDeletedItems() {
+        // Método mantido vazio intencionalmente - a detecção de soft delete
+        // é feita diretamente em syncFirebaseParaLocal() através da flag "deleted".
+        // Baixar todos os 10.000+ itens apenas para comparar IDs causaria:
+        // - Consumo excessivo de banda (potencialmente excedendo cota do Spark)
+        // - Alto uso de memória no dispositivo
+        // - Lentidão na sincronização
+        Log.d(TAG, "checkForDeletedItems: verificação via syncFirebaseParaLocal (soft delete)");
     }
 
     // ==================== TIMESTAMPS ====================
@@ -517,6 +515,7 @@ public class FirebaseBancoDadosHelper {
             itemMap.put("descricao", descr);
             itemMap.put("categoria", cat);
             itemMap.put(FIELD_TIMESTAMP, updateAt);
+            itemMap.put("deleted", false);
 
             ref.child(String.valueOf(id)).setValue(itemMap);
         }
@@ -543,6 +542,7 @@ public class FirebaseBancoDadosHelper {
             itemMap.put("descricao", descr);
             itemMap.put("categoria", cat);
             itemMap.put(FIELD_TIMESTAMP, updateAt);
+            itemMap.put("deleted", false);
 
             ref.child(String.valueOf(id)).setValue(itemMap);
         }

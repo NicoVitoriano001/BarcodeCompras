@@ -187,44 +187,42 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         adapter.setOnItemLongClickListener((view, group, position) -> {
             String codigo = group.getBcDB();
 
-            // Buscar dados da compra para o menu de contexto
+            // Buscar dados da compra para o menu de contexto (pode ser null)
             Compra compraParaMenu = buscarPrimeiraCompraPorCodigo(codigo);
-            if (compraParaMenu != null) {
-                ContextMenuHelper.showContextMenu(view, compraParaMenu,
-                        () -> {
-                            // Editar item do banco de dados
-                            Intent editIntent = new Intent(ResultBancoDadosActivity.this, EditBancoDadosActivity.class);
-                            editIntent.putExtra("CODIGO", group.getBcDB());
-                            editIntent.putExtra("DESCRICAO", group.getDescrDB());
-                            editIntent.putExtra("CATEGORIA", group.getCatDB());
-                            startActivityForResult(editIntent, EDIT_REQUEST_CODE);
-                        },
-                        () -> deletarItem(group, codigo),
-                        () -> {
-                            // Clonar - vai para MainActivity com dados
-                            if (compraParaMenu != null) {
-                                clonarCompra(compraParaMenu);
-                            } else {
-                                // Se não tem compra, criar intent genérica
-                                Intent intent = new Intent(ResultBancoDadosActivity.this, MainActivity.class);
-                                intent.putExtra("bc", group.getBcDB());
-                                intent.putExtra("descricao", group.getDescrDB());
-                                intent.putExtra("categoria", group.getCatDB());
-                                startActivity(intent);
-                            }
-                        },
-                        () -> {
-                            // Pesquisar no banco de dados (já estamos aqui, então pesquisar em compras)
-                            Intent searchIntent = new Intent(ResultBancoDadosActivity.this, ResultComprasActivity.class);
-                            searchIntent.putExtra("CODIGO", group.getBcDB());
-                            searchIntent.putExtra("DESCRICAO", group.getDescrDB());
-                            searchIntent.putExtra("CATEGORIA", group.getCatDB());
-                            startActivity(searchIntent);
+
+            ContextMenuHelper.showContextMenu(view, compraParaMenu,
+                    () -> {
+                        // Editar item do banco de dados
+                        Intent editIntent = new Intent(ResultBancoDadosActivity.this, EditBancoDadosActivity.class);
+                        editIntent.putExtra("ID", group.getId());
+                        editIntent.putExtra("CODIGO", group.getBcDB());
+                        editIntent.putExtra("DESCRICAO", group.getDescrDB());
+                        editIntent.putExtra("CATEGORIA", group.getCatDB());
+                        startActivityForResult(editIntent, EDIT_REQUEST_CODE);
+                    },
+                    () -> deletarItem(group, codigo),
+                    () -> {
+                        // Clonar - vai para MainActivity com dados
+                        if (compraParaMenu != null) {
+                            clonarCompra(compraParaMenu);
+                        } else {
+                            // Se não tem compra, criar intent genérica
+                            Intent intent = new Intent(ResultBancoDadosActivity.this, MainActivity.class);
+                            intent.putExtra("bc", group.getBcDB());
+                            intent.putExtra("descricao", group.getDescrDB());
+                            intent.putExtra("categoria", group.getCatDB());
+                            startActivity(intent);
                         }
-                );
-            } else {
-                Toast.makeText(this, "Erro ao carregar dados do item", Toast.LENGTH_SHORT).show();
-            }
+                    },
+                    () -> {
+                        // Pesquisar no banco de dados (já estamos aqui, então pesquisar em compras)
+                        Intent searchIntent = new Intent(ResultBancoDadosActivity.this, ResultComprasActivity.class);
+                        searchIntent.putExtra("CODIGO", group.getBcDB());
+                        searchIntent.putExtra("DESCRICAO", group.getDescrDB());
+                        searchIntent.putExtra("CATEGORIA", group.getCatDB());
+                        startActivity(searchIntent);
+                    }
+            );
             return true;
         });
     }
@@ -304,7 +302,7 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
                     // ====================================
 
                     // Criar grupo para cada item do banco de dados
-                    BancoDadosAgrupado group = new BancoDadosAgrupado(bc, desc, cat, contagem);
+                    BancoDadosAgrupado group = new BancoDadosAgrupado(id, bc, desc, cat, contagem);
                     groupList.add(group);
                 }
 

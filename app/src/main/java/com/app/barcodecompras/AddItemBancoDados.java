@@ -93,17 +93,21 @@ public class AddItemBancoDados extends AppCompatActivity {
             return;
         }
 
-        // ===== VERIFICAR DUPLICATA (bc_DB + descr_DB) =====
-        String[] duplicata = firebaseBancoHelper.verificarDuplicata(barcode, description);
-        if (duplicata != null) {
-            String idExistente = duplicata[0];
-            String bcExistente = duplicata[1];
-            String descrExistente = duplicata[2];
-            String catExistente = duplicata[3];
+        // ===== VERIFICAR DUPLICATA (apenas bc_DB) =====
+        Cursor cursorDuplicata = db.rawQuery(
+                "SELECT id, bc_DB, descr_DB, cat_DB FROM bancodados_tab WHERE bc_DB = ? LIMIT 1",
+                new String[]{barcode}
+        );
+        if (cursorDuplicata.moveToFirst()) {
+            String idExistente = String.valueOf(cursorDuplicata.getLong(0));
+            String bcExistente = cursorDuplicata.getString(1);
+            String descrExistente = cursorDuplicata.getString(2);
+            String catExistente = cursorDuplicata.getString(3);
+            cursorDuplicata.close();
 
             new AlertDialog.Builder(this)
                     .setTitle("⚠️ Item Já Existe")
-                    .setMessage("Já existe um item com este código e descrição:\n\n" +
+                    .setMessage("Já existe um item com este código de barras:\n\n" +
                             "📦 Código: " + bcExistente + "\n" +
                             "📝 Descrição: " + descrExistente + "\n" +
                             "📂 Categoria: " + catExistente + "\n\n" +
@@ -121,6 +125,7 @@ public class AddItemBancoDados extends AppCompatActivity {
                     .show();
             return;
         }
+        cursorDuplicata.close();
         // ===================================================
 
         try {
