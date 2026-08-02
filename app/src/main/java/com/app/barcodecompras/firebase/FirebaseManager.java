@@ -8,7 +8,7 @@ public class FirebaseManager {
     private DatabaseReference dbRef;
 
     public FirebaseManager() {
-        dbRef = FirebaseDatabase.getInstance().getReference("compras");
+        dbRef = FirebaseDatabase.getInstance().getReference();
     }
 
     // SALVAR COM REGRA DE CONFLITO

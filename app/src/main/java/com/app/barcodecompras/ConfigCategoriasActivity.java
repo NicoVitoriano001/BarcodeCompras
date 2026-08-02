@@ -17,6 +17,8 @@ import android.text.Editable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.app.barcodecompras.database.DatabaseHelper;
+import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
+import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.CategoriaItem;
 
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ import java.util.Map;
 public class ConfigCategoriasActivity extends AppCompatActivity {
 
     private SQLiteDatabase db;
+    private FirebaseBancoDadosHelper firebaseBancoHelper;
+    private FirebaseComprasHelper firebaseComprasHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,9 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
 
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         db = dbHelper.getWritableDatabase();
+
+        firebaseBancoHelper = new FirebaseBancoDadosHelper(this, db);
+        firebaseComprasHelper = new FirebaseComprasHelper(this, db);
 
         listarCategorias();
     }
@@ -243,14 +250,37 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
         intent.putExtra("CODIGO", "");
         intent.putExtra("DESCRICAO", "");
         intent.putExtra("CATEGORIA", categoria);
+        intent.putExtra("CATEGORIA_EXATA", true); // busca pelo nome exato da categoria
 
         startActivity(intent);
     }
 
     private void atualizarCategoria(String categoriaAntiga, String novaCategoria) {
 
+        // 1. Coletar os itens afetados ANTES da atualização
+        List<Long> ids = new ArrayList<>();
+        List<String> barcodes = new ArrayList<>();
+        List<String> descricoes = new ArrayList<>();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT id, bc_DB, descr_DB FROM bancodados_tab WHERE cat_DB = ?",
+                new String[]{categoriaAntiga}
+        );
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                ids.add(cursor.getLong(0));
+                barcodes.add(cursor.getString(1) != null ? cursor.getString(1) : "");
+                descricoes.add(cursor.getString(2) != null ? cursor.getString(2) : "");
+            }
+            cursor.close();
+        }
+
+        long updateAt = System.currentTimeMillis();
+
+        // 2. Renomear localmente em bancodados_tab (com timestamp para o sync)
         ContentValues values = new ContentValues();
         values.put("cat_DB", novaCategoria);
+        values.put("updated_at", updateAt);
 
         int linhas = db.update(
                 "bancodados_tab",
@@ -258,6 +288,34 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
                 "cat_DB = ?",
                 new String[]{categoriaAntiga}
         );
+
+        // 3. Enviar os itens renomeados ao Firebase (atualiza local + nó remoto)
+        if (linhas > 0 && firebaseBancoHelper != null) {
+            for (int i = 0; i < ids.size(); i++) {
+                firebaseBancoHelper.atualizarItem(
+                        ids.get(i),
+                        barcodes.get(i),
+                        descricoes.get(i),
+                        novaCategoria
+                );
+            }
+        }
+
+        // 4. Renomear também no histórico de compras (cat_compras) e sincronizar
+        ContentValues valuesCompras = new ContentValues();
+        valuesCompras.put("cat_compras", novaCategoria);
+        valuesCompras.put("updated_at", updateAt);
+
+        int linhasCompras = db.update(
+                "compras_tab",
+                valuesCompras,
+                "cat_compras = ?",
+                new String[]{categoriaAntiga}
+        );
+
+        if (linhasCompras > 0 && firebaseComprasHelper != null) {
+            firebaseComprasHelper.syncLocalParaFirebase();
+        }
 
         if (linhas > 0) {
             Toast.makeText(this, "Atualizado com sucesso", Toast.LENGTH_SHORT).show();
@@ -270,10 +328,17 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
 
 
     private void inserirCategoria(String categoria) {
-        ContentValues values = new ContentValues();
-        values.put("cat_DB", categoria);
+        long result;
 
-        long result = db.insert("bancodados_tab", null, values);
+        if (firebaseBancoHelper != null) {
+            // Insere localmente (com timestamp) e envia ao Firebase
+            result = firebaseBancoHelper.inserirItem("", "", categoria);
+        } else {
+            ContentValues values = new ContentValues();
+            values.put("cat_DB", categoria);
+            values.put("updated_at", System.currentTimeMillis());
+            result = db.insert("bancodados_tab", null, values);
+        }
 
         if (result != -1) {
             Toast.makeText(this, "Categoria criada com sucesso", Toast.LENGTH_SHORT).show();
@@ -294,18 +359,37 @@ public class ConfigCategoriasActivity extends AppCompatActivity {
     }
 
     private void deletarCategoria(String categoria) {
-        int linhas = db.delete(
-                "bancodados_tab",
-                "cat_DB = ?",
+
+        // 1. Coletar os IDs dos itens da categoria
+        List<Long> ids = new ArrayList<>();
+        Cursor cursor = db.rawQuery(
+                "SELECT id FROM bancodados_tab WHERE cat_DB = ?",
                 new String[]{categoria}
         );
-
-        if (linhas > 0) {
-            Toast.makeText(this, "Categoria excluída", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Erro ao excluir", Toast.LENGTH_SHORT).show();
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                ids.add(cursor.getLong(0));
+            }
+            cursor.close();
         }
 
+        if (ids.isEmpty()) {
+            Toast.makeText(this, "Erro ao excluir", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        if (firebaseBancoHelper != null) {
+            // 2. Soft delete no Firebase + remoção local de cada item
+            for (long id : ids) {
+                firebaseBancoHelper.deletarItem(id);
+            }
+        } else {
+            // Fallback: remoção local apenas
+            db.delete("bancodados_tab", "cat_DB = ?", new String[]{categoria});
+        }
+
+        Toast.makeText(this, "Categoria excluída", Toast.LENGTH_SHORT).show();
         finish();
     }
 

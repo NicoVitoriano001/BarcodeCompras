@@ -39,6 +39,7 @@ import java.util.Map;
 public class ResultBancoDadosActivity extends AppCompatActivity {
     private static final int EDIT_REQUEST_CODE = 1;
     private String currentCodigo, currentDescricao, currentCategoria;
+    private boolean currentCategoriaExata = false;
     private RecyclerView recyclerView;
     private BancoDadosExpandableAdapter adapter;
     private SQLiteDatabase db;
@@ -142,6 +143,7 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
             currentCodigo = codigo;
             currentDescricao = descricao;
             currentCategoria = categoria;
+            currentCategoriaExata = intent.getBooleanExtra("CATEGORIA_EXATA", false);
 
             loadBancoDados(codigo, descricao, categoria);
         }
@@ -265,13 +267,37 @@ public class ResultBancoDadosActivity extends AppCompatActivity {
         }
 
         if (!descricao.isEmpty()) {
-            query += " AND REPLACE(descr_DB, ' ', '%') LIKE ?";
-            params.add("%" + descricao.replace(" ", "%") + "%");
+            String[] termos = descricao.split(" ");
+            for (String termo : termos) {
+                if (termo.startsWith("-") && termo.length() > 1) {
+                    String valor = termo.substring(1);
+                    query += " AND REPLACE(descr_DB, ' ', '%') NOT LIKE ?";
+                    params.add("%" + valor.replace(" ", "%") + "%");
+                } else {
+                    query += " AND REPLACE(descr_DB, ' ', '%') LIKE ?";
+                    params.add("%" + termo.replace(" ", "%") + "%");
+                }
+            }
         }
 
         if (!categoria.isEmpty()) {
-            query += " AND REPLACE(cat_DB, ' ', '%') LIKE ?";
-            params.add("%" + categoria.replace(" ", "%") + "%");
+            if (currentCategoriaExata) {
+                // Busca pelo nome exato da categoria (ex.: vindo de ConfigCategoriasActivity)
+                query += " AND cat_DB = ?";
+                params.add(categoria);
+            } else {
+                String[] termos = categoria.split(" ");
+                for (String termo : termos) {
+                    if (termo.startsWith("-") && termo.length() > 1) {
+                        String valor = termo.substring(1);
+                        query += " AND REPLACE(cat_DB, ' ', '%') NOT LIKE ?";
+                        params.add("%" + valor.replace(" ", "%") + "%");
+                    } else {
+                        query += " AND REPLACE(cat_DB, ' ', '%') LIKE ?";
+                        params.add("%" + termo.replace(" ", "%") + "%");
+                    }
+                }
+            }
         }
 
         // ===== ORDENAÇÃO DINÂMICA =====
