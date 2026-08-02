@@ -26,7 +26,7 @@ public class FirebaseBancoDadosHelper {
     private static final String TAG = "FirebaseBancoDados";
     private static final String FIELD_TIMESTAMP = "updateAt";  // camelCase, sem underline
     private static final String TABLE_NAME = "bancodados_tab";
-    private static final String FIREBASE_NODE = "bancodados2"; // Nó no Firebase
+    private static final String FIREBASE_NODE = "bancodado"; // Nó no Firebase
     private static final String PREF_NAME = "sync_bancodados";
     private static final String KEY_LAST_SYNC_FIREBASE_LOCAL = "last_sync_time_firebase_para_local";
     private static final String KEY_LAST_SYNC_LOCAL_FIREBASE = "last_sync_time_local_para_firebase";

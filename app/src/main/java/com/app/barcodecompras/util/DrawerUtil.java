@@ -69,6 +69,10 @@ public class DrawerUtil {
                     if (bancoDadosBkp != null) {
                         bancoDadosBkp.restaurarBackup();
                     }
+
+                } else if (id == R.id.nav_instrucoes) {
+
+                    InstrucoesHelper.mostrarInstrucoes(activity);
                 }
 
             }, 200);

@@ -38,14 +38,31 @@
             android:textColor="@color/white"/>
 
         <!-- Descrição -->
-        <EditText
-            android:id="@+id/descr_DB_add"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/descr_item"
-            android:layout_marginTop="4dp"
-            android:inputType="textCapCharacters|textMultiLine"
-            android:textColor="?android:attr/textColorPrimary"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <EditText
+                android:id="@+id/descr_DB_add"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/descr_item"
+                android:inputType="textCapCharacters|textMultiLine"
+                android:textColor="?android:attr/textColorPrimary"/>
+
+            <ImageButton
+                android:id="@+id/btn_instrucoes_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Instruções de nomeação do item"
+                android:padding="8dp"
+                android:src="@drawable/ic_info_24dp"/>
+        </LinearLayout>
 
         <!-- Categoria -->
         <EditText

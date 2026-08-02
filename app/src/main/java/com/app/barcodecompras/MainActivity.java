@@ -681,7 +681,7 @@ public class MainActivity extends AppCompatActivity {
                                     double preco, double qnt, double total,
                                     String periodo, String obs, long updateAt){
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compras");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("compra");
 
         String key = String.valueOf(id);
 

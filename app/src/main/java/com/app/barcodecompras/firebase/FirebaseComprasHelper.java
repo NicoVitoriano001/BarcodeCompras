@@ -26,7 +26,7 @@ public class FirebaseComprasHelper {
     private static final String TAG = "FirebaseHelper";
     private static final String FIELD_TIMESTAMP = "updateAt";  // camelCase, sem underline
     private static final String TABLE_NAME = "compras_tab";
-    private static final String FIREBASE_NODE = "compras";
+    private static final String FIREBASE_NODE = "compra";
     private static final String PREF_NAME = "sync";
     private static final String KEY_LAST_SYNC = "last_sync_time";
 

@@ -54,4 +54,11 @@
             android:icon="@drawable/ic_restore"
             android:title="Restaurar Backup" />
     </group>
+
+    <group android:id="@+id/group_ajuda">
+        <item
+            android:id="@+id/nav_instrucoes"
+            android:icon="@drawable/ic_info_24dp"
+            android:title="Instruções de Criar Item" />
+    </group>
 </menu>

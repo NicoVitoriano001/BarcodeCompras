@@ -22,6 +22,7 @@ import com.app.barcodecompras.database.DatabaseHelper;
 import com.app.barcodecompras.firebase.FirebaseBancoDadosHelper;
 import com.app.barcodecompras.firebase.FirebaseComprasHelper;
 import com.app.barcodecompras.util.DrawerUtil;
+import com.app.barcodecompras.util.InstrucoesHelper;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -55,6 +56,10 @@ public class AddItemBancoDados extends AppCompatActivity {
 
         catImdbAdd.setFocusable(false);
         catImdbAdd.setClickable(true);
+
+        // Botão de instruções de nomeação do item
+        findViewById(R.id.btn_instrucoes_item).setOnClickListener(v ->
+                InstrucoesHelper.mostrarInstrucoes(this));
 
         // Recebe o valor do código de barras
         String barcode = getIntent().getStringExtra("BARCODE_VALUE");
