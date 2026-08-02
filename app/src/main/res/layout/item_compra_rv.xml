@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="13sp"
-                android:textColor="#9C27B0"
+                android:textColor="@color/violet"
                 android:textStyle="bold"
                 android:paddingStart="8dp"/>
         </LinearLayout>

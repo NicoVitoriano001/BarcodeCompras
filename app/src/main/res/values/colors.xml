@@ -12,6 +12,7 @@
     <color name="laranja">#FF9800</color>
     <color name="white">#FFFFFFFF</color>
     <color name="cinza_Gainsboro">#DCDCDC</color>
+
     <!-- 2025.05.08 cinza_Gainsboro um pouco mais claro que o padrao android:textColor="@android:color/darker_gray" -->
     <color name="button_text_dark">#FFFFFF</color> <!-- Branco -->
     <color name="button_text_light">#000000</color> <!-- Preto -->
@@ -23,10 +24,10 @@
     <color name="green">#FF008000</color> <!-- Verde -->
     <color name="blue">#FF0000FF</color> <!-- Azul -->
     <color name="indigo">#FF4B0082</color> <!-- Índigo -->
-    <color name="violet">#FFEE82EE</color> <!-- Violeta -->
+    <color name="violet">#AF03AF</color> <!-- Violeta -->
+    <color name="magenta">#FF2D95</color> <!-- Magenta -->
 
     <!-- 2026.06.11 cinza para hint do mainactivity -->
     <color name="hint_cinza">#969393</color>
-
 
 </resources>
