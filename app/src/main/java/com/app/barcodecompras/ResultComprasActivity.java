@@ -288,14 +288,14 @@ public class ResultComprasActivity extends AppCompatActivity {
                 comprasPorCodigo.get(bc).add(compra);
                 if (preco > maiorPreco) {
                     maiorPreco = preco;
-                    maiorPeriodo = periodoCompra;
-                    maiorObs = obs;
+                //2026.08.21    maiorPeriodo = periodoCompra;
+                //2026.08.21    maiorObs = obs;
                 }
 
                 if (preco < menorPreco) {
                     menorPreco = preco;
-                    menorPeriodo = periodoCompra;
-                    menorObs = obs;
+                //2026.08.21    menorPeriodo = periodoCompra;
+                //2026.08.21    menorObs = obs;
                 }
             } while (cursor.moveToNext());
 
@@ -306,7 +306,7 @@ public class ResultComprasActivity extends AppCompatActivity {
                 comprasGroupList.add(group);
             }
 
-            double mediaPreco = quantidadeItens > 0 ? somaPrecos / quantidadeItens : 0;
+          //2026.08.21  double mediaPreco = quantidadeItens > 0 ? somaPrecos / quantidadeItens : 0;
 
             TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
             tvSomaTotal.setText(String.format("Soma total: R$ %.2f (%d itens)", somaTotal, quantidadeItens));
@@ -400,10 +400,11 @@ public class ResultComprasActivity extends AppCompatActivity {
             DecimalFormat df = new DecimalFormat("#,##0.00");
             DecimalFormat dfPercent = new DecimalFormat("#,##0.00");
 
+            //"Item 1 (grupo %d): R$ %s\n" +
             String mensagem = String.format(
                     "Comparação de Preços:\n\n" +
-                            "Item 1 (grupo %d): R$ %s\n" +
-                            "Item 2 (grupo %d): R$ %s\n\n" +
+                            "[%d] Item 1: R$ %s\n" +
+                            "[%d] Item 2: R$ %s\n\n" +
                             "Diferença: R$ %s\n" +
                             "Percentual: %s%%",
                     itemDiffPosition1 + 1,
