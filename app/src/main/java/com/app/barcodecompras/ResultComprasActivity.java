@@ -26,7 +26,11 @@ import com.app.barcodecompras.util.DrawerUtil;
 import com.google.android.material.navigation.NavigationView;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,6 +50,8 @@ public class ResultComprasActivity extends AppCompatActivity {
     private FirebaseBancoDadosHelper firebaseBancoHelper;
     private double precoDiffItem1 = 0;
     private double precoDiffItem2 = 0;
+    private String periodoDiffItem1 = "";
+    private String periodoDiffItem2 = "";
     private int itemDiffPosition1 = -1;
     private int itemDiffPosition2 = -1;
     private boolean isFirstItemSelected = false;
@@ -188,7 +194,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         }
 
         query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, descr_compras ASC";
-      //query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
+        //query += " ORDER BY SUBSTR(periodo_compras, 5) DESC, periodo_compras ASC";
 
         // ===== CONSTRUIR A MESMA QUERY PARA CONTAGEM =====
         String countQuery = "SELECT bc_compras, COUNT(*) as total FROM compras_tab WHERE 1=1";
@@ -288,14 +294,14 @@ public class ResultComprasActivity extends AppCompatActivity {
                 comprasPorCodigo.get(bc).add(compra);
                 if (preco > maiorPreco) {
                     maiorPreco = preco;
-                //2026.08.21    maiorPeriodo = periodoCompra;
-                //2026.08.21    maiorObs = obs;
+                    //2026.08.21    maiorPeriodo = periodoCompra;
+                    //2026.08.21    maiorObs = obs;
                 }
 
                 if (preco < menorPreco) {
                     menorPreco = preco;
-                //2026.08.21    menorPeriodo = periodoCompra;
-                //2026.08.21    menorObs = obs;
+                    //2026.08.21    menorPeriodo = periodoCompra;
+                    //2026.08.21    menorObs = obs;
                 }
             } while (cursor.moveToNext());
 
@@ -306,7 +312,7 @@ public class ResultComprasActivity extends AppCompatActivity {
                 comprasGroupList.add(group);
             }
 
-          //2026.08.21  double mediaPreco = quantidadeItens > 0 ? somaPrecos / quantidadeItens : 0;
+            //2026.08.21  double mediaPreco = quantidadeItens > 0 ? somaPrecos / quantidadeItens : 0;
 
             TextView tvSomaTotal = findViewById(R.id.tvSomaTotal);
             tvSomaTotal.setText(String.format("Soma total: R$ %.2f (%d itens)", somaTotal, quantidadeItens));
@@ -370,7 +376,7 @@ public class ResultComprasActivity extends AppCompatActivity {
 
         // Long click nos detalhes = selecionar para calcular diferença
         adapter.setOnItemLongClickListenerDetalhe((view, compra, groupPosition, itemPosition) -> {
-            calcularDiferencaPreco(compra, groupPosition, itemPosition);
+            calcularDiferencaPrecoPeriodo(compra, groupPosition, itemPosition);
             return true;
         });
     }
@@ -380,39 +386,63 @@ public class ResultComprasActivity extends AppCompatActivity {
         return CompraUtil.buscarPrimeiraCompraPorCodigo(db, codigo);
     }
 
-  // Metodo para calcular diferença de preço
-    private void calcularDiferencaPreco(Compra compra, int groupPosition, int itemPosition) {
+    // Metodo para calcular diferença de preço e período
+    private void calcularDiferencaPrecoPeriodo(Compra compra, int groupPosition, int itemPosition) {
         double precoAtual = compra.getPrecoCompras();
+        String periodoAtual = compra.getPeriodoCompras();
 
         if (!isFirstItemSelected) {
             precoDiffItem1 = precoAtual;
+            periodoDiffItem1 = periodoAtual != null ? periodoAtual : "";
             itemDiffPosition1 = groupPosition;
             isFirstItemSelected = true;
             Toast.makeText(this, "Item 1 selecionado: R$ " + String.format("%.2f", precoAtual), Toast.LENGTH_SHORT).show();
         } else {
             precoDiffItem2 = precoAtual;
+            periodoDiffItem2 = periodoAtual != null ? periodoAtual : "";
             itemDiffPosition2 = groupPosition;
             isFirstItemSelected = false;
 
             double diferenca = precoDiffItem2 - precoDiffItem1;
             double porcentagem = (precoDiffItem1 != 0) ? (diferenca / precoDiffItem1) * 100 : 0;
 
+            // Calcular diferença de datas (período)
+            String diferencaDatas = "N/A";
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                // Extrair apenas a parte yyyy-MM-dd caso a string tenha prefixo (ex: "qui. 2025-05-01")
+                String data1Str = extrairData(periodoDiffItem1);
+                String data2Str = extrairData(periodoDiffItem2);
+                if (!data1Str.isEmpty() && !data2Str.isEmpty()) {
+                    Date data1 = sdf.parse(data1Str);
+                    Date data2 = sdf.parse(data2Str);
+                    if (data1 != null && data2 != null) {
+                        long diffEmMilis = Math.abs(data2.getTime() - data1.getTime());
+                        long diffEmDias = TimeUnit.DAYS.convert(diffEmMilis, TimeUnit.MILLISECONDS);
+                        diferencaDatas = diffEmDias + " dia(s)";
+                    }
+                }
+            } catch (Exception e) {
+                diferencaDatas = "Erro ao calcular";
+            }
+
             DecimalFormat df = new DecimalFormat("#,##0.00");
             DecimalFormat dfPercent = new DecimalFormat("#,##0.00");
 
-            //"Item 1 (grupo %d): R$ %s\n" +
             String mensagem = String.format(
                     "Comparação de Preços:\n\n" +
                             "[%d] Item 1: R$ %s\n" +
                             "[%d] Item 2: R$ %s\n\n" +
-                            "Diferença: R$ %s\n" +
-                            "Percentual: %s%%",
+                            "Diferença Preço: R$ %s\n" +
+                            "Percentual: %s%%\n\n" +
+                            "Diferença Datas: %s",
                     itemDiffPosition1 + 1,
                     df.format(precoDiffItem1),
                     itemDiffPosition2 + 1,
                     df.format(precoDiffItem2),
                     df.format(diferenca),
-                    dfPercent.format(porcentagem)
+                    dfPercent.format(porcentagem),
+                    diferencaDatas
             );
 
             new AlertDialog.Builder(this)
@@ -423,9 +453,25 @@ public class ResultComprasActivity extends AppCompatActivity {
 
             precoDiffItem1 = 0;
             precoDiffItem2 = 0;
+            periodoDiffItem1 = "";
+            periodoDiffItem2 = "";
             itemDiffPosition1 = -1;
             itemDiffPosition2 = -1;
         }
+    }
+
+    // Metodo auxiliar para extrair apenas a parte yyyy-MM-dd de uma string de período
+    private String extrairData(String periodo) {
+        if (periodo == null || periodo.isEmpty()) return "";
+        // Procura o padrão yyyy-MM-dd na string (4 dígitos - 2 dígitos - 2 dígitos)
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("(\\d{4}-\\d{2}-\\d{2})")
+                .matcher(periodo);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        // Se não encontrou o padrão, retorna a string original
+        return periodo.trim();
     }
 
     private void deletarCompra(Compra compra) {
@@ -484,7 +530,7 @@ public class ResultComprasActivity extends AppCompatActivity {
         intent.putExtra("CODIGO", compra.getBcCompras() != null ? compra.getBcCompras() : "");
         intent.putExtra("DESCRICAO", compra.getDescrCompras() != null ? compra.getDescrCompras() : "");
         intent.putExtra("CATEGORIA", compra.getCatCompras() != null ? compra.getCatCompras() : "");
-      //OKOK intent.putExtra("CATEGORIA", currentCategoria != null ? currentCategoria : "");
+        //OKOK intent.putExtra("CATEGORIA", currentCategoria != null ? currentCategoria : "");
         startActivity(intent);
     }
 }
